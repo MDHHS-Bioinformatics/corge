@@ -24,28 +24,16 @@ class RowChecker:
 
     """
 
-    VALID_FASTQ_FORMATS = (
+    VALID_FORMATS = (
         ".fq.gz",
         ".fastq.gz",
-    )
-
-    VALID_ASSEMBLY_FORMATS = (
-        ".fasta", ".fasta.gz",
-        ".fna", ".fna.gz",
-        ".fa", ".fa.gz"
-    )
-
-    VALID_GFF_FORMATS = (
-        ".gff",
-        ".gff3",
     )
 
     def __init__(
         self,
         sample_col="sample",
-        first_col="gff", #GFF column
-        second_col="assembly",#Assembly column
-        third_col='species',  #Species name
+        first_col="fastq_1",
+        second_col="fastq_2",
         single_col="single_end",
         **kwargs,
     ):
@@ -55,9 +43,10 @@ class RowChecker:
         Args:
             sample_col (str): The name of the column that contains the sample name
                 (default "sample").
-            first_col (str): The name of the column that contains the GFF file path (default "gff")
-            second_col (str):The name of the column that contains the assembly file paths
-            third_col (str): The name of the columnt that contains the species for the sample
+            first_col (str): The name of the column that contains the first (or only)
+                FASTQ file path (default "fastq_1").
+            second_col (str): The name of the column that contains the second (if any)
+                FASTQ file path (default "fastq_2").
             single_col (str): The name of the new column that will be inserted and
                 records whether the sample contains single- or paired-end sequencing
                 reads (default "single_end").
@@ -67,7 +56,6 @@ class RowChecker:
         self._sample_col = sample_col
         self._first_col = first_col
         self._second_col = second_col
-        self._third_col = third_col
         self._single_col = single_col
         self._seen = set()
         self.modified = []
@@ -82,10 +70,9 @@ class RowChecker:
 
         """
         self._validate_sample(row)
-        self._validate_assembly(row)
-        self._validate_gff(row)  # Validate GFF
-        #self._validate_reference(row)
-        #self._validate_pair(row)
+        self._validate_first(row)
+        self._validate_second(row)
+        self._validate_pair(row)
         self._seen.add((row[self._sample_col], row[self._first_col]))
         self.modified.append(row)
 
@@ -95,54 +82,35 @@ class RowChecker:
             raise AssertionError("Sample input is required.")
         # Sanitize samples slightly.
         row[self._sample_col] = row[self._sample_col].replace(" ", "_")
-    def _validate_assembly(self,row):
-        """Assert that the the Assembly entry is non-empty and has the right format"""
-        assembly = row.get(self._second_col,"")
-        if assembly and not(assembly.endswith(extension) for extension in self.VALID_ASSEMBLY_FORMATS):
-            raise AssertionError(
-                f"The Assembly file has an unrecognized extension: {assembly}\n"
-                f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}")
-    def _validate_gff(self, row):
-        """Assert that the GFF file has the correct format if it exists."""
-        gff = row.get(self._first_col, "")
-        if gff and not any(gff.endswith(extension) for extension in self.VALID_GFF_FORMATS):
-            raise AssertionError(
-                f"The GFF file has an unrecognized extension: {gff}\n"
-                f"It should be one of: {', '.join(self.VALID_GFF_FORMATS)}")
-    # def _validate_reference(self,row):
-    #     """Assert that the Reference file has the correct format if it exists"""
-    #     reference = row.get(self._fifth_col, "")
-    #     if reference and not any(reference.endswith(extension) for extension in self.VALID_ASSEMBLY_FORMATS):
-    #         raise AssertionError(
-    #             f"The Reference file has an unrecognized extension: {reference}\n"
-    #             f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"
-    #         )
 
-    # def _validate_pair(self, row):
-    #     """Assert that read pairs have the same file extension. Report pair status."""
-    #     if row[self._first_col] and row[self._second_col]:
-    #         row[self._single_col] = False
-    #         first_col_suffix = Path(row[self._first_col]).suffixes[-2:]
-    #         second_col_suffix = Path(row[self._second_col]).suffixes[-2:]
-    #         if first_col_suffix != second_col_suffix:
-    #             raise AssertionError("FASTQ pairs must have the same file extensions.")
-    #     else:
-    #         row[self._single_col] = True
+    def _validate_first(self, row):
+        """Assert that the first FASTQ entry is non-empty and has the right format."""
+        if len(row[self._first_col]) <= 0:
+            raise AssertionError("At least the first FASTQ file is required.")
+        self._validate_fastq_format(row[self._first_col])
+
+    def _validate_second(self, row):
+        """Assert that the second FASTQ entry has the right format if it exists."""
+        if len(row[self._second_col]) > 0:
+            self._validate_fastq_format(row[self._second_col])
+
+    def _validate_pair(self, row):
+        """Assert that read pairs have the same file extension. Report pair status."""
+        if row[self._first_col] and row[self._second_col]:
+            row[self._single_col] = False
+            first_col_suffix = Path(row[self._first_col]).suffixes[-2:]
+            second_col_suffix = Path(row[self._second_col]).suffixes[-2:]
+            if first_col_suffix != second_col_suffix:
+                raise AssertionError("FASTQ pairs must have the same file extensions.")
+        else:
+            row[self._single_col] = True
 
     def _validate_fastq_format(self, filename):
         """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(extension) for extension in self.VALID_FASTQ_FORMATS):
+        if not any(filename.endswith(extension) for extension in self.VALID_FORMATS):
             raise AssertionError(
                 f"The FASTQ file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_FASTQ_FORMATS)}"
-            )
-
-    def _validate_assembly_format(self, filename):
-        """Assert that a given filename has one of the expected assembly extensions."""
-        if not any(filename.endswith(extension) for extension in self.VALID_ASSEMBLY_FORMATS):
-            raise AssertionError(
-                f"The assembly file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"
+                f"It should be one of: {', '.join(self.VALID_FORMATS)}"
             )
 
     def validate_unique_samples(self):
@@ -223,15 +191,15 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    #required_columns = {"sample", "fastq_1", "fastq_2"}
+    required_columns = {"sample", "fastq_1", "fastq_2"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
         # Validate the existence of the expected header columns.
-        # if not required_columns.issubset(reader.fieldnames):
-        #     req_cols = ", ".join(required_columns)
-        #     logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
-        #     sys.exit(1)
+        if not required_columns.issubset(reader.fieldnames):
+            req_cols = ", ".join(required_columns)
+            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
+            sys.exit(1)
         # Validate each row.
         checker = RowChecker()
         for i, row in enumerate(reader):

@@ -12,33 +12,28 @@ workflow INPUT_CHECK {
     SAMPLESHEET_CHECK ( samplesheet )
         .csv
         .splitCsv ( header:true, sep:',' )
-        .map { create_fastq_channel(it) }
-        .set { reads }
-
+        .map { create_assembly_channel(it) }
+        .set { assemblies }
     emit:
-    reads                                     // channel: [ val(meta), [ reads ] ]
+    assemblies                                    // channel: [ val(meta), gff, assembly ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
 // Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
-def create_fastq_channel(LinkedHashMap row) {
+def create_assembly_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
     meta.id         = row.sample
-    meta.single_end = row.single_end.toBoolean()
+    meta.single_end = row.single_end ? row.single_end.toBoolean() : false
+    meta.species    = row.species
 
-    // add path(s) of the fastq file(s) to the meta map
-    def fastq_meta = []
-    if (!file(row.fastq_1).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> Read 1 FastQ file does not exist!\n${row.fastq_1}"
-    }
-    if (meta.single_end) {
-        fastq_meta = [ meta, [ file(row.fastq_1) ] ]
+    // add paths to the assemblies and gffs
+    def assembly_meta = []
+    if (!file(row.gff).exists() && !file(row.assembly).exists()) {
+        exit 1, "ERROR: Please check input samplesheet -> GFF or Assembly does not exist!\n${row.gff} or ${row.assembly}"
     } else {
-        if (!file(row.fastq_2).exists()) {
-            exit 1, "ERROR: Please check input samplesheet -> Read 2 FastQ file does not exist!\n${row.fastq_2}"
-        }
-        fastq_meta = [ meta, [ file(row.fastq_1), file(row.fastq_2) ] ]
+        assembly_meta = [meta, file(row.gff), file(row.assembly)]
     }
-    return fastq_meta
+
+    return assembly_meta
 }
