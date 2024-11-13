@@ -37,9 +37,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK           } from '../subworkflows/local/input_check'
-include { INPUT_CHECK_READS     } from '../subworkflows/local/input_check_reads.nf'
-include { VERIFY_CGMLST_SCHEMES } from '../subworkflows/local/verify_cgmlst_schemes.nf'
+include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
+include { INPUT_CHECK_READS           } from '../subworkflows/local/input_check_reads.nf'
+include { INPUT_CHECK_MASTER_MANIFEST } from '../subworkflows/local/input_check_master_manifest.nf'
+include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmlst_schemes.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -74,13 +75,21 @@ workflow CORGEPLUS {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    //INPUT_CHECK.out.assemblies.view()
+    INPUT_CHECK.out.assemblies.view()
 
     //
     // SUBWORKFLOW: Read in reads samplesheet if specifeid, validate that they exist but no need to stage files
     //
     if (params.reads_manifest) {
         INPUT_CHECK_READS(file(params.reads_manifest))
+    }
+
+    //
+    // SUBWORKFLOW: Read in master manifest file. Validate GFFs and Assemblies. Count how many samples per species
+    //
+    if (params.master_manifest) {
+        INPUT_CHECK_MASTER_MANIFEST(file(params.master_manifest))
+        //INPUT_CHECK_MASTER_MANIFEST.out.master_info.view()
     }
 
     //
