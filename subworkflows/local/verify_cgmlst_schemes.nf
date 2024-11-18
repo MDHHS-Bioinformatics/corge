@@ -18,16 +18,28 @@ def check_schema(species) {
     species_schema_exists = species_schema_path.exists() ? true : false
     return species_schema_exists
 }
+//Function to sum the new species counts and the previous species counts from our master file
+def merge_species_counts(new_counts,old_counts) {
+    return new_counts
+        .mix(old_counts)
+        .groupTuple()
+        .map{ species, counts ->
+        [species, counts.sum()]}
+}
 
 workflow VERIFY_CGMLST_SCHEMES {
 
     take:
     // TODO nf-core: edit input (take) channels
     ch_assemblies   // channel: [ val(meta), gff, assemblies]
-   // schema_dir
+    ch_new_species_count
+    ch_previous_species_count
 
     main:
     ch_versions = Channel.empty()
+    //ch_previous_species_count.view()
+    ch_total_counts = merge_species_counts(ch_new_species_count,ch_previous_species_count)
+    ch_total_counts.view()
     //Check whether cgMLST schemes are avaiable
     ch_assemblies
         .map{meta, gff, assemblies -> tuple(meta, gff, assemblies, check_schema(meta.species))}

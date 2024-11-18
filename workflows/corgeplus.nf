@@ -75,7 +75,7 @@ workflow CORGEPLUS {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    INPUT_CHECK.out.assemblies.view()
+    //INPUT_CHECK.out.assemblies.view()
 
     //
     // SUBWORKFLOW: Read in reads samplesheet if specifeid, validate that they exist but no need to stage files
@@ -90,6 +90,7 @@ workflow CORGEPLUS {
     if (params.master_manifest) {
         INPUT_CHECK_MASTER_MANIFEST(file(params.master_manifest))
         //INPUT_CHECK_MASTER_MANIFEST.out.master_info.view()
+        //INPUT_CHECK_MASTER_MANIFEST.out.species_count.view()
     }
 
     //
@@ -97,6 +98,8 @@ workflow CORGEPLUS {
     //
     VERIFY_CGMLST_SCHEMES(
         INPUT_CHECK.out.assemblies,
+        INPUT_CHECK.out.species_count,
+        INPUT_CHECK_MASTER_MANIFEST.out.species_count
         //file(params.schema_dir)
     )
 

@@ -11,3 +11,4 @@ results/*
 logs/*
 *.fasta
 *.sh
+python_notebooks/*

@@ -46,7 +46,7 @@ def create_fastq_channel(LinkedHashMap row) {
 
 // Function to count how many samples for each species there are
 def count_species(input_channel) {
-    def species_counting = input_channel
+    def counts = input_channel
         .map { meta, fastqs, gff, assembly ->
             [meta.species, 1]  // Extract species and assign initial count of 1
         }
@@ -55,5 +55,5 @@ def count_species(input_channel) {
             [species, counts.size()]  // Count occurrences of each species
         }
 
-    return species_counting
+    return counts
 }
