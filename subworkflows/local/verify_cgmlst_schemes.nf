@@ -60,13 +60,13 @@ workflow VERIFY_CGMLST_SCHEMES {
     //ch_previous_species_count.view()
     ch_total_counts = merge_species_counts(ch_new_species_count,ch_previous_species_count)
     //ch_total_counts.view()
-    ch_assemblies.view()
+    //ch_assemblies.view()
     // First, collect ch_total_counts into a map, keys are species names, and values are the counts
     ch_total_counts_map = ch_total_counts.toList().map { counts ->
         counts.collectEntries { it -> [(it[0]): it[1]] }
     }
     //ch_total_counts_map.view()
-    // Now combine ch_assemblies with the map of total counts
+    //Check whether cgMLST schemes are avaiable
     ch_assemblies_with_counts = ch_assemblies
         .combine(ch_total_counts_map)
         .map { meta, gff, assemblies, counts_map ->
@@ -78,17 +78,15 @@ workflow VERIFY_CGMLST_SCHEMES {
             scheme_unavailable: it[3] == false
         }
         .set { ch_schemes_availability }
-    //Check whether cgMLST schemes are avaiable
-    // ch_assemblies
-    //     .map{meta, gff, assemblies ->
-    //         tuple(meta, gff, assemblies, check_schema(meta.species),add_species_counts(ch_total_counts,meta.species) )
-    //         }
-    //     .branch{
-    //         scheme_available : it[3] == true
-    //         scheme_unavailable : it[3] == false
-    //     }
-    //     .set{ch_schemes_availability}
+
     //Check if there is more than one sample for each species for samples with no cgMLST
+    ch_schemes_availability.scheme_unavailable
+        .branch {
+            meta, gff, assemblies, schema_status ->
+            skip_core_genome_analysis: meta.species_count == 1
+            run_parsnp: meta.species_count > 1
+        }
+        .set { ch_no_schemes }
     // ch_schemes_availability.scheme_unavailable
     //     .map { meta, gff, assemblies, status -> tuple(meta.species, meta, gff, assemblies) }
     //     .groupTuple(by:[0])
@@ -98,8 +96,8 @@ workflow VERIFY_CGMLST_SCHEMES {
     //         run_parsnp : true //if more than 1 sample per species, run parsnp
     //     }
     // .set { ch_no_schemes }
-    //ch_assemblies.scheme_available.view()
-    ch_schemes_availability.scheme_unavailable.view()
+    //ch_schemes_availability.scheme_available.view()
+    ch_no_schemes.run_parsnp.view()
     //Format channel for samples/species that do have a cgMLST
     //ch
     emit:
