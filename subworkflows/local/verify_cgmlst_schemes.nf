@@ -26,27 +26,6 @@ def merge_species_counts(new_counts,old_counts) {
         .map{ species, counts ->
         [species, counts.sum()]}
 }
-//Function to find how many samples there are per species
-// def add_species_counts(count_channel, species_name) {
-//     ch_species = Channel.of(species_name)
-//     ch_species
-//         .mix(count_channel)
-//         .groupTuple()
-//         .map { species, counts -> counts}
-//     return ch_species
-// }
-def add_species_counts(count_channel, species_name) {
-    return count_channel
-        .filter { it[0] == species_name }
-        .map { it[1] }
-        .first()
-        .val
-}
-def remmap_counts(ch_counts) {
-    ch_counts
-        .collectEntries { species, count -> [(species) : count]}
-    return ch_counts
-}
 workflow VERIFY_CGMLST_SCHEMES {
 
     take:
@@ -59,49 +38,38 @@ workflow VERIFY_CGMLST_SCHEMES {
     ch_versions = Channel.empty()
     //ch_previous_species_count.view()
     ch_total_counts = merge_species_counts(ch_new_species_count,ch_previous_species_count)
-    //ch_total_counts.view()
-    //ch_assemblies.view()
     // First, collect ch_total_counts into a map, keys are species names, and values are the counts
     ch_total_counts_map = ch_total_counts.toList().map { counts ->
         counts.collectEntries { it -> [(it[0]): it[1]] }
     }
-    //ch_total_counts_map.view()
     //Check whether cgMLST schemes are avaiable
     ch_assemblies_with_counts = ch_assemblies
         .combine(ch_total_counts_map)
         .map { meta, gff, assemblies, counts_map ->
             def species_count = counts_map[meta.species] ?: 0
-            tuple([id: meta.id, single_end: meta.single_end, species: meta.species,species_count:species_count], gff, assemblies, check_schema(meta.species))
+            tuple([id: meta.id, single_end: meta.single_end, species: meta.species,species_count:species_count, schema: check_schema(meta.species)], gff, assemblies)
         }
         .branch {
-            scheme_available: it[3] == true
-            scheme_unavailable: it[3] == false
+            scheme_available: it[0].schema == true
+            scheme_unavailable: it[0].schema == false
         }
         .set { ch_schemes_availability }
 
     //Check if there is more than one sample for each species for samples with no cgMLST
     ch_schemes_availability.scheme_unavailable
         .branch {
-            meta, gff, assemblies, schema_status ->
+            meta, gff, assemblies ->
             skip_core_genome_analysis: meta.species_count == 1
             run_parsnp: meta.species_count > 1
         }
         .set { ch_no_schemes }
-    // ch_schemes_availability.scheme_unavailable
-    //     .map { meta, gff, assemblies, status -> tuple(meta.species, meta, gff, assemblies) }
-    //     .groupTuple(by:[0])
-    //     .map { species, meta, gff, assemblies -> tuple(meta, gff, assemblies)}
-    //     .branch{
-    //         skip_core_genome_analysis : it[2].size() ==1 //skipping core genome analysis if species only has one sample
-    //         run_parsnp : true //if more than 1 sample per species, run parsnp
-    //     }
-    // .set { ch_no_schemes }
-    //ch_schemes_availability.scheme_available.view()
-    ch_no_schemes.run_parsnp.view()
-    //Format channel for samples/species that do have a cgMLST
-    //ch
+
+
     emit:
     // TODO nf-core: edit emitted channels
+    samples_to_chewbbaca                = ch_schemes_availability.scheme_available
+    samples_to_parsnp                   = ch_no_schemes.run_parsnp
+    samples_to_skip_analysis            = ch_no_schemes.skip_core_genome_analysis
     versions = ch_versions                     // channel: [ versions.yml ]
 }
 
