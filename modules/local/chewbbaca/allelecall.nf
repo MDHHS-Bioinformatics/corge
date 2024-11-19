@@ -1,7 +1,6 @@
 process CHEWBBACA_ALLELECALL {
     tag "$meta.species"
     label 'process_high'
-
     conda "bioconda::chewbbaca=3.3.10"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
         'https://depot.galaxyproject.org/singularity/chewbbaca:3.3.10--pyhdfd78af_0':
@@ -12,7 +11,7 @@ process CHEWBBACA_ALLELECALL {
 
     output:
     tuple val(meta), path("new/*") , emit: results
-    tuple val(meta), path("new/results_alleles.tsv"), emit: results_alleles
+    tuple val(meta), path("new/new_results_alleles.tsv"), emit: results_alleles
     path "versions.yml"           , emit: versions
 
     when:
@@ -34,6 +33,12 @@ process CHEWBBACA_ALLELECALL {
         --output-directory new/ \
         --cpu $task.cpus
 
+    # Rename the prefix of the results files
+    for file in new/*; do
+        if [ -f "\$file" ]; then
+            mv -n "\$file" "new/new_\$(basename "\$file")" || echo "Failed to move \$file"
+        fi
+    done
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         chewbbaca: \$(echo \$(chewie --version 2>&1 | sed 's/^.*chewBBACA version: //g; s/Using.*\$//' ))

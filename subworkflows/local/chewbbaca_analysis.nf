@@ -66,7 +66,12 @@ workflow CHEWBBACA_ANALYSIS {
             [meta, new_alleles, get_previous_alleles_tsv(meta.species) ]
         }
         .set{ch_allele_tables}
-
+    //
+    //MODULE: Join new and previous allele table
+    //
+    CHEWBBACA_JOINPROFILES(
+        ch_allele_tables
+    )
     emit:
     // TODO nf-core: edit emitted channels
     // bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]
