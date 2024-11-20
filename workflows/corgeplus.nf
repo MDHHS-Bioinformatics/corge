@@ -42,6 +42,7 @@ include { INPUT_CHECK_READS           } from '../subworkflows/local/input_check_
 include { INPUT_CHECK_MASTER_MANIFEST } from '../subworkflows/local/input_check_master_manifest.nf'
 include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmlst_schemes.nf'
 include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
+include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -109,6 +110,13 @@ workflow CORGEPLUS {
     //
     CHEWBBACA_ANALYSIS (
         VERIFY_CGMLST_SCHEMES.out.samples_to_chewbbaca
+    )
+
+    //
+    // SUBWORKFLOW: Run Parsnp on samples without a schema
+    //
+    PARSNP_ANALYSIS (
+        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp
     )
 
     //
