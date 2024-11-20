@@ -74,10 +74,27 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_JOINPROFILES(
         ch_allele_tables
     )
-    CHEWBBACA_JOINPROFILES.out.final_alleles.view()
     //Create channel of all the allele tables, regardless of if JOIN PROFILES was run
+    ch_all_allele_results = Channel.empty()
+    ch_all_allele_results = ch_all_allele_results.mix(CHEWBBACA_JOINPROFILES.out.final_alleles)
+    ch_all_allele_results = ch_all_allele_results.mix(ch_previous_alleles.no)
+    // Check how many counts there are per species, greater than one means we run reportree
+    ch_all_allele_results
+        .branch { meta, allele_table ->
+            yes: meta.species_count > 1
+            no: meta.species_count == 1
+        }
+        .set{ch_run_reportree}
 
-    // Check how many
+    //
+    //MODULE: Run reportree on multiple samples for a species with a cgMLST
+    //
+    // REPORTREE_CGMLST (
+    //     ch_run_reportree.yes,
+    //     file(params.master_manifest)
+    // )
+
+
 
     emit:
     // TODO nf-core: edit emitted channels

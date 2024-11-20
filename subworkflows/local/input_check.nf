@@ -28,8 +28,7 @@ workflow INPUT_CHECK {
     else {
         prepped_assemblies = prepped_assemblies.mix(assemblies)
     }
-    prepped_assemblies.view()
-    //assemblies.view()
+
     emit:
     species_count
     prepped_assemblies                                    // channel: [ val(meta), gff, assembly ]
