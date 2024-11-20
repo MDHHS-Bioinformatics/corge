@@ -3,6 +3,7 @@
 //
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
+include { RENAME_INPUTS     } from '../../modules/local/renameinputs.nf'
 
 workflow INPUT_CHECK {
     take:
@@ -17,9 +18,21 @@ workflow INPUT_CHECK {
     count_species(assemblies)
     .set{species_count}
 
+    //Rename the input files if desired
+    prepped_assemblies = Channel.empty()
+    if (params.rename_files) {
+        //Rename the files
+        RENAME_INPUTS(assemblies)
+        prepped_assemblies = prepped_assemblies.mix(RENAME_INPUTS.out.renamed_files)
+    }
+    else {
+        prepped_assemblies = prepped_assemblies.mix(assemblies)
+    }
+    prepped_assemblies.view()
+    //assemblies.view()
     emit:
     species_count
-    assemblies                                    // channel: [ val(meta), gff, assembly ]
+    prepped_assemblies                                    // channel: [ val(meta), gff, assembly ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 

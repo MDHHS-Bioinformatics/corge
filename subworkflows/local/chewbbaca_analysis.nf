@@ -1,6 +1,7 @@
 
 include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
+include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
 
 //Function for creating the path to the schema for a species
 def include_schema(species) {
@@ -66,12 +67,18 @@ workflow CHEWBBACA_ANALYSIS {
             [meta, new_alleles, get_previous_alleles_tsv(meta.species) ]
         }
         .set{ch_allele_tables}
+
     //
     //MODULE: Join new and previous allele table
     //
     CHEWBBACA_JOINPROFILES(
         ch_allele_tables
     )
+    CHEWBBACA_JOINPROFILES.out.final_alleles.view()
+    //Create channel of all the allele tables, regardless of if JOIN PROFILES was run
+
+    // Check how many
+
     emit:
     // TODO nf-core: edit emitted channels
     // bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]

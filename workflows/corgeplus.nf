@@ -96,9 +96,9 @@ workflow CORGEPLUS {
 
     //
     //SUBWORKFLOW: Check if cgMLST schemes exist for each species
-    //
+
     VERIFY_CGMLST_SCHEMES(
-        INPUT_CHECK.out.assemblies,
+        INPUT_CHECK.out.prepped_assemblies,
         INPUT_CHECK.out.species_count,
         INPUT_CHECK_MASTER_MANIFEST.out.species_count
         //file(params.schema_dir)
