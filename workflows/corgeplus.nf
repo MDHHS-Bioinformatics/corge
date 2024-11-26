@@ -116,7 +116,8 @@ workflow CORGEPLUS {
     // SUBWORKFLOW: Run Parsnp on samples without a schema
     //
     PARSNP_ANALYSIS (
-        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp
+        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
+        INPUT_CHECK_MASTER_MANIFEST.out.master_info
     )
 
     //
