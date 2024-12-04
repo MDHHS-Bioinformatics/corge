@@ -1,11 +1,7 @@
-// TODO nf-core: If in doubt look at other nf-core/subworkflows to see how we are doing things! :)
-//               https://github.com/nf-core/modules/tree/master/subworkflows
-//               You can also ask for help via your pull request or on the #subworkflows channel on the nf-core Slack workspace:
-//               https://nf-co.re/join
-// TODO nf-core: A subworkflow SHOULD import at least two modules
-
-include { PARSNP      } from '../../modules/local/parsnp.nf'
-include { CLEAN_FASTA } from '../../modules/local/clean_fasta.nf'
+include { PARSNP                } from '../../modules/local/parsnp.nf'
+include { CLEAN_FASTA           } from '../../modules/local/clean_fasta.nf'
+include { SUBSET_LIMS_PARSNP    } from '../../modules/local/subset_lims_parsnp.nf'
+include { REPORTREE_PARSNP      } from '../../modules/local/reportree/parsnp.nf'
 
 workflow PARSNP_ANALYSIS {
 
@@ -57,6 +53,24 @@ workflow PARSNP_ANALYSIS {
     //
     CLEAN_FASTA(
         PARSNP.out.snps_alingment
+    )
+
+    //
+    //MODULE:Subset lims manifest file based on the species being analyzed
+    //
+    SUBSET_LIMS_PARSNP(
+        CLEAN_FASTA.out.cleaned_snps_alignment,
+        file(params.lims)
+    )
+
+    //CLEAN_FASTA.out.cleaned_snps_alignment.view()
+    SUBSET_LIMS_PARSNP.out.subset_species_lims.view()
+
+    //
+    //MODULE: Run ReporTree on the Parsnp results
+    //
+    REPORTREE_PARSNP(
+        SUBSET_LIMS_PARSNP.out.subset_species_lims
     )
 
     emit:

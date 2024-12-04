@@ -112,7 +112,7 @@ workflow CHEWBBACA_ANALYSIS {
         //file(params.lims)//file(params.master_manifest)
     )
 
-    REPORTREE_CGMLST.out.results.view()
+    //REPORTREE_CGMLST.out.results.view()
 
     emit:
     // TODO nf-core: edit emitted channels
