@@ -1,6 +1,8 @@
 
 include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
+include { SUBSET_LIMS               } from '../../modules/local/subset_lims.nf'
+include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
 include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
 
 //Function for creating the path to the schema for a species
@@ -87,14 +89,30 @@ workflow CHEWBBACA_ANALYSIS {
         .set{ch_run_reportree}
 
     //
+    ///MODULE: Run subsetting for the lims datasheet by each species
+    //
+    SUBSET_LIMS(
+        ch_run_reportree.yes,
+        file(params.lims)
+    )
+
+
+    //
+    //MODULE: Deduplicate any samples from the alleles table
+    //
+    DEDUPLICATE_ALLELES(
+        SUBSET_LIMS.out.subset_species_lims
+    )
+
+    //
     //MODULE: Run reportree on multiple samples for a species with a cgMLST
     //
-    // REPORTREE_CGMLST (
-    //     ch_run_reportree.yes,
-    //     file(params.master_manifest)
-    // )
+    REPORTREE_CGMLST (
+        DEDUPLICATE_ALLELES.out.data_for_reportree //ch_run_reportree.yes,
+        //file(params.lims)//file(params.master_manifest)
+    )
 
-
+    REPORTREE_CGMLST.out.results.view()
 
     emit:
     // TODO nf-core: edit emitted channels

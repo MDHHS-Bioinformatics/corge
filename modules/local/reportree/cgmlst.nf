@@ -5,13 +5,13 @@ process REPORTREE_CGMLST {
 
 
     //conda "YOUR-TOOL-HERE"
-    container "reportree_2.5.1.sif"
+    container "reportree_local_v2.5.3.sif"
 
     input:
-    tuple val(meta), path(allele_table)
-    path(master_manifest)
+    tuple val(meta), path(allele_table), path(lims_manifest) // path(master_manifest)
 
     output:
+    tuple val(meta), path("ReporTree*"), emit: results
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
     // tuple val(meta), path("*.bam"), emit: bam
     // TODO nf-core: List additional required output channels/values here
@@ -22,21 +22,20 @@ process REPORTREE_CGMLST {
 
     script:
     def args = task.ext.args ?: ''
-    def prefix = task.ext.prefix ?: "${meta.species}"
+    species = task.ext.prefix ?: "${meta.species}"
 
-    // TODO nf-core: Where possible, a command MUST be provided to obtain the version number of the software e.g. 1.10
-    //               If the software is unable to output a version number on the command-line then it can be manually specified
-    //               e.g. https://github.com/nf-core/modules/blob/master/modules/nf-core/homer/annotatepeaks/main.nf
-    //               Each software used MUST provide the software name and version number in the YAML version file (versions.yml)
-    // TODO nf-core: It MUST be possible to pass additional parameters to the tool as a command-line string via the "task.ext.args" directive
-    // TODO nf-core: If the tool supports multi-threading then you MUST provide the appropriate parameter
-    //               using the Nextflow "task" variable e.g. "--threads $task.cpus"
-    // TODO nf-core: Please replace the example samtools command below with your module's command
-    // TODO nf-core: Please indent the command appropriately (4 spaces!!) to help with readability ;)
     """
-
-    head $master_manifest
-
+    #mv $allele_table results_alleles.tsv
+    echo $species
+    reportree.py \
+        --metadata $lims_manifest \
+        --allele-profile $allele_table \
+        --loci-called 0.95 \
+        --method MSTreeV2 \
+        --columns_summary_report st,specimen_source,patient_county,submitter_name,date,first_seq_date,last_seq_date,timespan_days,patient_age,patient_sex,patient_race \
+        --metadata2report st \
+        --analysis HC \
+        --n_proc $task.cpus \
 
     """
 }
