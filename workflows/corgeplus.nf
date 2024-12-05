@@ -41,6 +41,7 @@ include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { INPUT_CHECK_READS           } from '../subworkflows/local/input_check_reads.nf'
 include { INPUT_CHECK_MASTER_MANIFEST } from '../subworkflows/local/input_check_master_manifest.nf'
 include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmlst_schemes.nf'
+include { MASHTREE_CORGE              } from '../subworkflows/local/mashtree_corge.nf'
 include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
 include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
 
@@ -53,8 +54,7 @@ include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analy
 //
 // MODULE: Installed directly from nf-core/modules
 //
-// include { FASTQC                      } from '../modules/nf-core/fastqc/main'
-// include { MULTIQC                     } from '../modules/nf-core/multiqc/main'
+
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -121,12 +121,13 @@ workflow CORGEPLUS {
     )
 
     //
-    // MODULE: Run FastQC
+    // SUBWORKFLOW: Run MashTree and create microreact files
     //
-    // FASTQC (
-    //     INPUT_CHECK.out.reads
-    // )
-    // ch_versions = ch_versions.mix(FASTQC.out.versions.first())
+    MASHTREE_CORGE(
+        VERIFY_CGMLST_SCHEMES.out.samples_to_chewbbaca,
+        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
+        INPUT_CHECK_MASTER_MANIFEST.out.master_info
+    )
 
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')

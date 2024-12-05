@@ -16,7 +16,7 @@ workflow INPUT_CHECK_MASTER_MANIFEST {
 
     emit:
     species_count
-    master_info                                     // channel: [ val(meta), [ reads ] ]
+    master_info                                     // channel: [ val(meta), [ reads ], gff, assembly ]
     versions = MASTER_MANIFEST_CHECK.out.versions // channel: [ versions.yml ]
 }
 

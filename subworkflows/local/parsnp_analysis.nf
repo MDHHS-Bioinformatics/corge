@@ -64,7 +64,7 @@ workflow PARSNP_ANALYSIS {
     )
 
     //CLEAN_FASTA.out.cleaned_snps_alignment.view()
-    SUBSET_LIMS_PARSNP.out.subset_species_lims.view()
+    //SUBSET_LIMS_PARSNP.out.subset_species_lims.view()
 
     //
     //MODULE: Run ReporTree on the Parsnp results
