@@ -11,7 +11,21 @@ process REPORTREE_CGMLST {
     tuple val(meta), path(allele_table), path(lims_manifest) // path(master_manifest)
 
     output:
-    tuple val(meta), path("ReporTree*"), emit: results
+    //tuple val(meta), path("ReporTree*"), emit: results
+    //tuple val(meta), path("ReporTree_align_profile.fasta"), emit: profile_fasta
+    //tuple val(meta), path("ReporTree_align_profile.tsv"), emit: profile_tsv
+    tuple val(meta), path("ReporTree_clean_missing_matrix.tsv"), emit: clean_missing_matrix
+    tuple val(meta), path("ReporTree_clusterComposition.tsv"), emit: cluster_composition
+    tuple val(meta), path("ReporTree_dist_hamming.tsv"), emit: dist_hamming
+    tuple val(meta), path("ReporTree_flt_samples_matrix.tsv"), emit: flt_samples_matrix
+    tuple val(meta), path("ReporTree_loci_report.tsv"), emit: loci_report
+    tuple val(meta), path("ReporTree_loci_used.txt"), emit: loci_used
+    tuple val(meta), path("ReporTree_metadata_w_partitions.tsv"), emit: metadata_w_partitions
+    tuple val(meta), path("ReporTree_partitions_summary.tsv"), emit: partitions_summary
+    tuple val(meta), path("ReporTree_partitions.tsv"), emit: partitions
+    tuple val(meta), path("ReporTree_single_HC.nwk"), emit: single_HC
+    tuple val(meta), path("ReporTree.log"), emit: log
+
     // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
     // tuple val(meta), path("*.bam"), emit: bam
     // TODO nf-core: List additional required output channels/values here

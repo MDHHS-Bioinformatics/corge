@@ -73,7 +73,10 @@ workflow PARSNP_ANALYSIS {
         SUBSET_LIMS_PARSNP.out.subset_species_lims
     )
 
+    //REPORTREE_PARSNP.out.dist_hamming.view()
     emit:
+    dist_hamming = REPORTREE_PARSNP.out.dist_hamming //channel: [val (meta), results ]
+    //reportree_results = REPORTREE_PARSNP.out.results //channel : [val(meta), results]
     // TODO nf-core: edit emitted channels
     // bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]
     // bai      = SAMTOOLS_INDEX.out.bai          // channel: [ val(meta), [ bai ] ]

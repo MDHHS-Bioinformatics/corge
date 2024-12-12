@@ -44,6 +44,7 @@ include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmls
 include { MASHTREE_CORGE              } from '../subworkflows/local/mashtree_corge.nf'
 include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
 include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
+include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_analysis.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -127,6 +128,16 @@ workflow CORGEPLUS {
         VERIFY_CGMLST_SCHEMES.out.samples_to_chewbbaca,
         VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
         INPUT_CHECK_MASTER_MANIFEST.out.master_info
+    )
+
+    // CHEWBBACA_ANALYSIS.out.dist_hamming.view()
+    // PARSNP_ANALYSIS.out.dist_hamming.view()
+    //
+    // SUBWORKFLOW: Determine if there are linkages and select clusters
+    //
+    LINKAGE_ANALYSIS(
+        CHEWBBACA_ANALYSIS.out.dist_hamming,
+        PARSNP_ANALYSIS.out.dist_hamming
     )
 
     // CUSTOM_DUMPSOFTWAREVERSIONS (
