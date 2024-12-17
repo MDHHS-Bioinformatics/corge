@@ -7,6 +7,7 @@
 include { BACTERIAL_LINKAGE      } from '../../modules/local/bacterial_linkage.nf'
 include { UPDATE_MASTER_MANIFEST } from '../../modules/local/update_master_manifest.nf'
 include { GET_BEST_PARTITION     } from '../../modules/local/get_best_partition.nf'
+include { CONCAT_BEST_PARTITIONS } from '../../modules/local/concat_best_partitions.nf'
 
 workflow LINKAGE_ANALYSIS {
 
@@ -62,6 +63,18 @@ workflow LINKAGE_ANALYSIS {
         ch_all_partitions_summary,
         UPDATE_MASTER_MANIFEST.out.updated_manifest,
         file(params.input)
+    )
+
+    //Initiailze channel to collect all partitions
+    ch_all_partitions = Channel.empty()
+    ch_all_partitions = ch_all_partitions.mix(GET_BEST_PARTITION.out.best_partitions.collect{it[1]}.ifEmpty([]))
+    ch_all_partitions.view()
+
+    //
+    //MODULE: Combine all the partitions summary into one
+    //
+    CONCAT_BEST_PARTITIONS(
+        ch_all_partitions
     )
     //
     // SAMTOOLS_SORT ( ch_bam )
