@@ -115,7 +115,8 @@ workflow CHEWBBACA_ANALYSIS {
     //REPORTREE_CGMLST.out.dist_hamming.view()
 
     emit:
-    dist_hamming = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
+    dist_hamming        = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
+    partitions_summary  = REPORTREE_CGMLST.out.partitions_summary //channel" [val (meta), partitions_summary]
     //reportree_results = REPORTREE_CGMLST.out.results //channel : [val(meta), results]
     // TODO nf-core: edit emitted channels
     // bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]

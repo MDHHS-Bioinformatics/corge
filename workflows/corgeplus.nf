@@ -130,14 +130,16 @@ workflow CORGEPLUS {
         INPUT_CHECK_MASTER_MANIFEST.out.master_info
     )
 
-    // CHEWBBACA_ANALYSIS.out.dist_hamming.view()
-    // PARSNP_ANALYSIS.out.dist_hamming.view()
+    // CHEWBBACA_ANALYSIS.out.partitions_summary.view()
+    // PARSNP_ANALYSIS.out.partitions_summary.view()
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
     LINKAGE_ANALYSIS(
         CHEWBBACA_ANALYSIS.out.dist_hamming,
-        PARSNP_ANALYSIS.out.dist_hamming
+        PARSNP_ANALYSIS.out.dist_hamming,
+        CHEWBBACA_ANALYSIS.out.partitions_summary,
+        PARSNP_ANALYSIS.out.partitions_summary
     )
 
     // CUSTOM_DUMPSOFTWAREVERSIONS (

@@ -4,9 +4,9 @@
 //               https://nf-co.re/join
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
-// include { SAMTOOLS_SORT      } from '../../../modules/nf-core/samtools/sort/main'
-// include { SAMTOOLS_INDEX     } from '../../../modules/nf-core/samtools/index/main'
-include { BACTERIAL_LINKAGE     } from '../../modules/local/bacterial_linkage.nf'
+include { BACTERIAL_LINKAGE      } from '../../modules/local/bacterial_linkage.nf'
+include { UPDATE_MASTER_MANIFEST } from '../../modules/local/update_master_manifest.nf'
+include { GET_BEST_PARTITION     } from '../../modules/local/get_best_partition.nf'
 
 workflow LINKAGE_ANALYSIS {
 
@@ -14,16 +14,30 @@ workflow LINKAGE_ANALYSIS {
     // TODO nf-core: edit input (take) channels
     ch_chewbbaca_dist_hamming  // channel: [ val(meta), [ results ] ]
     ch_parsnp_dist_hamming     // channel: [ val(meta), [ results ] ]
+    ch_chewbbaca_partitions_summary  // channel: [ val(meta), [ partitions_summary ] ]
+    ch_parsnp_partitions_summary     // channel: [ val(meta), [ partitions_summary ] ]
 
     main:
 
     ch_versions = Channel.empty()
+    //Add a scheme avaiability boolean value based on whether a cgMLST scheme exists
+    ch_chewbbaca_partitions_summary
+        .map {meta, partitions_summary -> [[species:meta.species, scheme_available:true], partitions_summary]}
+        .set {ch_chewbbaca}
+    ch_parsnp_partitions_summary
+        .map {meta, partitions_summary -> [[species:meta.species, scheme_available:false], partitions_summary]}
+        .set {ch_parsnp}
+    //create channel to store all reportree partitions summary results
+    ch_all_partitions_summary = Channel.empty()
+    ch_all_partitions_summary = ch_all_partitions_summary.mix(ch_chewbbaca)
+    ch_all_partitions_summary = ch_all_partitions_summary.mix(ch_parsnp)
+    ch_all_partitions_summary.view()
 
-    //create channel to store all reportree results
+    //create channel to store all reportree dist_hamming results
     ch_all_dist_hamming = Channel.empty()
     ch_all_dist_hamming = ch_all_dist_hamming.mix(ch_chewbbaca_dist_hamming)
     ch_all_dist_hamming= ch_all_dist_hamming.mix(ch_parsnp_dist_hamming)
-    ch_all_dist_hamming.view()
+    //ch_all_dist_hamming.view()
 
     //
     // MODULE: Create bacterial linkage table per species
@@ -31,8 +45,25 @@ workflow LINKAGE_ANALYSIS {
     BACTERIAL_LINKAGE(
         ch_all_dist_hamming
     )
-    // TODO nf-core: substitute modules here for the modules of your subworkflow
 
+    //
+    // MODULE: Update the master manifest file
+    //
+    UPDATE_MASTER_MANIFEST(
+        file(params.input),
+        file(params.reads_manifest),
+        file(params.master_manifest)
+    )
+
+    //
+    // MODULE: Get the best partitions per species
+    //
+    GET_BEST_PARTITION(
+        ch_all_partitions_summary,
+        UPDATE_MASTER_MANIFEST.out.updated_manifest,
+        file(params.input)
+    )
+    //
     // SAMTOOLS_SORT ( ch_bam )
     // ch_versions = ch_versions.mix(SAMTOOLS_SORT.out.versions.first())
 
