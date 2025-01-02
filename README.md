@@ -27,6 +27,10 @@ On release, automated continuous integration tests run the pipeline on a full-si
 
 1. Verification of CGMLST scheme avaiability for each sample
 2. Perform core genome analysis with either cgMLST scheme (['chewBBACA'](https://chewbbaca.readthedocs.io/en/latest/index.html)) or core genome alignment if there is no scheme avaiable (['Parsnp'](https://github.com/marbl/parsnp))
+3. Hierarchical clustering (['ReporTree'](https://github.com/insapathogenomics/ReporTree))
+4. Create linkage table
+5. Cluster selection
+6. Generate Microract file to visalize results (tbd)
 
 ## Quick Start
 
@@ -47,7 +51,18 @@ On release, automated continuous integration tests run the pipeline on a full-si
    > - If you are using `singularity`, please use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
    > - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
 
-4. Start running your own analysis!
+4. Prepare manifest files
+Currently, the pipeline requires three different input csv files. The assemblies manifest, the reads manifest, and the master manifest.
+
+### Assemblies manifest
+Create a csv file containing paths to the GFFs, assemblies, and species
+
+The following columns are **mandatory**:
+- 'sample'
+- 'gff'
+- 'assembly'
+- 'species'
+
 
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
