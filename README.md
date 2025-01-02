@@ -85,7 +85,11 @@ Create a csv file containing any legacy samples that have been previously analyz
 5. Start running your own analysis
    ```bash
    nextflow run main.nf --input manifest_assemblies.csv --outdir <OUTDIR> \
-   --schema_dir <PATH_TO_SCHEMAS> --previous_results <BASE_PATH_TO_PREVIOUS_RESULTS> \ --previous_results_inner_dir
+   --schema_dir <PATH_TO_SCHEMAS> --previous_results <BASE_PATH_TO_PREVIOUS_RESULTS> \
+   --previous_results_inner_dir <PATH_TO_PREVIOUS_RESULTS> --master_manifest master_manifest.csv \
+   --lims lims_data.csv --reads_manifest manifest_reads.csv \
+   -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
+
    ```
 
 ## Documentation
