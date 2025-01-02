@@ -95,12 +95,12 @@ Create a csv file containing any legacy samples that have been previously analyz
 ## Inpuut/Output Options
 - `--input` [string] Path to a csv file containing information about the samples, specifically the gff, assembly, and species (mandatory).
 - `--outdir`  [string] The output directory where the results will be saved. You must use absolute paths for storage on Cloud infrastructure (mandatory).
-- `--schema_dir`
-- `--previous_results`
-- `--previous_results_inner_dir`
-- `--master_manifest`
-- `--reads_manifest`
-- `--lims`
+- `--schema_dir` [string] Path to where your schemas are located. This directory should contain a directory named after each species you hope to use a schema for cgMLST. If no schema is avaiable for a given species, analysis will default to using Parsnp instead of chewBBACA. (optional)
+- `--previous_results` [string] Path to where previous results are located. Directories located in this path should have the same species names as the species names in your samplesheet if you plan to use these previous results. Used when seeking to use chewBBACA (optional)
+- `--previous_results_inner_dir` [string] Used in conjunction with --previous_results. Uses the base path of --previous_results and the current sample species, to form the complete path to the previous 'results_alleles.tsv' (mandatory if --previous_results used)
+- `--master_manifest` [string] Path to a csv file containing information about previous samples (mandatory).
+- `--reads_manifest` [string] Path to a csv file containing read information for the newest samples being analyzed (mandatory).
+- `--lims` [string] Path to a lims csv file (mandatory)
 
 ## Credits
 
