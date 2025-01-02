@@ -14,13 +14,13 @@ def include_schema(species) {
 //Function to check if the previous allele table exists
 def check_previous_alleles_tsv(species) {
     // Create the path to where the previous alleles tsv are stored
-    def previous_alleles_path = file("${params.previous_results}/${species}/${params.previous_results_extra}/results_alleles.tsv", checkIfExists: false)
+    def previous_alleles_path = file("${params.previous_results}/${species}/${params.previous_results_inner_dir}/results_alleles.tsv", checkIfExists: false)
     return previous_alleles_path.exists()
 }
 //Function to return the previous allele table (assuming it exists)
 def get_previous_alleles_tsv(species ) {
     // Create the path to where the previous alleles tsv are stored
-    def previous_alleles_path = file("${params.previous_results}/${species}/${params.previous_results_extra}/results_alleles.tsv", checkIfExists: false)
+    def previous_alleles_path = file("${params.previous_results}/${species}/${params.previous_results_inner_dir}/results_alleles.tsv", checkIfExists: false)
     return previous_alleles_path
 }
 workflow CHEWBBACA_ANALYSIS {
