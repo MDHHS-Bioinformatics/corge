@@ -58,11 +58,27 @@ Currently, the pipeline requires three different input csv files. The assemblies
 Create a csv file containing paths to the GFFs, assemblies, and species
 
 The following columns are **mandatory**:
-- 'sample'
-- 'gff'
-- 'assembly'
-- 'species'
+- `sample`
+- `gff`
+- `assembly`
+- `species`
 
+### Reads manifest
+Create a csv file containing paths to the reads used to generate the assemblies in the assemblies manifest. Should have the same samples as the assemblies manifest.
+The following columns are **mandatory**:
+- `sample`
+- `fastq_1`
+- `fastq_2`
+
+### Master manifest
+Create a csv file containing any legacy samples that have been previously analyzed. The following columns are **mandatory**:
+- `sample`
+- `fastq_1`
+- `fastq_2`
+- `gff`
+- `assembly`
+- `species`
+- `scaffolds_over_500bp_count`
 
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
