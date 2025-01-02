@@ -82,8 +82,10 @@ Create a csv file containing any legacy samples that have been previously analyz
 
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
+5. Start running your own analysis
    ```bash
-   nextflow run nf-core/corgeplus --input samplesheet.csv --outdir <OUTDIR> --genome GRCh37 -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
+   nextflow run main.nf --input manifest_assemblies.csv --outdir <OUTDIR> \
+   --schema_dir <PATH_TO_SCHEMAS> --previous_results <BASE_PATH_TO_PREVIOUS_RESULTS> \ --previous_results_inner_dir
    ```
 
 ## Documentation
