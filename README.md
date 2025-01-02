@@ -92,9 +92,15 @@ Create a csv file containing any legacy samples that have been previously analyz
 
    ```
 
-## Documentation
-
-The nf-core/corgeplus pipeline comes with documentation about the pipeline [usage](https://nf-co.re/corgeplus/usage), [parameters](https://nf-co.re/corgeplus/parameters) and [output](https://nf-co.re/corgeplus/output).
+## Inpuut/Output Options
+- `--input` [string] Path to a csv file containing information about the samples, specifically the gff, assembly, and species (mandatory).
+- `--outdir`  [string] The output directory where the results will be saved. You must use absolute paths for storage on Cloud infrastructure (mandatory).
+- `--schema_dir`
+- `--previous_results`
+- `--previous_results_inner_dir`
+- `--master_manifest`
+- `--reads_manifest`
+- `--lims`
 
 ## Credits
 
