@@ -1,4 +1,4 @@
-# ![Corge]() ![Corge]()
+# ![Corge](docs/images/corge_workflow.png)
 
 
 
@@ -104,17 +104,11 @@ Create a csv file containing any legacy samples that have been previously analyz
 
 ## Credits
 
-nf-core/corgeplus was originally written by @MTDouglas.
+Corge was originally written by MDHHS Genomics Analysis Unit with Karla Vasco and Douglas Maldonado-Torres as main mainteiners.
 
-We thank the following people for their extensive assistance in the development of this pipeline:
 
-<!-- TODO nf-core: If applicable, make list of people who have also contributed -->
 
-## Contributions and Support
 
-If you would like to contribute to this pipeline, please see the [contributing guidelines](.github/CONTRIBUTING.md).
-
-For further information or help, don't hesitate to get in touch on the [Slack `#corgeplus` channel](https://nfcore.slack.com/channels/corgeplus) (you can join with [this invite](https://nf-co.re/join/slack)).
 
 ## Citations
 
