@@ -83,18 +83,14 @@ workflow CORGEPLUS {
     //
     // SUBWORKFLOW: Read in reads samplesheet if specifeid, validate that they exist but no need to stage files
     //
-    if (params.reads_manifest) {
-        INPUT_CHECK_READS(file(params.reads_manifest))
-    }
+    INPUT_CHECK_READS(file(params.reads_manifest))
 
     //
     // SUBWORKFLOW: Read in master manifest file. Validate GFFs and Assemblies. Count how many samples per species
     //
-    if (params.master_manifest) {
-        INPUT_CHECK_MASTER_MANIFEST(file(params.master_manifest))
+    INPUT_CHECK_MASTER_MANIFEST(file(params.master_manifest))
         //INPUT_CHECK_MASTER_MANIFEST.out.master_info.view()
         //INPUT_CHECK_MASTER_MANIFEST.out.species_count.view()
-    }
 
     //
     //SUBWORKFLOW: Check if cgMLST schemes exist for each species
