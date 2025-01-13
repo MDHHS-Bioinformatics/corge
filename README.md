@@ -121,7 +121,7 @@ Create a csv file containing any legacy samples that have been previously analyz
 - `--previous_results_inner_dir` [string] Used in conjunction with --previous_results. Uses the base path of --previous_results and the current sample species, to form the complete path to the previous 'results_alleles.tsv' (mandatory if --previous_results used)
 - `--lims` [string] Path to a lims csv file (mandatory)
 - `--master_manifest` [string] Path to a csv file containing information about previous samples (mandatory).
- `--rename_files` [boolean] Rename input files to use just the base name. This is done to prevent files that may have the same name (optional).
+- `--rename_files` [boolean] Rename input files to use just the base name. This is done to prevent files that may have the same name (optional).
 
 
 ## Credits
