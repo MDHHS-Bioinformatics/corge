@@ -67,6 +67,7 @@ The following columns are **mandatory**:
 |--------|-----|----------|---------|
 | SAMPLE_1 | /path/to/gff/files/SAMPLE_1.gff/ | /path/to/assembly/files/SAMPLE_1.fasta | SPECIES_NAME |
 | SAMPLE_2 | /path/to/gff/files/SAMPLE_2.gff/ | /path/to/assembly/files/SAMPLE_2.fasta | SPECIES_NAME |
+| SAMPLE_3 | /path/to/gff/files/SAMPLE_3.gff/ | /path/to/assembly/files/SAMPLE_3.fasta | SPECIES_NAME |
 
 
 ### Reads manifest
@@ -75,6 +76,12 @@ The following columns are **mandatory**:
 - `sample`
 - `fastq_1`
 - `fastq_2`
+
+| sample | fastq_1 | fastq_2 |
+|--------|---------|---------|
+| SAMPLE_1 | /path/to/fastq/files/SAMPLE_1.fastq_R1.gz | /path/to/fastq/files/SAMPLE_1.fastq_R2.gz |
+| SAMPLE_2 | /path/to/fastq/files/SAMPLE_2.fastq_R1.gz | /path/to/fastq/files/SAMPLE_2.fastq_R2.gz |
+| SAMPLE_3 | /path/to/fastq/files/SAMPLE_3.fastq_R1.gz | /path/to/fastq/files/SAMPLE_3.fastq_R2.gz |
 
 ### Master manifest
 Create a csv file containing any legacy samples that have been previously analyzed. The following columns are **mandatory**:
@@ -85,6 +92,11 @@ Create a csv file containing any legacy samples that have been previously analyz
 - `assembly`
 - `species`
 - `scaffolds_over_500bp_count`
+
+| sample | fastq_1 | fastq_2 | gff | assembly | species | scaffolds_over_500bp_cout |
+|--------|---------|---------|-----|----------|---------|---------------------------|
+| SAMPLE_A | /path/to/fastq/files/SAMPLE_A.fastq_R1.gz | /path/to/fastq/files/SAMPLE_A.fastq_R2.gz | path/to/gff/files/SAMPLE_A.gff | /path/to/assembly/files/SAMPLE_A.fasta | SPECIES_A | SCAFFOLDS_COUNT |
+
 
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
 
