@@ -96,6 +96,8 @@ Create a csv file containing any legacy samples that have been previously analyz
 | sample | fastq_1 | fastq_2 | gff | assembly | species | scaffolds_over_500bp_cout |
 |--------|---------|---------|-----|----------|---------|---------------------------|
 | SAMPLE_A | /path/to/fastq/files/SAMPLE_A.fastq_R1.gz | /path/to/fastq/files/SAMPLE_A.fastq_R2.gz | path/to/gff/files/SAMPLE_A.gff | /path/to/assembly/files/SAMPLE_A.fasta | SPECIES_A | SCAFFOLDS_COUNT |
+| SAMPLE_B | /path/to/fastq/files/SAMPLE_B.fastq_R1.gz | /path/to/fastq/files/SAMPLE_B.fastq_R2.gz | path/to/gff/files/SAMPLE_B.gff | /path/to/assembly/files/SAMPLE_B.fasta | SPECIES_B | SCAFFOLDS_COUNT |
+| SAMPLE_C | /path/to/fastq/files/SAMPLE_C.fastq_R1.gz | /path/to/fastq/files/SAMPLE_C.fastq_R2.gz | path/to/gff/files/SAMPLE_C.gff | /path/to/assembly/files/SAMPLE_C.fasta | SPECIES_C | SCAFFOLDS_COUNT |
 
 
    <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
