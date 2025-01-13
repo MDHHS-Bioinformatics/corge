@@ -64,8 +64,10 @@ The following columns are **mandatory**:
 - `species`
 
 | sample | gff | assembly | species |
-|----------------------------------------------------------------------|
+|--------|-----|----------|---------|
 | SAMPLE_1 | /path/to/gff/files/SAMPLE_1.gff/ | /path/to/assembly/files/SAMPLE_1.fasta | SPECIES_NAME |
+| SAMPLE_2 | /path/to/gff/files/SAMPLE_2.gff/ | /path/to/assembly/files/SAMPLE_2.fasta | SPECIES_NAME |
+
 
 ### Reads manifest
 Create a csv file containing paths to the reads used to generate the assemblies in the assemblies manifest. Should have the same samples as the assemblies manifest.
