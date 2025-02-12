@@ -59,6 +59,19 @@ def generate_partitions(new_samples_df,filtered_df,partitions_summary_df,target_
             }
     return results
 
+def select_best_reference_per_cluster_no_previous_results(master_species_df,target_partition_df):
+    #choose reference for SNIPPY based on the target partitions (in case the alternative partition introduces a biased reference)
+    sample_list_best_target = [item for sublist in target_partition_df['samples'].str.split(',') for item in sublist]
+    sample_best_target_df = master_species_df[master_species_df['sample'].isin(sample_list_best_target)].copy()
+    #Find the row with the minimum number of scaffolds
+    sample_best_target_df['scaffolds_over_500bp_count'] = pd.to_numeric(sample_best_target_df['scaffolds_over_500bp_count'],errors="coerce")
+    #for simplicity use just the first assembly path from each row as the reference path to use
+    assembly_path = sample_best_target_df['assembly'].iloc[0]
+    #get the cluster name
+    cluster_name = target_partition_df['partition_cluster_name'].values[0]
+    cluster_manifest = create_cluster_manifest(sample_best_target_df,assembly_path,cluster_name)
+    return cluster_manifest
+
 def select_best_reference_per_cluster(master_species_df,target_partition_df):
     #choose reference for SNIPPY based on the target partitions (in case the alternative partition introduces a biased reference)
     sample_list_best_target = [item for sublist in target_partition_df['samples'].str.split(',') for item in sublist]
@@ -73,6 +86,7 @@ def select_best_reference_per_cluster(master_species_df,target_partition_df):
     cluster_name = target_partition_df['partition_cluster_name'].values[0]
     cluster_manifest = create_cluster_manifest(sample_best_target_df,assembly_path,cluster_name)
     return cluster_manifest
+
 def create_cluster_manifest(samples_df,assembly_path, cluster_name):
     #drop the scaffolds column
     if "scaffolds_over_500bp_count" in samples_df.columns:
@@ -86,7 +100,7 @@ def create_cluster_manifest(samples_df,assembly_path, cluster_name):
 
     return samples_df
 
-def process_cluster_info(results,master_manifest_df,output_csv_path="test.csv"):
+def process_cluster_info(results,master_manifest_df, previous_results ='True', output_csv_path="test.csv"):
     #store all the create dfs
     cluster_manifest_list = []
     #iterate over the results
@@ -95,7 +109,10 @@ def process_cluster_info(results,master_manifest_df,output_csv_path="test.csv"):
         target_partition_df = partition_info['target_partition_df']  # Used for SNIPPY to identify reference
         # make sure that there's actually a value in the variable
         if not target_partition_df.empty:
-            current_cluster_manifest = select_best_reference_per_cluster(master_manifest_df,target_partition_df)
+            if previous_results == 'False':
+                current_cluster_manifest = select_best_reference_per_cluster_no_previous_results(master_manifest_df,target_partition_df)
+            else:
+                current_cluster_manifest = select_best_reference_per_cluster(master_manifest_df,target_partition_df)
             #save each cluster manifest to the list if it doesn't already exist
             if not any(current_cluster_manifest.equals(df) for df in cluster_manifest_list):
                 cluster_manifest_list.append(current_cluster_manifest)
@@ -135,6 +152,9 @@ def main(argv=None):
     parser.add_argument(
         'file_output', type=str, help="File name for the partitions"
     )
+    parser.add_argument(
+        'previous_results', type=str, help='Are there previous results being used (Bool)'
+    )
     #use the args
     args = parser.parse_args(argv)
 
@@ -157,6 +177,7 @@ def main(argv=None):
     #load in the updated master manifest
     master_updated_df = pd.read_csv(args.master_manifest)
     #create the summary file
-    process_cluster_info(best_partitions,master_updated_df,args.file_output)
+    process_cluster_info(best_partitions,master_updated_df, args.previous_results, args.file_output,)
+
 if __name__ == "__main__":
     main()
