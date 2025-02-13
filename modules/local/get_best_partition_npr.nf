@@ -1,4 +1,4 @@
-process GET_BEST_PARTITION {
+process GET_BEST_PARTITION_NPR {
     tag "$meta.species"
     label 'process_medium'
 
@@ -32,14 +32,11 @@ process GET_BEST_PARTITION {
     """
     echo $species
     echo $scheme_available
-
-    get_best_partition.py \
+    get_best_partition_old.py \
         $reportree_partitions \
         $master_manifest \
         $manifest_new_assemblies \
         $scheme_available \
         $file_output \
-        $previous_results
-
     """
 }
