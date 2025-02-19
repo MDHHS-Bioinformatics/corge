@@ -25,7 +25,6 @@ process GET_BEST_PARTITION {
     def args = task.ext.args ?: ''
     def scheme_available = task.ext.scheme_available ?: "${meta.scheme_available}"
     def file_output = task.ext.file_output ?: "${meta.species}_partitions.csv"
-    def previous_results = task.ext.previous_results ?:''
     species = task.ext.species ?: "${meta.species}"
 
 
@@ -33,13 +32,12 @@ process GET_BEST_PARTITION {
     echo $species
     echo $scheme_available
 
-    get_best_partition.py \
+    get_best_partition_old.py \
         $reportree_partitions \
         $master_manifest \
         $manifest_new_assemblies \
         $scheme_available \
         $file_output \
-        $previous_results
 
     """
 }

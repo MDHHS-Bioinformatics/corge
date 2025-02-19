@@ -40,13 +40,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
 include { INPUT_CHECK_READS           } from '../subworkflows/local/input_check_reads.nf'
 include { INPUT_CHECK_MASTER_MANIFEST } from '../subworkflows/local/input_check_master_manifest.nf'
-//include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmlst_schemes.nf'
 include { VERIFY_CGMLST_SCHEMES_NPR   } from '../subworkflows/local/verify_cgmlst_schmes_npr.nf'
-//include { MASHTREE_CORGE              } from '../subworkflows/local/mashtree_corge.nf'
 include { MASHTREE_CORGE_NPR          } from '../subworkflows/local/mashtree_corge_npr.nf'
 include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
 include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
-//include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_analysis.nf'
 include { LINKAGE_ANALYSIS_NPR            } from '../subworkflows/local/linkage_analysis_npr.nf'
 
 /*
