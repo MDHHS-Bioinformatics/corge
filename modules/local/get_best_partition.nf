@@ -32,7 +32,7 @@ process GET_BEST_PARTITION {
     echo $species
     echo $scheme_available
 
-    get_best_partition_old.py \
+    get_best_partition.py \
         $reportree_partitions \
         $master_manifest \
         $manifest_new_assemblies \

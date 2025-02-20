@@ -1,7 +1,6 @@
 include { BACTERIAL_LINKAGE      } from '../../modules/local/bacterial_linkage.nf'
 include { UPDATE_MASTER_MANIFEST } from '../../modules/local/update_master_manifest.nf'
-//include { GET_BEST_PARTITION     } from '../../modules/local/get_best_partition.nf'
-include { GET_BEST_PARTITION_NPR     } from '../../modules/local/get_best_partition_npr.nf'
+include { GET_BEST_PARTITION     } from '../../modules/local/get_best_partition.nf'
 include { CONCAT_BEST_PARTITIONS } from '../../modules/local/concat_best_partitions.nf'
 
 workflow LINKAGE_ANALYSIS_NPR {
@@ -55,7 +54,7 @@ workflow LINKAGE_ANALYSIS_NPR {
     //
     // MODULE: Get the best partitions per species
     //
-    GET_BEST_PARTITION_NPR(
+    GET_BEST_PARTITION(
         ch_all_partitions_summary,
         file(params.master_manifest), //UPDATE_MASTER_MANIFEST.out.updated_manifest,
         file(params.input)
@@ -63,7 +62,7 @@ workflow LINKAGE_ANALYSIS_NPR {
 
     //Initiailze channel to collect all partitions
     ch_all_partitions = Channel.empty()
-    ch_all_partitions = ch_all_partitions.mix(GET_BEST_PARTITION_NPR.out.best_partitions.collect{it[1]}.ifEmpty([]))
+    ch_all_partitions = ch_all_partitions.mix(GET_BEST_PARTITION.out.best_partitions.collect{it[1]}.ifEmpty([]))
     ch_all_partitions.view()
 
     //
