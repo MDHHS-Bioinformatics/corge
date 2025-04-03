@@ -28,13 +28,25 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-include { CORGEPLUS } from './workflows/corgeplus'
-
+if (params.mode == 'default'){
+    include { CORGEPLUS } from './workflows/corgeplus'
+} else if (params.mode == 'npr') {
+    include { CORGEPLUS_NPR } from './workflows/corgeplus_npr.nf'
+}
 //
 // WORKFLOW: Run main nf-core/corgeplus analysis pipeline
 //
 workflow NFCORE_CORGEPLUS {
-    CORGEPLUS ()
+    //
+    //WORKFLOW: The standard option. When using previous samples from your master manifest
+    if (params.mode=='default') {
+        CORGEPLUS ()
+    //
+    //WORKFLOW: For ad hoc analysis. Use if you want to focus on solely a couple of samples in isolation from any other results
+    } else if (params.mode=='npr') {
+        CORGEPLUS_NPR()
+
+    }
 }
 
 /*

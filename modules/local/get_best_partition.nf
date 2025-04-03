@@ -37,7 +37,7 @@ process GET_BEST_PARTITION {
         $master_manifest \
         $manifest_new_assemblies \
         $scheme_available \
-        $file_output
+        $file_output \
 
     """
 }
