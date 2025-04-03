@@ -1,13 +1,12 @@
 .nextflow*
 work/
 data/
-*results/
 .DS_Store
 testing/
 testing*
 *.pyc
 *.csv
-results/*
+*results*
 logs/*
 *.fasta
 *.sh
