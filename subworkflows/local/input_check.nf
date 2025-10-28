@@ -40,15 +40,15 @@ def create_assembly_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
     meta.id         = row.sample
-    meta.single_end = row.single_end ? row.single_end.toBoolean() : false
+    //meta.single_end = row.single_end ? row.single_end.toBoolean() : false
     meta.species    = row.species
 
     // add paths to the assemblies and gffs
     def assembly_meta = []
-    if (!file(row.gff).exists() && !file(row.assembly).exists()) {
-        exit 1, "ERROR: Please check input samplesheet -> GFF or Assembly does not exist!\n${row.gff} or ${row.assembly}"
+    if (!file(row.assembly).exists()){
+        exit 1, "ERROR: Please check input samplesheet -> Assembly file does not exist! \n${row.assembly}"
     } else {
-        assembly_meta = [meta, file(row.gff), file(row.assembly)]
+        assembly_meta = [meta,file(row.assembly)]
     }
 
     return assembly_meta
@@ -57,7 +57,7 @@ def create_assembly_channel(LinkedHashMap row) {
 // Function to count how many samples for each species there are
 def count_species(input_channel) {
     def counts = input_channel
-        .map { meta, gff, assembly ->
+        .map { meta, assembly ->
             [meta.species, 1]  // Extract species and assign initial count of 1
         }
         .groupTuple()  // Group by species
