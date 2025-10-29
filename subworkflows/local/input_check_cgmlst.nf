@@ -31,18 +31,18 @@ workflow INPUT_CHECK_CGMLST {
 
     //Reformat channel for species witha  cgmlst
     cgmlst_species_counts.chewbbaca.map{
-        species, count, inner_tuple -> [[species:species],count, inner_tuple[1]]
+        species, count, inner_tuple -> [[species:species, count:count], inner_tuple[1]]
     }
     .set{cgmlst_species}
     //Reformat channel for species with no cgmlst
     cgmlst_species_counts.schema_unavaiable.map{
-        species, count, no_path -> [[species:species],count]
+        species, count, no_path -> [[species:species, count:count]]
     }
     .set{no_cgmlst_species}
 
     emit:
-    species_counts_cgmlst  = cgmlst_species     // channel: [[species], count, path_to_cgmlst]
-    species_count_nocgmlst = no_cgmlst_species  // channel: [[species], count]
+    species_counts_cgmlst  = cgmlst_species     // channel: [[species, count,], path_to_cgmlst]
+    species_count_nocgmlst = no_cgmlst_species  // channel: [[species, count]]
     versions = ch_versions                     // channel: [ versions.yml ]
 }
 
