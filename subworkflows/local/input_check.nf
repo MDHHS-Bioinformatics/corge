@@ -31,7 +31,7 @@ workflow INPUT_CHECK {
 
     emit:
     species_count
-    prepped_assemblies                                    // channel: [ val(meta), gff, assembly ]
+    ch_sample_assemblies = prepped_assemblies // channel: [ val(meta), assembly ]
     versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
 }
 
