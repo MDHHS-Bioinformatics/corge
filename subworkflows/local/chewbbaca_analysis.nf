@@ -82,7 +82,7 @@ workflow CHEWBBACA_ANALYSIS {
             meta, new_alleles ->
             [meta, new_alleles, get_previous_alleles_tsv(meta.species)]
         }
-        .set{ch_alleles_tables}
+        .set{ch_alleles_tables} // [[species,previous_alleles], new_alleles, previous_alleles]
     //ch_alleles_tables.view()
 
     //
@@ -97,20 +97,27 @@ workflow CHEWBBACA_ANALYSIS {
     ch_all_allele_results = Channel.empty()
     ch_all_allele_results = ch_all_allele_results.mix(CHEWBBACA_JOINPROFILES.out.final_alleles)
     ch_all_allele_results = ch_all_allele_results.mix(ch_verify_previous_alleles.no_previous_alleles)
-    ch_all_allele_results.view()
+    //ch_all_allele_results.view()
+
+    //
+    //MODULE: Deduplicate any samples from the alleles table
+    //
+    DEDUPLICATE_ALLELES(
+        ch_all_allele_results
+    )
 
     //
     // MODULE: Run reportree on multiple samples for a species with a cgMLST
     //
     REPORTREE_CGMLST(
-        ch_all_allele_results
+        DEDUPLICATE_ALLELES.out.data_for_reportree
     )
 
 
     emit:
     dist_hamming        = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
     partitions  = REPORTREE_CGMLST.out.partitions //channel" [val (meta), partitions_summary]
-    //reportree_results = REPORTREE_CGMLST.out.results //channel : [val(meta), results]
+    // //reportree_results = REPORTREE_CGMLST.out.results //channel : [val(meta), results]
 
 
     versions = ch_versions                     // channel: [ versions.yml ]

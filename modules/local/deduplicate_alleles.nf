@@ -8,10 +8,10 @@ process DEDUPLICATE_ALLELES {
         'https://quay.io/repository/biocontainers/pandas/manifest/sha256:509adc4983db6c608fa516bea822c29bf34d5b3f039d331fc705fc27492a0987' }"
 
     input:
-     tuple val(meta), path(alleles_table), path(lims_table)
+     tuple val(meta), path(alleles_table)
 
     output:
-    tuple val(meta), path("*.tsv"), path(lims_table), emit: data_for_reportree
+    tuple val(meta), path("*.tsv"), emit: data_for_reportree
 
 
     when:
