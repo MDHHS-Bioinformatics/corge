@@ -133,14 +133,14 @@ workflow CORGEPLUS {
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
     //
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions_summary
+    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
     .join(CHEWBBACA_ANALYSIS.out.dist_tree, by:0)
     .join(MASHTREE_CORGE.out.mashtree, by:0)
     .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
    
     MICROREACT_CGMLST(ch_cgmlst_microreact)
 
-    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions_summary
+    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions
     .join(PARSNP_ANALYSIS.out.dist_tree, by:0)
     .join(MASHTREE_CORGE.out.mashtree, by:0)
     .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
