@@ -76,7 +76,8 @@ workflow PARSNP_ANALYSIS {
     //REPORTREE_PARSNP.out.dist_hamming.view()
     emit:
     dist_hamming        = REPORTREE_PARSNP.out.dist_hamming //channel: [val (meta), results ]
-    partitions_summary  = REPORTREE_PARSNP.out.partitions_summary //channel" [val (meta), partitions_summary]
+    partitions  = REPORTREE_PARSNP.out.partitions //channel" [val (meta), partitions]
+    dist_tree  = REPORTREE_PARSNP.out.single_HC //channel" [val (meta), nwk]
     //reportree_results = REPORTREE_PARSNP.out.results //channel : [val(meta), results]
     // TODO nf-core: edit emitted channels
     // bam      = SAMTOOLS_SORT.out.bam           // channel: [ val(meta), [ bam ] ]
