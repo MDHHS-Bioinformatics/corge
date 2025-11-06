@@ -25,7 +25,7 @@ _
         --reportree-tree $single_HC \
         --mash-tree $mashtree \
         --template $params.microreact_template \
-        --output ${species}.microreact
+        --output ${species}_corge.microreact
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
