@@ -115,9 +115,10 @@ workflow CHEWBBACA_ANALYSIS {
 
 
     emit:
-    dist_hamming    = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
-    partitions      = REPORTREE_CGMLST.out.partitions   //channel" [val (meta), partitions_summary]
-    dist_tree       = REPORTREE_CGMLST.out.single_HC    //channel: [val(meta), single_hc]
+    dist_hamming        = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
+    partitions          = REPORTREE_CGMLST.out.partitions   //channel" [val (meta), partitions_summary]
+    dist_tree           = REPORTREE_CGMLST.out.single_HC    //channel: [val(meta), single_hc]
+    cluster_composition = REPORTREE_CGMLST.out.cluster_composition //channel: [val(meta), cluster_composition]
 
 
     versions = ch_versions                     // channel: [ versions.yml ]
