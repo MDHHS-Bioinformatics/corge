@@ -34,6 +34,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
+// MODULES
+include { MICROREACT AS MICROREACT_CGMLST           } from '../modules/local/microreact.nf'
+include { MICROREACT AS MICROREACT_SNP           } from '../modules/local/microreact.nf'
+
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
@@ -125,6 +129,23 @@ workflow CORGEPLUS {
         VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
         INPUT_CHECK_MASTER_MANIFEST.out.master_info
     )
+
+    //
+    // MICROREACT: Summary plot with distance trees and selected partitions
+    //
+    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions_summary
+    .join(CHEWBBACA_ANALYSIS.out.dist_tree, by:0)
+    .join(MASHTREE_CORGE.out.mashtree, by:0)
+    .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
+   
+    MICROREACT_CGMLST(ch_cgmlst_microreact)
+
+    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions_summary
+    .join(PARSNP_ANALYSIS.out.dist_tree, by:0)
+    .join(MASHTREE_CORGE.out.mashtree, by:0)
+    .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
+   
+    MICROREACT_SNP(ch_parsnp_microreact)
 
     // CHEWBBACA_ANALYSIS.out.partitions_summary.view()
     // PARSNP_ANALYSIS.out.partitions_summary.view()
