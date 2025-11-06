@@ -65,9 +65,9 @@ workflow PARSNP_ANALYSIS {
 
 
     emit:
-    dist_hamming        = REPORTREE_PARSNP.out.dist_hamming //channel: [val (meta), results ]
-    partitions  = REPORTREE_PARSNP.out.partitions //channel" [val (meta), partitions_summary]
-    // //reportree_results = REPORTREE_PARSNP.out.results //channel : [val(meta), results]
+    dist_hamming    = REPORTREE_PARSNP.out.dist_hamming //channel: [val (meta), results ]
+    partitions      = REPORTREE_PARSNP.out.partitions   //channel: [val (meta), partitions_summary]
+    dist_tree       = REPORTREE_PARSNP.out.single_HC    //channel: [val(meta), single_hc]
 
     versions = ch_versions                     // channel: [ versions.yml ]
 }
