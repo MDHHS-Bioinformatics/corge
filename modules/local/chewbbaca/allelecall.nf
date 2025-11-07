@@ -7,7 +7,7 @@ process CHEWBBACA_ALLELECALL {
         'quay.io/biocontainers/chewbbaca:3.3.10--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta), path(gff), path(assemblies), path(schema)
+    tuple val(meta), path(schema), path(assemblies)
 
     output:
     tuple val(meta), path("new/*") , emit: results

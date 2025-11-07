@@ -10,17 +10,21 @@ process MICROREACT {
 
     input:
     tuple val(meta), path(partitions), path(single_HC), path(mashtree)
-_
     output:
     path '*.microreact'       , emit: microreact
     path "versions.yml"       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def thresholds = task.ext.thresholds ?: ''
     species = task.ext.prefix ?: "${meta.species}"
 
+
     """
-    make_microreact.py --species $species --partitions $params.thresholds \
+    make_microreact.py --species $species --partitions ${thresholds} \
         --partitions-tsv $partitions \
         --reportree-tree $single_HC \
         --mash-tree $mashtree \

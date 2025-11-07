@@ -25,6 +25,6 @@ def main(argv=None):
     # Format species argument
     species = args.species.replace(' ', '_')
     print('made it to the end')
-    deduplicated_df.to_csv(f"{species}_results_alleles.tsv",index=False,sep='\t')
+    deduplicated_df.to_csv(f"results_alleles.tsv",index=False,sep='\t')
 if __name__ == "__main__":
     main()

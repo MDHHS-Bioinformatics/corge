@@ -35,16 +35,15 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
-include { MICROREACT AS MICROREACT_CGMLST           } from '../modules/local/microreact.nf'
-include { MICROREACT AS MICROREACT_SNP           } from '../modules/local/microreact.nf'
+include { MICROREACT as MICROREACT_CGMLST           } from '../modules/local/microreact.nf'
+include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
-include { INPUT_CHECK_READS           } from '../subworkflows/local/input_check_reads.nf'
-include { INPUT_CHECK_MASTER_MANIFEST } from '../subworkflows/local/input_check_master_manifest.nf'
-include { VERIFY_CGMLST_SCHEMES       } from '../subworkflows/local/verify_cgmlst_schemes.nf'
+include { INPUT_CHECK_CGMLST          } from '../subworkflows/local/input_check_cgmlst.nf'
+include { VERIFY_PREVIOUS_RESULTS     } from '../subworkflows/local/verify_previous_results.nf'
 include { MASHTREE_CORGE              } from '../subworkflows/local/mashtree_corge.nf'
 include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
 include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
@@ -82,109 +81,101 @@ workflow CORGEPLUS {
         ch_input
     )
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
-    //INPUT_CHECK.out.assemblies.view()
 
     //
-    // SUBWORKFLOW: Read in reads samplesheet if specifeid, validate that they exist but no need to stage files
+    // SUBWORKFLOW: Read in csv containing cgmlst paths per species and validate they they exist
     //
-    INPUT_CHECK_READS(file(params.reads_manifest))
-
-    //
-    // SUBWORKFLOW: Read in master manifest file. Validate GFFs and Assemblies. Count how many samples per species
-    //
-    INPUT_CHECK_MASTER_MANIFEST(file(params.master_manifest))
-        //INPUT_CHECK_MASTER_MANIFEST.out.master_info.view()
-        //INPUT_CHECK_MASTER_MANIFEST.out.species_count.view()
-
-    //
-    //SUBWORKFLOW: Check if cgMLST schemes exist for each species
-
-    VERIFY_CGMLST_SCHEMES(
-        INPUT_CHECK.out.prepped_assemblies,
-        INPUT_CHECK.out.species_count,
-        INPUT_CHECK_MASTER_MANIFEST.out.species_count
-        //file(params.schema_dir)
+    INPUT_CHECK_CGMLST(
+        file(params.cgmlst_schemas),
+        INPUT_CHECK.out.species_count
     )
+
+    //INPUT_CHECK_CGMLST.out.species_counts_cgmlst.view()
+    //INPUT_CHECK_CGMLST.out.species_count_nocgmlst.view()
+
+    //
+    // SUBWORKFLOW: Check the previous results if provided and determine what analysis were be performed for each species
+    //
+    VERIFY_PREVIOUS_RESULTS(
+        INPUT_CHECK_CGMLST.out.species_counts_cgmlst,
+        INPUT_CHECK_CGMLST.out.species_count_nocgmlst
+    )
+
+    // VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca.view()
+    // VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp.view()
+    // VERIFY_PREVIOUS_RESULTS.out.species_to_skip_analysis.view()
+
+    // INPUT_CHECK.out.ch_sample_assemblies.view()
 
     //
     //SUBWORKFLOW: Run ChewBBACA on samples with a schema
     //
     CHEWBBACA_ANALYSIS (
-        VERIFY_CGMLST_SCHEMES.out.samples_to_chewbbaca
+        INPUT_CHECK.out.ch_sample_assemblies,
+        VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca
     )
+    // CHEWBBACA_ANALYSIS.out.dist_hamming.view()
+    // CHEWBBACA_ANALYSIS.out.partitions.view()
 
     //
     // SUBWORKFLOW: Run Parsnp on samples without a schema
     //
     PARSNP_ANALYSIS (
-        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
-        INPUT_CHECK_MASTER_MANIFEST.out.master_info
+        INPUT_CHECK.out.ch_sample_assemblies,
+        VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
     )
+    // PARSNP_ANALYSIS.out.dist_hamming.view()
+    // PARSNP_ANALYSIS.out.partitions.view()
 
     //
     // SUBWORKFLOW: Run MashTree and create microreact files
     //
     MASHTREE_CORGE(
-        VERIFY_CGMLST_SCHEMES.out.samples_to_chewbbaca,
-        VERIFY_CGMLST_SCHEMES.out.samples_to_parsnp,
-        INPUT_CHECK_MASTER_MANIFEST.out.master_info
+        INPUT_CHECK.out.ch_sample_assemblies,
+        VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca,
+        VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
     )
+
+
+    //Create an empty channel to store all the speices that have cgmlst for microreact
+    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions.join(CHEWBBACA_ANALYSIS.out.dist_tree)
+        .map{meta,partitions_tsv,dist_tree -> [[species:meta.species],partitions_tsv,dist_tree]}
+        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
     //
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
-    .join(CHEWBBACA_ANALYSIS.out.dist_tree, by:0)
-    .join(MASHTREE_CORGE.out.mashtree, by:0)
-    .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
-   
     MICROREACT_CGMLST(ch_cgmlst_microreact)
 
-    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions
-    .join(PARSNP_ANALYSIS.out.dist_tree, by:0)
-    .join(MASHTREE_CORGE.out.mashtree, by:0)
-    .map{meta, partitions_tsv, dist_tree, mashtree -> tuple(meta, partitions_tsv, dist_tree, mashtree)}
-   
+    //First join the parsnp results
+    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
+        .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
+        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
+    ch_parsnp_microreact.view()
+
+    //
+    // MICROREACT: Summary plot with distance trees and selected partitions
+    //
     MICROREACT_SNP(ch_parsnp_microreact)
 
-    // CHEWBBACA_ANALYSIS.out.partitions_summary.view()
-    // PARSNP_ANALYSIS.out.partitions_summary.view()
+    // // CHEWBBACA_ANALYSIS.out.partitions_summary.view()
+    // // PARSNP_ANALYSIS.out.partitions_summary.view()
+    // CHEWBBACA_ANALYSIS.out.dist_tree.view()
+    // PARSNP_ANALYSIS.out.dist_tree.view()
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
     LINKAGE_ANALYSIS(
         CHEWBBACA_ANALYSIS.out.dist_hamming,
         PARSNP_ANALYSIS.out.dist_hamming,
-        CHEWBBACA_ANALYSIS.out.partitions_summary,
-        PARSNP_ANALYSIS.out.partitions_summary
+        CHEWBBACA_ANALYSIS.out.cluster_composition,
+        PARSNP_ANALYSIS.out.cluster_composition
     )
 
     // CUSTOM_DUMPSOFTWAREVERSIONS (
     //     ch_versions.unique().collectFile(name: 'collated_versions.yml')
     // )
 
-    // //
-    // // MODULE: MultiQC
-    // //
-    // workflow_summary    = WorkflowCorgeplus.paramsSummaryMultiqc(workflow, summary_params)
-    // ch_workflow_summary = Channel.value(workflow_summary)
-
-    // methods_description    = WorkflowCorgeplus.methodsDescriptionText(workflow, ch_multiqc_custom_methods_description)
-    // ch_methods_description = Channel.value(methods_description)
-
-    // ch_multiqc_files = Channel.empty()
-    // ch_multiqc_files = ch_multiqc_files.mix(ch_workflow_summary.collectFile(name: 'workflow_summary_mqc.yaml'))
-    // ch_multiqc_files = ch_multiqc_files.mix(ch_methods_description.collectFile(name: 'methods_description_mqc.yaml'))
-    // ch_multiqc_files = ch_multiqc_files.mix(CUSTOM_DUMPSOFTWAREVERSIONS.out.mqc_yml.collect())
-    // ch_multiqc_files = ch_multiqc_files.mix(FASTQC.out.zip.collect{it[1]}.ifEmpty([]))
-
-    // MULTIQC (
-    //     ch_multiqc_files.collect(),
-    //     ch_multiqc_config.toList(),
-    //     ch_multiqc_custom_config.toList(),
-    //     ch_multiqc_logo.toList()
-    // )
-    // multiqc_report = MULTIQC.out.report.toList()
 }
 
 /*

@@ -11,7 +11,7 @@ process CHEWBBACA_JOINPROFILES {
     tuple val(meta), path(new_alleles), path(old_alleles)
 
     output:
-    tuple val(meta), path("final/results_alleles.tsv"), emit: final_alleles
+    tuple val(meta), path("joined_results_alleles.tsv"), emit: final_alleles
     path "versions.yml"           , emit: versions
 
     when:
@@ -22,12 +22,14 @@ process CHEWBBACA_JOINPROFILES {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    #create the final directory to save files
-    mkdir final
+    #crete previous directory to disambiguate files
+    mkdir previous
+    mv $old_alleles previous/
+
 
     chewBBACA.py JoinProfiles \
-        --profiles $new_alleles $old_alleles \
-        --output-file final/results_alleles.tsv
+        --profiles $new_alleles previous/$old_alleles \
+        --output-file joined_results_alleles.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

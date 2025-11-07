@@ -32,6 +32,7 @@ process PARSNP {
         --sequences assemblies/ \
         --skip-phylogeny \
         --threads $task.cpus \
+        -c \
         $args \
         --output-dir results > results/parsnp.log 2>&1
 

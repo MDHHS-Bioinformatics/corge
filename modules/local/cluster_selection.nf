@@ -1,7 +1,5 @@
-
-
-process BACTERIAL_LINKAGE {
-    tag  "$meta.species"
+process CLUSTER_SELECTION {
+    tag "$meta.species"
     label 'process_single'
 
     conda "conda-forge::pandas=2.2.3"
@@ -11,13 +9,11 @@ process BACTERIAL_LINKAGE {
 
 
     input:
-    tuple val(meta), path(dist_hamming)
+    tuple val(meta), path(cluster_composition)
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    // path "*.bam", emit: bam
-    // TODO nf-core: List additional required output channels/values here
-    tuple val(meta), path("*_potential_linkages.csv"), emit: potential_linkages
+
+    tuple val(meta), path("genomic_context_groups/"), emit: genomic_context_groups
     path "versions.yml"           , emit: versions
 
     when:
@@ -25,19 +21,20 @@ process BACTERIAL_LINKAGE {
 
     script:
     def args = task.ext.args ?: ''
+    def thresholds = task.ext.thresholds ?: ''
     species = task.ext.species ?: "${meta.species}"
 
     """
-    echo $species
-    bacterial_linkage_corge.py \
-        --species $species \
-        --dist-hamming $dist_hamming \
-        --output ${species}_potential_linkages.csv
-
+    cluster_selection.py \
+        --species  ${species} \
+        --cluster-composition $cluster_composition \
+        --thresholds ${thresholds} \
+        --outdir genomic_context_groups \
+        --include-date
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        bacteriallinkage: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' ))
+        clusterselection: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' ))
     END_VERSIONS
     """
 }
