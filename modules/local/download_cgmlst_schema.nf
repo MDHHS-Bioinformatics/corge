@@ -5,7 +5,7 @@ process DOWNLOAD_CGMLST_SCHEMA {
     tuple val(id), val(name), val(url), val(trn)
 
     output:
-    tuple val(name), path("${name}_alleles"), val(trn)
+    tuple val(name), path("${name}_alleles.zip"), val(trn), emit: alleles_zip
     
     when:
     task.ext.when == null || task.ext.when
@@ -13,6 +13,5 @@ process DOWNLOAD_CGMLST_SCHEMA {
     script:
     """
     curl -s ${url} -o ${name}_alleles.zip
-    unzip -o -q ${name}_alleles.zip -d ${name}_alleles
     """
 }
