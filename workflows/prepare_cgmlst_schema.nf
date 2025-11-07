@@ -14,21 +14,27 @@ WorkflowCorgeplus.initialise(params, log)
 def checkPathParamList = [ params.schema_info, params.trn_files,  params.species_schemas]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-
-// Define allowed schema pattern: s1 to s36
-def validSchemaPattern = ~/^s([1-9]|[1-2][0-9]|3[0-6])$/
-
-// Perform validation
-if (params.schema_ids == null || !(params.schema_ids ==~ validSchemaPattern)) {
-    exit 1, 'Invalid value for --schema_ids: '${params.schema_ids}'. Must be a string between s1 and s36.'}
+if (params.schema_ids == null) {
+     exit 1, 'Missing --schema_ids.  Give e.g. "s12" or "s12,s24,s36".'}
 
 // Split comma-separated input
-def schemaList = params.schema_ids.tokenize(',')
+def schemaList = params.schema_ids
+                    .split(/,\s*/)          //  "s24,s25"  -> ['s24','s25']
+                    .collect { it.trim() }   // strip spaces
+                    .unique()                // drop duplicates
 
-// Validate each schema entry
-def invalidSchemas = schemaList.findAll { !(it ==~ validSchemaPattern) }
+// Define allowed schema pattern: s1 to s36
+def validRe = ~/^s([1-9]|[12][0-9]|3[0-6])$/
+def invalid = schemaList.findAll { !(it ==~ validRe) }
 
-if (!invalidSchemas.isEmpty()) {exit 1, 'Invalid schema values: '${invalidSchemas.join(', ')}'. Must be strings between s1 and s36.'}
+
+// Perform validation
+if( !schemaList || invalid ) {
+    exit 1, "Invalid --schema_ids value(s): ${ invalid.join(', ') }  " +
+            "Allowed range is s1–s36, comma‑separated."
+}
+
+println "Schemas requested: ${schemaList.join(', ')}"   // => s24,s25
 
 // Check mandatory parameters
 if (params.outdir) { ch_db = file("${params.outdir}/cgmlst_schemas") } else { exit 1, 'CorGe outdir not specified!' }
@@ -58,6 +64,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
 include { DOWNLOAD_CGMLST_SCHEMA } from '../modules/local/download_cgmlst_schema'
+include { UNZIP_CGMLST_SCHEMA } from '../modules/local/unzip_cgmlst_schema'
 include { CONFIGURE_CGMLST_SCHEMA } from '../modules/local/configure_cgmlst_schema'
 include { UPDATE_CGMLST_FILE } from '../modules/local/update_cgmlst_file'
 
@@ -123,23 +130,25 @@ workflow PREPARE_CGMLST_SCHEMA {
         schema_channel
     )
     
+    UNZIP_CGMLST_SCHEMA(
+        DOWNLOAD_CGMLST_SCHEMA.out.alleles_zip
+    )
+
     // MODULE: Configure the cgMLST schemas in chewbbaca format
     CONFIGURE_CGMLST_SCHEMA(
-        DOWNLOAD_CGMLST_SCHEMA.out
+        UNZIP_CGMLST_SCHEMA.out.alleles
     )
     
+    // Wait for all schema dirs to finish
+    CONFIGURE_CGMLST_SCHEMA.out.schema
+        .collect()
+        .map { dirs -> true }  // just a signal
+        .set { ready_ch }
+
+    // Combine static path and species file with completion signal
     Channel
-        .of(tuple( file("$params.outdir/cgmlst_schemas"), file(params.species_schemas) ) )
-        .set { cgmlst_sp_ch }
-
-    CONFIGURE_CGMLST_SCHEMA.out.done
-        | collect
-        | map { _ -> true}
-        | set {ready_ch}
-
-    cgmlst_sp_ch
+        .of(tuple(file("$params.outdir/cgmlst_schemas"), file(params.species_schemas)))
         .combine(ready_ch)
-        //.view()
         .set { update_ch }
 
     // Update cgMLST info file once all schemas were downloaded and configured as ChewBBACA format
