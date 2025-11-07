@@ -38,10 +38,10 @@ workflow {
         CORGEPLUS()
     } else if (params.mode == 'npr') {
         CORGEPLUS_NPR()
-    } else if (params.mode == 'db') {
+    } else if (params.mode == 'schema') {
         PREPARE_CGMLST_SCHEMA()
     } else {
-        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'npr', 'db'."
+        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'npr', 'schema'."
     }
 }
 
