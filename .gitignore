@@ -5,7 +5,6 @@ data/
 testing/
 testing*
 *.pyc
-*.csv
 *results*
 logs/*
 *.fasta
