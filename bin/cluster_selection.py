@@ -163,7 +163,15 @@ def run_corge_cluster_selection(
 
         if include_date:
             chosen['report_date'] = datetime.datetime.now().strftime('%Y-%m-%d')
-
+        print(chosen.columns)
+        #rename the columns
+        chosen.rename(columns ={'sample_id':'sample','partition_cluster_name':'group_name',
+                                'cluster_length':'group_length','cluster_samples':'group_samples'},inplace=True)
+        print(chosen.columns)
+        #add the species column
+        chosen['species'] = species
+        #reorder the columns
+        chosen = chosen[['sample','species','group_name','group_length','group_samples', 'report_date']] if include_date else chosen[['sample','species','group_name','group_length','group_samples']]
         out_path = os.path.join(outdir, f'{species}-groups_HC{th}.csv')
         chosen.to_csv(out_path, index=False)
         logging.info(f"✅ Cluster info saved for {species} threshold={th}: {out_path}")

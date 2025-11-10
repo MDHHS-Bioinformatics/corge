@@ -151,7 +151,6 @@ workflow CORGEPLUS {
     ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
         .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
-    ch_parsnp_microreact.view()
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
