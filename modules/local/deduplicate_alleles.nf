@@ -1,5 +1,5 @@
 process DEDUPLICATE_ALLELES {
-    tag '$meta.species'
+    tag "${meta.species}"
     label 'process_single'
 
     conda "conda-forge::pandas=2.2.3"

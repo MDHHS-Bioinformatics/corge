@@ -1,5 +1,5 @@
 process CLEAN_FASTA {
-    tag '$meta.species'
+    tag "${meta.species}"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"
