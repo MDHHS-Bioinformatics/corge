@@ -1,4 +1,5 @@
 include { MASHTREE              } from '../../modules/nf-core/mashtree/main'
+include { ROOT_TREE             } from '../../modules/local/root_tree.nf'
 
 //Function to get all the previous assembly files for each species
 def get_previous_assemblies(species ) {
@@ -52,8 +53,15 @@ workflow MASHTREE_CORGE {
        ch_all_assemblies
     )
 
+    //
+    // MODULE: Root the MashTree tree
+    //
+    ROOT_TREE(
+        MASHTREE.out.tree
+    )
+
     emit:
-    mashtree_tree       = MASHTREE.out.tree
+    mashtree_tree       = ROOT_TREE.out.tre
     mashtree_matrix     = MASHTREE.out.matrix
 
     versions = ch_versions                     // channel: [ versions.yml ]
