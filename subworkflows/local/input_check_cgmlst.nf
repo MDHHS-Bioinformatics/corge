@@ -5,7 +5,6 @@ include { SAMPLESHEET_CHECK_CGMLST } from '../../modules/local/samplesheet_check
 workflow INPUT_CHECK_CGMLST {
 
     take:
-    // TODO nf-core: edit input (take) channels
     cgmlst_schemas  // csv file containg species and path species schemas
     species_count   //channel: [species, counts]
     main:
@@ -17,6 +16,7 @@ workflow INPUT_CHECK_CGMLST {
         .splitCsv (header:true, sep:',')
         .map{ create_cgmlst_channel(it)}
         .set{cgmlst_paths}
+    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK_CGMLST.out.versions)
     //join the cgmlst paths with the species_count channel
     joined_species_count = species_count
     .join(cgmlst_paths.map{ meta, path -> [meta.species, [meta, path]]}, remainder:true)

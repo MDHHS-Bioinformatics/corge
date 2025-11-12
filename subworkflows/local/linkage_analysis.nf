@@ -5,10 +5,7 @@
 // TODO nf-core: A subworkflow SHOULD import at least two modules
 
 include { BACTERIAL_LINKAGE      } from '../../modules/local/bacterial_linkage.nf'
-include { UPDATE_MASTER_MANIFEST } from '../../modules/local/update_master_manifest.nf'
-include { GET_BEST_PARTITION     } from '../../modules/local/get_best_partition.nf'
 include { CLUSTER_SELECTION      } from '../../modules/local/cluster_selection.nf'
-include { CONCAT_BEST_PARTITIONS } from '../../modules/local/concat_best_partitions.nf'
 
 workflow LINKAGE_ANALYSIS {
 
@@ -35,6 +32,7 @@ workflow LINKAGE_ANALYSIS {
     BACTERIAL_LINKAGE(
         ch_all_dist_hamming
     )
+    ch_versions = ch_versions.mix(BACTERIAL_LINKAGE.out.versions)
 
     //Combine all the cluster composition files
     ch_all_cluster_composition = Channel.empty()
@@ -47,11 +45,11 @@ workflow LINKAGE_ANALYSIS {
     CLUSTER_SELECTION(
         ch_all_cluster_composition
     )
+    ch_versions = ch_versions.mix(CLUSTER_SELECTION.out.versions)
 
     emit:
     potential_linkages  = BACTERIAL_LINKAGE.out.potential_linkages     //channel: [ val(meta), potential_linkages]
     selected_cluster    = CLUSTER_SELECTION.out.genomic_context_groups //channel: [ val(meta), cluster_selection]
-
     versions = ch_versions                     // channel: [ versions.yml ]
 }
 

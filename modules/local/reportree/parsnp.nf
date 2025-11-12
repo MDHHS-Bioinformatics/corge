@@ -21,6 +21,7 @@ process REPORTREE_PARSNP {
     tuple val(meta), path("ReporTree_partitions.tsv"), emit: partitions
     tuple val(meta), path("ReporTree_single_HC.nwk"), emit: single_HC
     tuple val(meta), path("ReporTree.log"), emit: log
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -37,5 +38,9 @@ process REPORTREE_PARSNP {
         --analysis HC \
         --n_proc $task.cpus \
 
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        reportree: \$(reportree.py --version 2>&1 | sed 's/.*Version: //i' | head -n1)
+    END_VERSIONS
     """
 }

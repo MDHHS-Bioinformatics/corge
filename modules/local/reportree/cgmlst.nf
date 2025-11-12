@@ -24,11 +24,7 @@ process REPORTREE_CGMLST {
     tuple val(meta), path("ReporTree_partitions.tsv"), emit: partitions
     tuple val(meta), path("ReporTree_single_HC.nwk"), emit: single_HC
     tuple val(meta), path("ReporTree.log"), emit: log
-
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    // tuple val(meta), path("*.bam"), emit: bam
-    // TODO nf-core: List additional required output channels/values here
-    //path "versions.yml"           , emit: versions
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -47,5 +43,9 @@ process REPORTREE_CGMLST {
         --analysis HC \
         --n_proc $task.cpus \
 
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        reportree: \$(reportree.py --version 2>&1 | sed 's/.*Version: //i' | head -n1)
+    END_VERSIONS
     """
 }

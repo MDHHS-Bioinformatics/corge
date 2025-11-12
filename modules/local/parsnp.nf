@@ -14,6 +14,7 @@ process PARSNP {
     output:
     tuple val(meta), path("results/") , emit: results
     tuple val(meta), path("results/snps_alingment.fasta"), emit: snps_alingment
+    path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -41,7 +42,7 @@ process PARSNP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        parsnp: \$(parsnp -v 2>&1 | grep -Eo "v[0-9]+\.[0-9]+")
+        parsnp: \$(parsnp -V 2>&1 | tail -n 1)
     END_VERSIONS
     """
 }

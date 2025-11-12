@@ -52,6 +52,7 @@ workflow MASHTREE_CORGE {
     MASHTREE(
        ch_all_assemblies
     )
+    ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     //
     // MODULE: Root the MashTree tree
@@ -59,6 +60,7 @@ workflow MASHTREE_CORGE {
     ROOT_TREE(
         MASHTREE.out.tree
     )
+    ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
 
     emit:
     mashtree_tree       = ROOT_TREE.out.tre

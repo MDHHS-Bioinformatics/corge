@@ -34,7 +34,7 @@ process CLUSTER_SELECTION {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        clusterselection: \$(echo \$(samtools --version 2>&1) | sed 's/^.*samtools //; s/Using.*\$//' ))
+        python: \$(python --version | sed 's/Python //g')
     END_VERSIONS
     """
 }

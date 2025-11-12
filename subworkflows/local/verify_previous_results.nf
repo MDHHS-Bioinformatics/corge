@@ -5,8 +5,6 @@ workflow VERIFY_PREVIOUS_RESULTS {
     species_counts_nocgmlst  // channel: [[species], count]
 
     main:
-    ch_versions = Channel.empty()
-
     total_counts_cgmlst = Channel.empty()
     total_counts_nocgmlst = Channel.empty()
 
@@ -15,13 +13,11 @@ workflow VERIFY_PREVIOUS_RESULTS {
         //count the number of fasta files for species with a cgmlst
         count_fasta_files_cgmlst(species_counts_cgmlst)
         .set{previous_cgmlst_counts}
-        //previous_cgmlst_counts.view()
         total_counts_cgmlst = total_counts_cgmlst.mix(previous_cgmlst_counts)
 
         //count the number of fasta files for species without a cgmlst
         count_fasta_files_nocgmlst(species_counts_nocgmlst)
         .set{previous_nocgmlst_counts}
-        //previous_nocgmlst_counts.view()
         total_counts_nocgmlst = total_counts_nocgmlst.mix(previous_nocgmlst_counts)
     } else {
         total_counts_cgmlst = total_counts_cgmlst.mix(species_counts_cgmlst)
@@ -36,13 +32,8 @@ workflow VERIFY_PREVIOUS_RESULTS {
             run_parsnp: meta[0].count > 1
         }
     .set{ch_no_schemas}
-    //ch_no_schemes.run_parsnp.view()
-
-    // total_counts_cgmlst.view()
-    // total_counts_nocgmlst.view()
 
     emit:
-    //versions = ch_versions
     species_to_chewbbaca        = total_counts_cgmlst       // [[species, count], path_to_cgmlst_scheme]
     species_to_parsnp           = ch_no_schemas.run_parsnp  // [[species,count]]
     species_to_skip_analysis    = ch_no_schemas.skip_core_genome_analysis // [[species,count]]
@@ -69,15 +60,3 @@ def count_fasta_files_nocgmlst(input_channel) {
         return [[species:species, count:count + input_count]]
     }
 }
-
-// def count_fasta_files_nocgmlst(input_channel) {
-//     return input_channel.map { meta ->
-//         def species = meta.species
-//         def input_count = meta.count
-//         def fasta_files = file("${params.previous_results}/${species}/*.{fasta,fa,fas}")
-//         def count = fasta_files.size()  // Simply get the size - will be 0 if no files found
-
-//         return [[species:species, count:count]]
-//         //return [[species:species, count:count + input_count]]
-//     }
-// }

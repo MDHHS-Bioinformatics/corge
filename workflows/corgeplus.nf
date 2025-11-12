@@ -89,9 +89,7 @@ workflow CORGEPLUS {
         file(params.cgmlst_schemas),
         INPUT_CHECK.out.species_count
     )
-
-    //INPUT_CHECK_CGMLST.out.species_counts_cgmlst.view()
-    //INPUT_CHECK_CGMLST.out.species_count_nocgmlst.view()
+    ch_versions = ch_versions.mix(INPUT_CHECK_CGMLST.out.versions)
 
     //
     // SUBWORKFLOW: Check the previous results if provided and determine what analysis were be performed for each species
@@ -101,12 +99,6 @@ workflow CORGEPLUS {
         INPUT_CHECK_CGMLST.out.species_count_nocgmlst
     )
 
-    // VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca.view()
-    // VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp.view()
-    // VERIFY_PREVIOUS_RESULTS.out.species_to_skip_analysis.view()
-
-    // INPUT_CHECK.out.ch_sample_assemblies.view()
-
     //
     //SUBWORKFLOW: Run ChewBBACA on samples with a schema
     //
@@ -114,8 +106,7 @@ workflow CORGEPLUS {
         INPUT_CHECK.out.ch_sample_assemblies,
         VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca
     )
-    // CHEWBBACA_ANALYSIS.out.dist_hamming.view()
-    // CHEWBBACA_ANALYSIS.out.partitions.view()
+    ch_versions = ch_versions.mix(CHEWBBACA_ANALYSIS.out.versions)
 
     //
     // SUBWORKFLOW: Run Parsnp on samples without a schema
@@ -124,8 +115,7 @@ workflow CORGEPLUS {
         INPUT_CHECK.out.ch_sample_assemblies,
         VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
     )
-    // PARSNP_ANALYSIS.out.dist_hamming.view()
-    // PARSNP_ANALYSIS.out.partitions.view()
+    ch_versions = ch_versions.mix(PARSNP_ANALYSIS.out.versions)
 
     //
     // SUBWORKFLOW: Run MashTree and create microreact files
@@ -135,6 +125,7 @@ workflow CORGEPLUS {
         VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca,
         VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
     )
+    ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
 
 
     //Create an empty channel to store all the speices that have cgmlst for microreact
@@ -145,7 +136,10 @@ workflow CORGEPLUS {
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
     //
-    MICROREACT_CGMLST(ch_cgmlst_microreact)
+    MICROREACT_CGMLST(
+        ch_cgmlst_microreact
+    )
+    ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
 
     //First join the parsnp results
     ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
@@ -155,12 +149,11 @@ workflow CORGEPLUS {
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
     //
-    MICROREACT_SNP(ch_parsnp_microreact)
+    MICROREACT_SNP(
+        ch_parsnp_microreact
+    )
+    ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
 
-    // // CHEWBBACA_ANALYSIS.out.partitions_summary.view()
-    // // PARSNP_ANALYSIS.out.partitions_summary.view()
-    // CHEWBBACA_ANALYSIS.out.dist_tree.view()
-    // PARSNP_ANALYSIS.out.dist_tree.view()
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
@@ -170,6 +163,7 @@ workflow CORGEPLUS {
         CHEWBBACA_ANALYSIS.out.cluster_composition,
         PARSNP_ANALYSIS.out.cluster_composition
     )
+    ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')

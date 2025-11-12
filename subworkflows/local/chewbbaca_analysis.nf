@@ -26,14 +26,11 @@ def get_previous_alleles_tsv(species ) {
 workflow CHEWBBACA_ANALYSIS {
 
     take:
-    // TODO nf-core: edit input (take) channels
     ch_samples         // channel: [ val(meta), assemblies ]
     ch_cgmlst_schema  // [[species, count], path_to_cgmlst_scheme]
 
     main:
     ch_versions = Channel.empty()
-    //ch_samples.view()
-    //ch_cgmlst_schema.view()
 
     //Join all samples by species
     ch_samples
@@ -42,16 +39,11 @@ workflow CHEWBBACA_ANALYSIS {
         }
         .groupTuple(by: 0)
         .set{ch_samples_grouped}
-    //ch_samples_grouped.view()
 
     // Now joing species with the appropriate schema
     ch_samples_and_schema = ch_cgmlst_schema.map{
         meta, schema_path -> [[species:meta.species],schema_path]
     }.join(ch_samples_grouped)
-
-
-    //ch_samples_and_schema = ch_samples_grouped.join(ch_cgmlst_schema)
-    //ch_samples_and_schema.view()
 
     //
     // MODULE: Determine the allelic profiles of a set of genomes
@@ -59,9 +51,9 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_ALLELECALL (
         ch_samples_and_schema
     )
+    ch_versions = ch_versions.mix(CHEWBBACA_ALLELECALL.out.versions)
 
     // Check if a previous alleles tsv file exists
-    //CHEWBBACA_ALLELECALL.out.results_alleles.view()
     CHEWBBACA_ALLELECALL.out.results_alleles
         .map{
             meta, new_alleles ->
@@ -73,9 +65,6 @@ workflow CHEWBBACA_ANALYSIS {
         }
         .set{ch_verify_previous_alleles} //[[species, previous_alleles], path_to_new_alleles.tsv]
 
-    //ch_previous_alleles.no_previous_alleles.view()
-    //ch_verify_previous_alleles.previous_alleles.view()
-
     //For species that previously had an alleles tsv file, add it to the channel
     ch_verify_previous_alleles.previous_alleles
         .map{
@@ -83,7 +72,6 @@ workflow CHEWBBACA_ANALYSIS {
             [meta, new_alleles, get_previous_alleles_tsv(meta.species)]
         }
         .set{ch_alleles_tables} // [[species,previous_alleles], new_alleles, previous_alleles]
-    //ch_alleles_tables.view()
 
     //
     // MODULE: Join new and previous allele tables
@@ -91,13 +79,12 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_JOINPROFILES(
         ch_alleles_tables
     )
+    ch_versions = ch_versions.mix(CHEWBBACA_JOINPROFILES.out.versions)
 
-    //CHEWBBACA_JOINPROFILES.out.final_alleles.view()
     //Create channel of all the allele tables, regardless of if JON PROFILES was run
     ch_all_allele_results = Channel.empty()
     ch_all_allele_results = ch_all_allele_results.mix(CHEWBBACA_JOINPROFILES.out.final_alleles)
     ch_all_allele_results = ch_all_allele_results.mix(ch_verify_previous_alleles.no_previous_alleles)
-    //ch_all_allele_results.view()
 
     //
     //MODULE: Deduplicate any samples from the alleles table
@@ -105,6 +92,7 @@ workflow CHEWBBACA_ANALYSIS {
     DEDUPLICATE_ALLELES(
         ch_all_allele_results
     )
+    ch_versions = ch_versions.mix(DEDUPLICATE_ALLELES.out.versions)
 
     //
     // MODULE: Run reportree on multiple samples for a species with a cgMLST
@@ -112,6 +100,7 @@ workflow CHEWBBACA_ANALYSIS {
     REPORTREE_CGMLST(
         DEDUPLICATE_ALLELES.out.data_for_reportree
     )
+    ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
 
 
     emit:

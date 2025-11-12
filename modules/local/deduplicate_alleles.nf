@@ -12,6 +12,7 @@ process DEDUPLICATE_ALLELES {
 
     output:
     tuple val(meta), path("*.tsv"), emit: data_for_reportree
+    path "versions.yml", emit: versions
 
 
     when:
@@ -24,6 +25,12 @@ process DEDUPLICATE_ALLELES {
 
     """
     deduplicate_alleles.py $alleles_table $species
+
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
 
     """
 }

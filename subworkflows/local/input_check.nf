@@ -10,6 +10,7 @@ workflow INPUT_CHECK {
     samplesheet // file: /path/to/samplesheet.csv
 
     main:
+    ch_versions = Channel.empty()
     SAMPLESHEET_CHECK ( samplesheet )
         .csv
         .splitCsv ( header:true, sep:',' )
@@ -17,6 +18,7 @@ workflow INPUT_CHECK {
         .set { assemblies }
     count_species(assemblies)
     .set{species_count}
+    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK.out.versions)
 
     //Rename the input files if desired
     prepped_assemblies = Channel.empty()
