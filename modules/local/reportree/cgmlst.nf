@@ -16,8 +16,8 @@ process REPORTREE_CGMLST {
     tuple val(meta), path("ReporTree_clean_missing_matrix.tsv"), emit: clean_missing_matrix
     tuple val(meta), path("ReporTree_clusterComposition.tsv"), emit: cluster_composition
     tuple val(meta), path("ReporTree_dist_hamming.tsv"), emit: dist_hamming
-    tuple val(meta), path("ReporTree_flt_samples_matrix.tsv"), emit: flt_samples_matrix
-    tuple val(meta), path("ReporTree_loci_report.tsv"), emit: loci_report
+    //tuple val(meta), path("ReporTree_flt_samples_matrix.tsv"), emit: flt_samples_matrix
+    //tuple val(meta), path("ReporTree_loci_report.tsv"), emit: loci_report
     tuple val(meta), path("ReporTree_loci_used.txt"), emit: loci_used
     //tuple val(meta), path("ReporTree_metadata_w_partitions.tsv"), emit: metadata_w_partitions
     //tuple val(meta), path("ReporTree_partitions_summary.tsv"), emit: partitions_summary
@@ -38,7 +38,6 @@ process REPORTREE_CGMLST {
     echo $species
     reportree.py \
         --allele-profile $allele_table \
-        --loci-called 0.95 \
         --method MSTreeV2 \
         --analysis HC \
         --n_proc $task.cpus \

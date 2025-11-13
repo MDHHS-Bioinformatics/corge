@@ -11,7 +11,7 @@ process DEDUPLICATE_ALLELES {
      tuple val(meta), path(alleles_table)
 
     output:
-    tuple val(meta), path("*.tsv"), emit: data_for_reportree
+    tuple val(meta), path("*.tsv"), emit: deduplicated_alleles_table
     path "versions.yml", emit: versions
 
 

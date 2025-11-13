@@ -33,7 +33,6 @@ process REPORTREE_PARSNP {
     """
     reportree.py \
         --alignment $snps_alignment_fasta \
-        --sample-ATCG-content 0.95 \
         --method MSTreeV2 \
         --analysis HC \
         --n_proc $task.cpus \

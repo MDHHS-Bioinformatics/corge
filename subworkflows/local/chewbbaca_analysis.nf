@@ -1,6 +1,7 @@
 
 include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
+include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
 include { SUBSET_LIMS               } from '../../modules/local/subset_lims.nf'
 include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
 include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
@@ -83,22 +84,29 @@ workflow CHEWBBACA_ANALYSIS {
 
     //Create channel of all the allele tables, regardless of if JON PROFILES was run
     ch_all_allele_results = Channel.empty()
-    ch_all_allele_results = ch_all_allele_results.mix(CHEWBBACA_JOINPROFILES.out.final_alleles)
+    ch_all_allele_results = ch_all_allele_results.mix(CHEWBBACA_JOINPROFILES.out.joined_alleles)
     ch_all_allele_results = ch_all_allele_results.mix(ch_verify_previous_alleles.no_previous_alleles)
 
     //
     //MODULE: Deduplicate any samples from the alleles table
     //
     DEDUPLICATE_ALLELES(
-        ch_all_allele_results
+        ch_all_allele_results //CHEWBBACA_EXTRACTCGMLST.out.masked_alleles//ch_all_allele_results
     )
     ch_versions = ch_versions.mix(DEDUPLICATE_ALLELES.out.versions)
+
+      //
+    //  MODULE: Properly format the alleles matrix for possible new allels
+    //
+    CHEWBBACA_EXTRACTCGMLST(
+        DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
+    )
 
     //
     // MODULE: Run reportree on multiple samples for a species with a cgMLST
     //
     REPORTREE_CGMLST(
-        DEDUPLICATE_ALLELES.out.data_for_reportree
+        CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
     )
     ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
 
