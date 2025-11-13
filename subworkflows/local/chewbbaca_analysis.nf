@@ -2,8 +2,7 @@
 include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
 include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
-include { SUBSET_LIMS               } from '../../modules/local/subset_lims.nf'
-include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
+include { DEDUPLICATE_ALLELES_TABLE } from '../../modules/local/deduplicate_alleles_table.nf'
 include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
 
 //Function for creating the path to the schema for a species
@@ -90,16 +89,16 @@ workflow CHEWBBACA_ANALYSIS {
     //
     //MODULE: Deduplicate any samples from the alleles table
     //
-    DEDUPLICATE_ALLELES(
+    DEDUPLICATE_ALLELES_TABLE(
         ch_all_allele_results //CHEWBBACA_EXTRACTCGMLST.out.masked_alleles//ch_all_allele_results
     )
-    ch_versions = ch_versions.mix(DEDUPLICATE_ALLELES.out.versions)
+    ch_versions = ch_versions.mix(DEDUPLICATE_ALLELES_TABLE.out.versions)
 
       //
     //  MODULE: Properly format the alleles matrix for possible new allels
     //
     CHEWBBACA_EXTRACTCGMLST(
-        DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
+        DEDUPLICATE_ALLELES_TABLE.out.deduplicated_alleles_table
     )
 
     //
