@@ -1,4 +1,4 @@
-<img src="docs/images/corge_logo.png" alt="CorGe Logo" width="100" align="right"/>
+<img src="docs/images/corge_logo.png" alt="CorGe Logo" width="70" align="right"/>
 
 # 🧬 CorGe+ — Core Genome based **grouping**
 
@@ -22,7 +22,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 3. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree) (method = `single`).
 4. Create potential linkage tables per species.
 5. Select groups per sample using user-defined thresholds.
-6. Run MashTree.
+6. Run [`MashTree`](https://github.com/lskatz/mashtree).
 7. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees based on core genome and Mash distances.
 
 ### ![CorGe workflow](docs/images/corge_workflow.png)
@@ -56,7 +56,7 @@ You only need to download each species’ cgMLST schema **once**. CorGe+ can aut
 - **Step 2. Download the schemas**: Find the schema ID in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s18`). Multiple IDs can be listed as: `--schema_ids s1,s18`.
 
 ```bash
-nextflow run CorGE \
+nextflow run CorGe \
   --mode schema \
   --schema_ids s1,s18 \
   --outdir corge \
@@ -78,7 +78,7 @@ Escherichia_coli,/path/to/Escherichia_coli_cgMLST
 Include:
 * `sample`: unique ID (no spaces recommended)
 * `assembly`: absolute path to FASTA assembly for the sample
-* `species`: species name used for schema lookup / species grouping. The spaces will be replaced by underscores.
+* `species`: species name used for taxa grouping. The spaces will be replaced by underscores.
 
 ```
 sample,assembly,species
@@ -93,7 +93,7 @@ ISO4,/path/iso2.fasta,Acinetobacter baumannii
 ### Basic run
 
 ```bash
-nextflow run CorGE \
+nextflow run CorGe \
   --input manifest.csv \
   --schema_file cgmlst_schemas.csv \
   --outdir corge \
@@ -105,7 +105,7 @@ Default clustering thresholds: `15, 20, 40, 150` — customizable via `--thresho
 ### With custom thresholds
 
 ```bash
-nextflow run CorGE \
+nextflow run CorGe \
   --input manifest.csv \
   --schema_file cgmlst_schemas.csv \
   --outdir results \
@@ -287,7 +287,7 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
 * **Different group IDs across runs**: Expected when using **Parsnp**, because reference choice and sample composition affect cluster boundaries. For **stable and reproducible** group IDs, prefer cgMLST.
 
 * **Missing schema for a species**
-  → Use `--mode schema` to download schemas or provide one with `--schema_file`.
+  → Use `--mode schema` to download schemas and provide the path with `--schema_file`.
   → If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
   → Rename or remove the old species subdirectory in your `outdir` to prevent conflicts when the pipeline checks for prior results.
 
@@ -321,7 +321,7 @@ If you use CorGe+, please cite:
 * cgmlst.org —  cgMLST server
 * nf-core — bioinformatics pipeline framework
 * NextFlow — computational workflow
-* Software packaging/containerisation tools
+* Software packaging/containerization tools
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
@@ -338,4 +338,5 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
