@@ -1,6 +1,6 @@
 <img src="docs/images/corge_logo.png" alt="CorGe Logo" width="70" align="right"/>
 
-# 🧬 CorGe+ — Core Genome based **grouping**
+# 🧬 CorGe+ — Core Genome plus **grouping** of bacteria
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
@@ -12,6 +12,19 @@ CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance 
 
 It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time.
 
+# Table of Contents
+- [Pipeline summary](#-pipeline-summary)
+- [Quick Start](#-quick-start)
+- [Parameters](#parameters)
+- [Designed for bacterial surveillance](#-designed-for-bacterial-surveillance)
+- [When to use what](#-when-to-use-what)
+- [Key files: Linkages & context groups](#-key-files--linkages--context-groups)
+- [est practices & caveats](#-best-practices--caveats)
+- [Troubleshooting](#-troubleshooting)
+- [Output overview](#-output-overview)
+- [Citations](#-citations)
+- [Credits & Community](#credits--community)
+- [License](#-license)
 
 ---
 
@@ -208,7 +221,7 @@ If your group becomes too large, **lower the threshold** to retain only the most
 
 ---
 
-## 🔑 Key tables: Linkages & context groups
+## 🔑 Key files: Linkages & context groups
 
 CorGe+ generates two main tables to support surveillance, cluster interpretation, and downstream hqSNP-based analysis.
 
@@ -338,5 +351,6 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
