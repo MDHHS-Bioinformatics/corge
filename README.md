@@ -19,7 +19,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 - [Designed for bacterial surveillance](#-designed-for-bacterial-surveillance)
 - [When to use what](#-when-to-use-what)
 - [Key files: Linkages & context groups](#-key-files--linkages--context-groups)
-- [est practices & caveats](#-best-practices--caveats)
+- [Best practices & caveats](#-best-practices--caveats)
 - [Troubleshooting](#-troubleshooting)
 - [Output overview](#-output-overview)
 - [Citations](#-citations)
@@ -351,6 +351,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
