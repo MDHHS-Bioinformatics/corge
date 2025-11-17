@@ -1,4 +1,4 @@
-process DEDUPLICATE_ALLELES_TABLE {
+process DEDUPLICATE_ALLELES {
     tag "${meta.species}"
     label 'process_single'
 
