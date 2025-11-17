@@ -1,4 +1,4 @@
-<img src="docs/images/corge_logo.png" alt="CorGe Logo" width="70" align="right"/>
+<img src="docs/images/corge_logo.png" alt="CorGe Logo" width="100" align="right"/>
 
 # 🧬 CorGe+ — Core Genome plus **grouping** of bacteria
 
@@ -10,7 +10,7 @@
 
 CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance and linkage investigation**. It performs **core genome MLST (cgMLST)** or **core genome alignment** and then identifies potential linkages between samples and clusters isolates into **genomic context groups**.
 
-It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time.
+It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time. More details [below](#-designed-for-bacterial-surveillance)
 
 # Table of Contents
 - [Pipeline summary](#-pipeline-summary)
@@ -59,7 +59,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 
 You only need to download each species’ cgMLST schema **once**. CorGe+ can automatically fetch and prepare schemas from [`cgmlst.org`](https://cgmlst.org/).
 
-- **Step 1. Update scheme URLs (required):** Allele FASTA URLs on [`cgmlst.org`](https://cgmlst.org/) change **daily**. Update the `url_alleles` column in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv), for the schemes you want to download. To update:
+- **Step 1. Update scheme URLs (required):** Allele FASTA URLs on [`cgmlst.org`](https://cgmlst.org/) change **daily**. Update the `url_alleles` column in the [`<pipeline directory>/assets/schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv), for the schemes you want to download. To update:
 
   1. Open the species schema on [cgmlst.org](https://cgmlst.org/)
   2. Click **“Show Targets”**
@@ -76,16 +76,26 @@ nextflow run CorGe \
   -profile singularity
 ```
 
-- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Use this file for downstream runs. Example cgMLST schema file:
+- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species, so the file will automatically reflect that (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). Use this file for downstream runs. Example cgMLST schema file:
 
 ```
 species,cgmlst_path
+Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
 Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+Escherichia_albertii,/path/to/Escherichia_coli_cgMLST
+Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+Escherichia_fergusonii,/path/to/Escherichia_coli_cgMLST
+Escherichia_marmotae,/path/to/Escherichia_coli_cgMLST
+Escherichia_ruysiae,/path/to/Escherichia_coli_cgMLST
+Shigella_boydii,/path/to/Escherichia_coli_cgMLST
+Shigella_dysenteriae,/path/to/Escherichia_coli_cgMLST
+Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
+Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
 
 > [!NOTE]
 > If your species’ schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
-> You could also download schemas from **Chewie-NS**, create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html)
+> You could also download schemas from **Chewie-NS**, create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
 
 ### 3. Prepare your manifest file
 Include:
@@ -113,7 +123,7 @@ nextflow run CorGe \
   -profile singularity
 ```
 
-Default clustering thresholds: `15, 20, 40, 150` — customizable via `--thresholds 1,10,100,1000`.
+Default clustering thresholds: `15, 20, 40, 150` (alleles for cgMLST or SNPs for Parsnp) — customizable via `--thresholds 1,10,100,1000`.
 
 ### With custom thresholds
 
@@ -130,18 +140,18 @@ nextflow run CorGe \
 
 ## Parameters
 
-| Param           | Required | Default        | Description                                                                                             |
-| --------------- | :------: | -------------- | ------------------------------------------------------------------------------------------------------- |
-| `--input`       |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
-| `--outdir`      |     ✓    | –              | Output directory root.                                                                                  |
-| `--schema_file` |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
-| `--thresholds`  |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
-| `--mode`        |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
-| `--schema_ids`  |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s18).                                    |
-| `-profile`      |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
-| `--max_memory`       |     –    | `128.GB`              | Max memory in GB                                                          |
-| `--max_cpus`       |     –    | `16`              | Max number of CPUs                                                          |
-| `--max_memory`       |     –    | `24.h`              | Max time in hours                                            
+| Param  <!-- widen column -->  | Required | Default        | Description                                                                                             |
+| ------------------------ | :------: | -------------- | --------------------------------------------------------------------------------------------------- |
+| `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
+| `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
+| `--schema_file`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
+| `--thresholds`           |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
+| `--mode`                 |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
+| `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s18).                                    |
+| `-profile`               |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
+| `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
+| `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
+| `--max_time`             |     –    | `24.h`              | Max time in hours                                            
 ---
 
 
@@ -308,7 +318,7 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
 
 ## 📊 Output overview
 
-Results are structured by **species** inside `<outdir>/corge/<Species>/`.
+Results are structured by **species** inside `<outdir>/<Species>/`.
 Each folder includes:
 
 * **cgMLST** or **Parsnp** results
@@ -351,6 +361,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
