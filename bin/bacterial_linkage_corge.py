@@ -26,8 +26,9 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
     # -----------------------------
     def format_linkages(df, threshold, max_distance, include_threshold=False):
         def linkages(distances):
-            linked_samples = [
-                f"{sample} ({distances[sample]})"
+            # Filter linked samples
+            linked = [
+                (sample, distances[sample])
                 for sample in distances.index
                 if (
                     ((distances[sample] > threshold) if not include_threshold else (distances[sample] >= threshold))
@@ -35,7 +36,15 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
                     and sample != distances.name
                 )
             ]
-            return ', '.join(linked_samples) if linked_samples else 'no linkages'
+
+            if not linked:
+                return 'no linkages'
+
+            # Sort by distance (ascending)
+            linked_sorted = sorted(linked, key=lambda x: x[1])
+
+            # Convert to "sample (integer)" format
+            return ', '.join(f"{s} ({int(d)})" for s, d in linked_sorted)
 
         return df.apply(linkages, axis=1)
 
@@ -55,12 +64,12 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
 
     # Replace diagonal with inf (self-comparisons)
     np.fill_diagonal(matrix_df.values, float('inf'))
-
     # -----------------------------
     # Compute linkages
     # -----------------------------
     strong_linkages = format_linkages(matrix_df, 0, 10, include_threshold=True)
     intermediate_linkages = format_linkages(matrix_df, 10, 40)
+    lineage_level = format_linkages(matrix_df, 40, 100)
 
     # -----------------------------
     # Build results table
@@ -69,12 +78,14 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
         'sample_id': matrix_df.index,
         'species': species,
         'strong_linkages': strong_linkages,
-        'intermediate_linkages': intermediate_linkages
+        'intermediate_linkages': intermediate_linkages,
+        'lineage_level': lineage_level
     })
 
     # Fill missing safely
     result_df['strong_linkages'] = result_df['strong_linkages'].fillna('no linkages')
     result_df['intermediate_linkages'] = result_df['intermediate_linkages'].fillna('no linkages')
+    result_df['lineage_level'] = result_df['lineage_level'].fillna('no linkages')
 
     # -----------------------------
     # Save to CSV
@@ -110,4 +121,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-
