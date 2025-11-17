@@ -2,10 +2,8 @@ process PARSNP {
     tag "$meta.species"
     label 'process_high'
 
-    conda "bioconda::parsnp=2.0.6"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/parsnp:2.0.6--hdcf5f25_0':
-        'quay.io/biocontainers/parsnp:2.0.6--hdcf5f25_0' }"
+    conda "bioconda::parsnp=2.1.5"
+    container "quay.io/staphb/parsnp:2.1.5"
 
     input:
 
@@ -13,7 +11,7 @@ process PARSNP {
 
     output:
     tuple val(meta), path("results/") , emit: results
-    tuple val(meta), path("results/snps_alingment.fasta"), emit: snps_alingment
+    tuple val(meta), path("results/parsnp.snps.mblocks"), emit: snps_alingment
     path "versions.yml", emit: versions
 
     when:
@@ -33,12 +31,11 @@ process PARSNP {
         --sequences assemblies/ \
         --skip-phylogeny \
         --threads $task.cpus \
-        -c \
+        --alignment-program mafft \
+        --curated \
+        --recomb-filter \ 
         $args \
         --output-dir results > results/parsnp.log 2>&1
-
-    #Convert ginger file to multi-fasta
-    harvesttools -i results/parsnp.ggr -S results/snps_alingment.fasta >> results/parsnp.log 2>&1
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
