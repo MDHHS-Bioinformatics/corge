@@ -242,8 +242,9 @@ Identifies **strong** or **intermediate** linkages between samples based on **al
 **Columns:**
 
 * `sample`
-* `strong_linkages(0-10)` — highly similar isolates
-* `intermediate_linkage(11-40)` — moderately similar isolates
+* `strong_linkages` — highly similar isolates (0-10)
+* `intermediate_linkage` — moderately similar isolates (11-40)
+* `lineage_level` — less similar isolates (41-100)
 
 ---
 
@@ -360,6 +361,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
