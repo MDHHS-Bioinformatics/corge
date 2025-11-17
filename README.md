@@ -1,6 +1,6 @@
-# ![Corge](docs/images/corge_workflow.png)
+<img src="docs/images/corge_logo.png" alt="CorGe Logo" width="100" align="right"/>
 
-
+# 🧬 CorGe+ — Core Genome plus **grouping** of bacteria
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with conda](http://img.shields.io/badge/run%20with-conda-3EB049?labelColor=000000&logo=anaconda)](https://docs.conda.io/en/latest/)
@@ -8,143 +8,363 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 
 
+CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance and linkage investigation**. It performs **core genome MLST (cgMLST)** or **core genome alignment** and then identifies potential linkages between samples and clusters isolates into **genomic context groups**.
 
-## Introduction
+It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time. More details [below](#-designed-for-bacterial-surveillance)
 
-<!-- TODO nf-core: Write a 1-2 sentence summary of what data the pipeline is for and what it does -->
+# Table of Contents
+- [Pipeline summary](#-pipeline-summary)
+- [Quick Start](#-quick-start)
+- [Parameters](#parameters)
+- [Designed for bacterial surveillance](#-designed-for-bacterial-surveillance)
+- [When to use what](#-when-to-use-what)
+- [Key files: Linkages & context groups](#-key-files--linkages--context-groups)
+- [Best practices & caveats](#-best-practices--caveats)
+- [Troubleshooting](#-troubleshooting)
+- [Output overview](#-output-overview)
+- [Citations](#-citations)
+- [Credits & Community](#credits--community)
+- [License](#-license)
 
-**Corgeplus** is a bioinformatics best-practice analysis pipeline for Core genome clustering using a core genome MLST.
+---
 
-The pipeline is built using [Nextflow](https://www.nextflow.io), a workflow tool to run tasks across multiple compute infrastructures in a very portable manner. It uses Docker/Singularity containers making installation trivial and results highly reproducible. The [Nextflow DSL2](https://www.nextflow.io/docs/latest/dsl2.html) implementation of this pipeline uses one container per process which makes it much easier to maintain and update software dependencies. Where possible, these processes have been submitted to and installed from [nf-core/modules](https://github.com/nf-core/modules) in order to make them available to all nf-core pipelines, and to everyone within the Nextflow community!
+## 🧩 Pipeline summary
 
-<!-- TODO nf-core: Add full-sized test dataset and amend the paragraph below if applicable -->
+1. Verify cgMLST schema availability for each species.
+2. Perform core genome analysis using [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA) (cgMLST) or [`Parsnp`](https://github.com/marbl/parsnp) (core alignment if schema unavailable).
+3. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree) (method = `single`).
+4. Create potential linkage tables per species.
+5. Select groups per sample using user-defined thresholds.
+6. Run [`MashTree`](https://github.com/lskatz/mashtree).
+7. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees based on core genome and Mash distances.
 
-On release, automated continuous integration tests run the pipeline on a full-sized dataset on the AWS cloud infrastructure. This ensures that the pipeline runs on AWS, has sensible resource allocation defaults set to run on real-world datasets, and permits the persistent storage of results to benchmark between pipeline releases and other analysis sources.The results obtained from the full-sized test can be viewed on the [nf-core website](https://nf-co.re/corgeplus/results).
+### ![CorGe workflow](docs/images/corge_workflow.png)
 
-## Pipeline summary
+---
 
-<!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
+## ⚡ Quick Start
 
-1. Verification of CGMLST scheme avaiability for each sample
-2. Perform core genome analysis with either cgMLST scheme (['chewBBACA'](https://chewbbaca.readthedocs.io/en/latest/index.html)) or core genome alignment if there is no scheme avaiable (['Parsnp'](https://github.com/marbl/parsnp))
-3. Hierarchical clustering (['ReporTree'](https://github.com/insapathogenomics/ReporTree))
-4. Create linkage table
-5. Cluster selection
-6. Generate Microract file to visalize results (tbd)
-
-## Quick Start
+### 1. Install prerequisites
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
-
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(you can use [`Conda`](https://conda.io/miniconda.html) both to install Nextflow itself and also to manage software within pipelines. Please only use it within pipelines as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_.
+3. Download this repository.
 
-3. Download the pipeline and test it on a minimal dataset with a single command:
+> [!NOTE]  
+> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later.
 
-   ```bash
-   nextflow run nf-core/corgeplus -profile test,YOURPROFILE --outdir <OUTDIR>
-   ```
+---
 
-   Note that some form of configuration will be needed so that Nextflow knows how to fetch the required software. This is usually done in the form of a config profile (`YOURPROFILE` in the example command above). You can chain multiple config profiles in a comma-separated string.
+### 2. Download cgMLST schemas
 
-   > - The pipeline comes with config profiles called `docker`, `singularity`, `podman`, `shifter`, `charliecloud` and `conda` which instruct the pipeline to use the named tool for software management. For example, `-profile test,docker`.
-   > - Please check [nf-core/configs](https://github.com/nf-core/configs#documentation) to see if a custom config file to run nf-core pipelines already exists for your Institute. If so, you can simply use `-profile <institute>` in your command. This will enable either `docker` or `singularity` and set the appropriate execution settings for your local compute environment.
-   > - If you are using `singularity`, please use the [`nf-core download`](https://nf-co.re/tools/#downloading-pipelines-for-offline-use) command to download images first, before running the pipeline. Setting the [`NXF_SINGULARITY_CACHEDIR` or `singularity.cacheDir`](https://www.nextflow.io/docs/latest/singularity.html?#singularity-docker-hub) Nextflow options enables you to store and re-use the images from a central location for future pipeline runs.
-   > - If you are using `conda`, it is highly recommended to use the [`NXF_CONDA_CACHEDIR` or `conda.cacheDir`](https://www.nextflow.io/docs/latest/conda.html) settings to store the environments in a central location for future pipeline runs.
+You only need to download each species’ cgMLST schema **once**. CorGe+ can automatically fetch and prepare schemas from [`cgmlst.org`](https://cgmlst.org/).
 
-4. Prepare manifest files
-Currently, the pipeline requires three different input csv files. The assemblies manifest, the reads manifest, and the master manifest.
+- **Step 1. Update scheme URLs (required):** Allele FASTA URLs on [`cgmlst.org`](https://cgmlst.org/) change **daily**. Update the `url_alleles` column in the [`<pipeline directory>/assets/schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv), for the schemes you want to download. To update:
 
-### Assemblies manifest
-Create a csv file containing paths to the GFFs, assemblies, and species
+  1. Open the species schema on [cgmlst.org](https://cgmlst.org/)
+  2. Click **“Show Targets”**
+  3. Copy the **“Download alleles as FASTA”** URL
+  4. Replace the URL in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv)
 
-The following columns are **mandatory**:
-- `sample`
-- `gff`
-- `assembly`
-- `species`
+- **Step 2. Download the schemas**: Find the schema ID in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s18`). Multiple IDs can be listed as: `--schema_ids s1,s18`.
 
-| sample | gff | assembly | species |
-|--------|-----|----------|---------|
-| SAMPLE_1 | /path/to/gff/files/SAMPLE_1.gff/ | /path/to/assembly/files/SAMPLE_1.fasta | SPECIES_NAME |
-| SAMPLE_2 | /path/to/gff/files/SAMPLE_2.gff/ | /path/to/assembly/files/SAMPLE_2.fasta | SPECIES_NAME |
-| SAMPLE_3 | /path/to/gff/files/SAMPLE_3.gff/ | /path/to/assembly/files/SAMPLE_3.fasta | SPECIES_NAME |
+```bash
+nextflow run CorGe \
+  --mode schema \
+  --schema_ids s1,s18 \
+  --outdir corge \
+  -profile singularity
+```
+
+- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species, so the file will automatically reflect that (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). Use this file for downstream runs. Example cgMLST schema file:
+
+```
+species,cgmlst_path
+Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
+Escherichia_albertii,/path/to/Escherichia_coli_cgMLST
+Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+Escherichia_fergusonii,/path/to/Escherichia_coli_cgMLST
+Escherichia_marmotae,/path/to/Escherichia_coli_cgMLST
+Escherichia_ruysiae,/path/to/Escherichia_coli_cgMLST
+Shigella_boydii,/path/to/Escherichia_coli_cgMLST
+Shigella_dysenteriae,/path/to/Escherichia_coli_cgMLST
+Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
+Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
+```
+
+> [!NOTE]
+> If your species’ schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
+> You could also download schemas from **Chewie-NS**, create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+
+### 3. Prepare your manifest file
+Include:
+* `sample`: unique ID (no spaces recommended)
+* `assembly`: absolute path to FASTA assembly for the sample
+* `species`: species name used for taxa grouping. The spaces will be replaced by underscores.
+
+```
+sample,assembly,species
+ISO1,/path/iso1.fasta,Escherichia_coli
+ISO2,/path/iso2.fasta,Escherichia coli
+ISO3/path/iso2.fasta,Acinetobacter baumannii
+ISO4,/path/iso2.fasta,Acinetobacter baumannii
+```
+
+### 4. Run your analyses
+
+### Basic run
+
+```bash
+nextflow run CorGe \
+  --input manifest.csv \
+  --schema_file cgmlst_schemas.csv \
+  --outdir corge \
+  -profile singularity
+```
+
+Default clustering thresholds: `15, 20, 40, 150` (alleles for cgMLST or SNPs for Parsnp) — customizable via `--thresholds 1,10,100,1000`.
+
+### With custom thresholds
+
+```bash
+nextflow run CorGe \
+  --input manifest.csv \
+  --schema_file cgmlst_schemas.csv \
+  --outdir results \
+  --thresholds 1,10,100,1000 \
+  -profile singularity
+```
+
+---
+
+## Parameters
+
+| Param  <!-- widen column -->  | Required | Default        | Description                                                                                             |
+| ------------------------ | :------: | -------------- | --------------------------------------------------------------------------------------------------- |
+| `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
+| `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
+| `--schema_file`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
+| `--thresholds`           |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
+| `--mode`                 |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
+| `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s18).                                    |
+| `-profile`               |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
+| `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
+| `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
+| `--max_time`             |     –    | `24.h`              | Max time in hours                                            
+---
 
 
-### Reads manifest
-Create a csv file containing paths to the reads used to generate the assemblies in the assemblies manifest. Should have the same samples as the assemblies manifest.
-The following columns are **mandatory**:
-- `sample`
-- `fastq_1`
-- `fastq_2`
+## 🔍 Designed for bacterial surveillance
 
-| sample | fastq_1 | fastq_2 |
-|--------|---------|---------|
-| SAMPLE_1 | /path/to/fastq/files/SAMPLE_1.fastq_R1.gz | /path/to/fastq/files/SAMPLE_1.fastq_R2.gz |
-| SAMPLE_2 | /path/to/fastq/files/SAMPLE_2.fastq_R1.gz | /path/to/fastq/files/SAMPLE_2.fastq_R2.gz |
-| SAMPLE_3 | /path/to/fastq/files/SAMPLE_3.fastq_R1.gz | /path/to/fastq/files/SAMPLE_3.fastq_R2.gz |
+CorGe+ was created to make **genomic epidemiology, routine surveillance, and outbreak screening both fast and accessible**. It helps you:
 
-### Master manifest
-Create a csv file containing any legacy samples that have been previously analyzed. The following columns are **mandatory**:
-- `sample`
-- `fastq_1`
-- `fastq_2`
-- `gff`
-- `assembly`
-- `species`
-- `scaffolds_over_500bp_count`
+* 🕒 **Track related isolates over time** and monitor emerging patterns.
+* 🧬 **Group genomes by allelic or SNP distance** using cgMLST or core-genome alignment.
+* 🔗 **Identify potential linkages** based on allelic distances (cgMLST) or SNP distances (Parsnp).
+* 📤 **Export clean, shareable outputs** (CSV tables + Microreact visualizations).
+* 🧩 **Feed selected genomic context groups** into downstream pipelines like **PoODLE** for high-quality SNP and pangenome analyses.
 
-| sample | fastq_1 | fastq_2 | gff | assembly | species | scaffolds_over_500bp_cout |
-|--------|---------|---------|-----|----------|---------|---------------------------|
-| SAMPLE_A | /path/to/fastq/files/SAMPLE_A.fastq_R1.gz | /path/to/fastq/files/SAMPLE_A.fastq_R2.gz | path/to/gff/files/SAMPLE_A.gff | /path/to/assembly/files/SAMPLE_A.fasta | SPECIES_A | SCAFFOLDS_COUNT |
-| SAMPLE_B | /path/to/fastq/files/SAMPLE_B.fastq_R1.gz | /path/to/fastq/files/SAMPLE_B.fastq_R2.gz | path/to/gff/files/SAMPLE_B.gff | /path/to/assembly/files/SAMPLE_B.fasta | SPECIES_B | SCAFFOLDS_COUNT |
-| SAMPLE_C | /path/to/fastq/files/SAMPLE_C.fastq_R1.gz | /path/to/fastq/files/SAMPLE_C.fastq_R2.gz | path/to/gff/files/SAMPLE_C.gff | /path/to/assembly/files/SAMPLE_C.fasta | SPECIES_C | SCAFFOLDS_COUNT |
+When the first question is *“Are these isolates related?”*, CorGe+ gives you a fast answer.
 
+### Multi-species and incremental analysis
 
-   <!-- TODO nf-core: Update the example "typical command" below used to run the pipeline -->
+CorGe+ can analyze **multiple species in a single run**.
+The output directory acts as a **growing surveillance database** — new samples are automatically compared with previous ones, and group nomenclature remains stable across batches.
 
-5. Start running your own analysis
-   ```bash
-   nextflow run main.nf --input manifest_assemblies.csv --outdir <OUTDIR> \
-   --schema_dir <PATH_TO_SCHEMAS> --previous_results <BASE_PATH_TO_PREVIOUS_RESULTS> \
-   --previous_results_inner_dir <PATH_TO_PREVIOUS_RESULTS> --master_manifest master_manifest.csv \
-   --lims lims_data.csv --reads_manifest manifest_reads.csv \
-   -profile <docker/singularity/podman/shifter/charliecloud/conda/institute>
+If you need to **analyze a batch independently** (e.g., without comparing to historical data), simply specify a **new `--outdir`** and include only the samples you want to compare in the manifest.
 
-   ```
+---
 
-## Inpuut/Output Options
-- `--input` [string] Path to a csv file containing information about the samples, specifically the gff, assembly, and species (mandatory).
-- `--outdir`  [string] The output directory where the results will be saved. You must use absolute paths for storage on Cloud infrastructure (mandatory).
-- `--reads_manifest` [string] Path to a csv file containing read information for the newest samples being analyzed (mandatory).
-- `--schema_dir` [string] Path to where your schemas are located. This directory should contain a directory named after each species you hope to use a schema for cgMLST. If no schema is avaiable for a given species, analysis will default to using Parsnp instead of chewBBACA. (optional)
-- `--previous_results` [string] Path to where previous results are located. Directories located in this path should have the same species names as the species names in your samplesheet if you plan to use these previous results. Used when seeking to use chewBBACA (optional)
-- `--previous_results_inner_dir` [string] Used in conjunction with --previous_results. Uses the base path of --previous_results and the current sample species, to form the complete path to the previous 'results_alleles.tsv' (mandatory if --previous_results used)
-- `--lims` [string] Path to a lims csv file (mandatory)
-- `--master_manifest` [string] Path to a csv file containing information about previous samples (mandatory).
-- `--rename_files` [boolean] Rename input files to use just the base name. This is done to prevent files that may have the same name (optional).
+## 🧭 When to use what
 
+### **🔹 cgMLST (ChewBBACA)** — *preferred method*
 
-## Credits
+Used automatically when a cgMLST schema is available for the species.
 
-Corge was originally written by MDHHS Genomics Analysis Unit with Karla Vasco and Douglas Maldonado-Torres as main mainteiners.
+* Works with as few as **2 samples**.
+* Provides **stable, reference-free** allele calling (40–80% of the genome).
 
+---
 
+### **🔹 Parsnp fallback** — *used when no cgMLST schema exists*
 
+Parsnp is triggered when a species lacks a schema.
 
+* Recommended: **≥5 samples** for meaningful alignments.
+* Minimum: **2 samples**, but expect longer runtimes and reduced SNP accuracy.
+* Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~100 SNPs) when evaluating potential linkages.
+* For downstream confirmation, use an hqSNP workflow (e.g., **Snippy**).
 
-## Citations
+---
 
-<!-- TODO nf-core: Add citation for pipeline after first release. Uncomment lines below and update Zenodo doi and badge at the top of this file. -->
-<!-- If you use  nf-core/corgeplus for your analysis, please cite it using the following doi: [10.5281/zenodo.XXXXXX](https://doi.org/10.5281/zenodo.XXXXXX) -->
+### **🔹 Group thresholds (allelic or SNP distance cutoffs)**
 
-<!-- TODO nf-core: Add bibliography of tools and data used in your pipeline -->
+Thresholds determine **which samples are grouped together** for downstream high-resolution analysis (hqSNPs, recombination filtering, pangenome comparisons).
+These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
+
+**Practical guidance from surveillance experience:**
+
+* **15–20 alleles**
+
+  * Useful for species or STs that are *highly prevalent* and genetically tight
+    (e.g., *Acinetobacter baumannii* ST2, *Klebsiella pneumoniae* ST219).
+  * Helps separate closely related sub-lineages.
+
+* **40 alleles**
+
+  * Good general-purpose threshold to keep **linked + contextual** samples together
+    within the same broader lineage.
+
+* **150 alleles**
+
+  * Useful when a cluster has **too few samples** and you want to include more that are
+    still related at a lineage level but not necessarily linked.
+
+A meaningful group for downstream SNP-based analysis ideally contains **>4 samples**.
+If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
+
+---
+
+> [!TIP]
+> Use the **Microreact visualization** to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+
+---
+
+## 🔑 Key files: Linkages & context groups
+
+CorGe+ generates two main tables to support surveillance, cluster interpretation, and downstream hqSNP-based analysis.
+
+### **📘 Potential linkages**
+
+File: `<Species>_potential_linkages.csv`
+Identifies **strong** or **intermediate** linkages between samples based on **allelic distances** (cgMLST) or **SNP distances** (Parsnp).
+
+**Columns:**
+
+* `sample`
+* `strong_linkages` — highly similar isolates (0-10)
+* `intermediate_linkage` — moderately similar isolates (11-40)
+* `lineage_level` — less similar isolates (41-100)
+
+---
+
+### **📗 Genomic context groups**
+
+Files: `<Species>-groups_HC<threshold>.csv`
+One file is produced for **each threshold** selected with `--thresholds`.
+
+These tables define groups of samples for downstream analysis, using the standardized `HC<partition>-C<id>` nomenclature. Example: `HC20-C25`
+  * **Partition** corresponds to the *lowest distance at which two clusters merge* under single-linkage at the chosen threshold.
+  * **Cluster IDs** (`C1`, `C2`, …) are unique within each partition.
+  * Group names remain **stable across batches** because CorGe+ reuses `partitions.csv` from previous runs.
+
+  **Columns:**
+
+  * `sample`
+  * `species`
+  * `group_name` — stable cluster label in the form `HC<partition>-C<id>`
+  * `group_length` — number of samples in the group
+  * `group_samples` — comma-separated list of all samples in the group
+  * `report_date` — timestamp of the analysis
+
+---
+
+### 🧬 Microreact export
+
+CorGe+ generates a `.microreact` file that brings together **two complementary phylogenetic perspectives**:
+
+* **Mashtree** — reflects genome composition and accessory gene content, making it sensitive to horizontal gene transfer.
+* **ReporTree distance tree** — based on core-genome distances, ideal for interpreting vertical evolutionary relationships.
+
+By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which isolates to include in downstream high-resolution analyses.
+
+To aid interpretation, Microreact also displays **heatmaps per threshold**, using the ReporTree **partition nomenclature**.
+Each partition corresponds to a hierarchical clustering level and includes the method, numeric threshold, and distance unit. For example, threshold **15** corresponds to the partition `single-15x1.0`.
+
+To visualize, upload the `.microreact` file to [`Microreact`](https://microreact.org/upload)
+
+### ![Microreact example](docs/images/corge_microreact_example.png)
+
+---
+
+## 🧭 Best practices & caveats
+
+* **Use high-quality assemblies:** Ideally, assemblies should have **<500 contigs ≥500 bp**, **≥30× Illumina coverage**, and **no contamination**.
+
+* **Interpret CorGe+ results as *screening*:** Use the output to identify candidate related isolates, but confirm relatedness with more granular analysis within an identified genomic context group (e.g., Snippy, Panaroo, Gubbins, Mashtree).
+
+* **Parsnp-specific guidance:**
+  * Prefer **≥5 samples** to obtain meaningful alignments.
+  * Treat SNP distances as inflated; use **higher SNP thresholds** (~100 SNPs) when evaluating potential linkages.
+
+* **Disk cleanup:** After the pipeline completes, you may safely remove the Nextflow `work/` directory to reclaim space.
+
+---
+
+## 🛠 Troubleshooting
+
+* **No clusters at a threshold**: Increase the value in `--thresholds`.
+
+* **Very small Parsnp alignment**:  Add more samples (≥5) or verify correct species labels.
+
+* **Different group IDs across runs**: Expected when using **Parsnp**, because reference choice and sample composition affect cluster boundaries. For **stable and reproducible** group IDs, prefer cgMLST.
+
+* **Missing schema for a species**
+  → Use `--mode schema` to download schemas and provide the path with `--schema_file`.
+  → If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
+  → Rename or remove the old species subdirectory in your `outdir` to prevent conflicts when the pipeline checks for prior results.
+
+---
+
+## 📊 Output overview
+
+Results are structured by **species** inside `<outdir>/<Species>/`.
+Each folder includes:
+
+* **cgMLST** or **Parsnp** results
+* **Linkage analysis** CSVs
+* **Genomic context group** tables per threshold
+* **MashTree** files
+* **Microreact** project file (`*.microreact`)
+* **ReporTree** distance and cluster files
+
+Detailed outputs can be found in the [`corge_outputs.md`](corge_outputs.md) file.
+
+---
+
+## 💬 Citations
+
+If you use CorGe+, please cite:
+
+* ChewBBACA — cgMLST calling
+* ReporTree — hierarchical clustering
+* Mashtree — composition-based tree
+* Parsnp — core alignment
+* Microreact — visualization platform
+* cgmlst.org —  cgMLST server
+* nf-core — bioinformatics pipeline framework
+* NextFlow — computational workflow
+* Software packaging/containerization tools
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
-You can cite the `nf-core` publication as follows:
+---
 
-> **The nf-core framework for community-curated bioinformatics pipelines.**
->
-> Philip Ewels, Alexander Peltzer, Sven Fillinger, Harshil Patel, Johannes Alneberg, Andreas Wilm, Maxime Ulysse Garcia, Paolo Di Tommaso & Sven Nahnsen.
->
-> _Nat Biotechnol._ 2020 Feb 13. doi: [10.1038/s41587-020-0439-x](https://dx.doi.org/10.1038/s41587-020-0439-x).
+## Credits & Community
+
+Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis Unit with Karla Vasco and Douglas Maldonado-Torres as main mainteiners.
+
+📢 Contributions, issues, and pull requests are welcome — help make bacterial surveillance reproducible and accessible for everyone!
+
+---
+
+## 📜 License
+
+This project is released under the **MIT License**.
+
+
+
+
+
+
+

@@ -1,10 +1,10 @@
 process CHEWBBACA_ALLELECALL {
     tag "$meta.species"
     label 'process_high'
-    conda "bioconda::chewbbaca=3.3.10"
+    conda "bioconda::chewbbaca=3.4.2"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/chewbbaca:3.3.10--pyhdfd78af_0':
-        'quay.io/biocontainers/chewbbaca:3.3.10--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/chewbbaca:3.4.2--pyhdfd78af_0':
+        'quay.io/biocontainers/chewbbaca:3.4.2--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(schema), path(assemblies)

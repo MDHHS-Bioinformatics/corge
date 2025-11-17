@@ -2,10 +2,8 @@ process PARSNP {
     tag "$meta.species"
     label 'process_high'
 
-    conda "bioconda::parsnp=2.0.6"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/parsnp%3A2.1.5--h077b44d_0':
-        'quay.io/biocontainers/parsnp:2.1.5--h077b44d_0' }"
+    conda "bioconda::parsnp=2.1.5"
+    container "quay.io/staphb/parsnp:2.1.5"
 
     input:
 
@@ -14,7 +12,6 @@ process PARSNP {
     output:
     tuple val(meta), path("results/") , emit: results
     tuple val(meta), path("results/parsnp.snps.mblocks"), emit: snps_alingment
-    tuple val(meta), path('parsnp.log'), emit: parsnp_log
     path "versions.yml", emit: versions
 
     when:
@@ -36,8 +33,8 @@ process PARSNP {
         --alignment-program mafft \
         --curated \
         --recomb-filter \
-        --threads $task.cpus \
         --force-overwrite \
+        --threads $task.cpus \
         $args \
         --output-dir results > parsnp.log 2>&1
 
