@@ -81,7 +81,6 @@ nextflow run CorGe \
 ```
 species,cgmlst_path
 Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
-Escherichia_coli,/path/to/Escherichia_coli_cgMLST
 Escherichia_albertii,/path/to/Escherichia_coli_cgMLST
 Escherichia_coli,/path/to/Escherichia_coli_cgMLST
 Escherichia_fergusonii,/path/to/Escherichia_coli_cgMLST
@@ -361,6 +360,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
