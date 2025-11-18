@@ -97,13 +97,12 @@ workflow PREPARE_CGMLST_SCHEMA {
     Channel
         .from(schemaList.toSet())
         .set { schema_filter_set }
-
+    // schema_filter_set.view()
+    
     FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
         .splitCsv(header: true, sep: ',')
         .map { row -> tuple(row.id, row) }
-        .combine(schema_filter_set)
-        .filter { id, row, id_set -> id_set.contains(id) }
-        .map { id, row, id_set -> tuple(id, row) }  // Remove id_set for downstream
+        .join(schema_filter_set)
         .set { selected_schema_data }
 
     selected_schema_data
