@@ -59,24 +59,17 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 
 You only need to download each species’ cgMLST schema **once**. CorGe+ can automatically fetch and prepare schemas from [`cgmlst.org`](https://cgmlst.org/).
 
-- **Step 1. Update scheme URLs (required):** Allele FASTA URLs on [`cgmlst.org`](https://cgmlst.org/) change **daily**. Update the `url_alleles` column in the [`<pipeline directory>/assets/schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv), for the schemes you want to download. To update:
-
-  1. Open the species schema on [cgmlst.org](https://cgmlst.org/)
-  2. Click **“Show Targets”**
-  3. Copy the **“Download alleles as FASTA”** URL
-  4. Replace the URL in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv)
-
-- **Step 2. Download the schemas**: Find the schema ID in [`schemas_info.csv`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/schemas_info.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s18`). Multiple IDs can be listed as: `--schema_ids s1,s18`.
+- **Step 1. Download the schemas**: Find the schema ID in [`cgMLST schema IDs`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/cgmlst_schemas_id.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s18`.
 
 ```bash
 nextflow run CorGe \
   --mode schema \
-  --schema_ids s1,s18 \
+  --schema_ids s1,s20 \
   --outdir corge \
   -profile singularity
 ```
 
-- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
+- **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas_list.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas_list.csv` for downstream runs. Example cgMLST schema file:
 
 ```
 species,cgmlst_path
@@ -138,14 +131,14 @@ nextflow run CorGe \
 
 ## Parameters
 
-|          `    Parameter    `              | Required | Default        | Description                                                                              |
+|          Parameter             | Required | Default        | Description                                                                              |
 | --------------------------------- | :------: | -------------- | ------------------------------------------------------------------------------------ |
 | `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
 | `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
 | `--schema_file`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
 | `--thresholds`           |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
 | `--mode`                 |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
-| `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s18).                                    |
+| `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                    |
 | `-profile`               |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
 | `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
 | `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
