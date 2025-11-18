@@ -18,7 +18,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 - [Parameters](#parameters)
 - [Designed for bacterial surveillance](#-designed-for-bacterial-surveillance)
 - [When to use what](#-when-to-use-what)
-- [Key files: Linkages & context groups](#-key-files--linkages--context-groups)
+- [Key files: Linkages & context groups](#-key-files-linkages--context-groups)
 - [Best practices & caveats](#-best-practices--caveats)
 - [Troubleshooting](#-troubleshooting)
 - [Output overview](#-output-overview)
@@ -100,8 +100,7 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 Include:
 * `sample`: unique ID (no spaces recommended)
 * `assembly`: absolute path to FASTA assembly for the sample
-* `species`: species name used for taxa grouping. The spaces will be replaced by underscores.
-
+* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Any spaces in the name will be automatically replaced with underscores.
 ```
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
@@ -139,8 +138,8 @@ nextflow run CorGe \
 
 ## Parameters
 
-| Param  <!-- widen column -->  | Required | Default        | Description                                                                                             |
-| ------------------------ | :------: | -------------- | --------------------------------------------------------------------------------------------------- |
+|          `    Parameter    `              | Required | Default        | Description                                                                              |
+| --------------------------------- | :------: | -------------- | ------------------------------------------------------------------------------------ |
 | `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
 | `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
 | `--schema_file`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
@@ -150,7 +149,7 @@ nextflow run CorGe \
 | `-profile`               |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
 | `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
 | `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
-| `--max_time`             |     –    | `24.h`              | Max time in hours                                            
+| `--max_time`             |     –    | `24.h`              | Max time in hours                               |             
 ---
 
 
@@ -226,7 +225,7 @@ If your group becomes too large, **lower the threshold** to retain only the most
 ---
 
 > [!TIP]
-> Use the **Microreact visualization** to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+> Use the [**Microreact visualization**](https://github.com/MI-Bioinformatics/CorGe/tree/development#-microreact-export) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
 
 ---
 
@@ -271,10 +270,10 @@ These tables define groups of samples for downstream analysis, using the standar
 
 ### 🧬 Microreact export
 
-CorGe+ generates a `.microreact` file that brings together **two complementary phylogenetic perspectives**:
+CorGe+ generates a `.microreact` file that brings together **two complementary genetic perspectives**:
 
-* **Mashtree** — reflects genome composition and accessory gene content, making it sensitive to horizontal gene transfer.
-* **ReporTree distance tree** — based on core-genome distances, ideal for interpreting vertical evolutionary relationships.
+* **Mashtree** — produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes, making it sensitive to horizontal gene transfer.
+* **Core-genome distance tree** — prepared by ReporTree with the MSTreeV2 method, it's useful for visualizing genetic relatedness among isolates.
 
 By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which isolates to include in downstream high-resolution analyses.
 
@@ -298,6 +297,8 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
   * Treat SNP distances as inflated; use **higher SNP thresholds** (~100 SNPs) when evaluating potential linkages.
 
 * **Disk cleanup:** After the pipeline completes, you may safely remove the Nextflow `work/` directory to reclaim space.
+
+* **Sample names:** Use unique sample names across all runs (both historical and new). If a sample name is reused, CorGe+ will overwrite the previous results for that sample with the most recent analysis.
 
 ---
 
@@ -361,6 +362,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
