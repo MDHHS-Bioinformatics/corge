@@ -17,21 +17,17 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 if (params.schema_ids == null) {
      exit 1, 'Missing --schema_ids.  Give e.g. "s12" or "s12,s24,s36".'}
 
-// Split comma-separated input
-def schemaList = params.schema_ids
-                    .split(/,\s*/)          //  "s24,s25"  -> ['s24','s25']
-                    .collect { it.trim() }   // strip spaces
-                    .unique()                // drop duplicates
+def raw = params.schema_ids?.toString() ?: ''
+def schemaList = raw.split(/,\s*/).collect { it.trim() }.unique()
 
-// Define allowed schema pattern: s1 to s36
-def validRe = ~/^s([1-9]|[12][0-9]|3[0-6])$/
+// Define allowed schema pattern: s1 to s40
+def validRe = ~/^s([1-9]|[1-3]\d|40)$/
 def invalid = schemaList.findAll { !(it ==~ validRe) }
-
 
 // Perform validation
 if( !schemaList || invalid ) {
     exit 1, "Invalid --schema_ids value(s): ${ invalid.join(', ') }  " +
-            "Allowed range is s1–s36, comma‑separated."
+            "Allowed range is s1–s40, comma‑separated."
 }
 
 println "Schemas requested: ${schemaList.join(', ')}"   // => s24,s25
@@ -63,6 +59,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
+include { FETCH_CGMLST_SCHEMAS } from '../modules/local/fetch_cgmlst_schemas'
 include { DOWNLOAD_CGMLST_SCHEMA } from '../modules/local/download_cgmlst_schema'
 include { UNZIP_CGMLST_SCHEMA } from '../modules/local/unzip_cgmlst_schema'
 include { CONFIGURE_CGMLST_SCHEMA } from '../modules/local/configure_cgmlst_schema'
@@ -94,23 +91,14 @@ workflow PREPARE_CGMLST_SCHEMA {
 
     ch_versions = Channel.empty()
 
-    // Load and parse the CSV as a list of maps
-    Channel
-        .fromPath(params.schema_info)
-        .splitCsv(header: true, sep: '\t') // or sep: ',' if CSV is comma-separated
-        .map { row -> 
-            // Create a tuple: (id, row_map)
-            tuple(row.id, row)
-        }
-        .set { schema_data_channel }
+    FETCH_CGMLST_SCHEMAS(params.schema_info)
 
     // Broadcast the list to use in filtering
     Channel
         .from(schemaList.toSet())
         .set { schema_filter_set }
 
-    Channel
-        .fromPath(params.schema_info)
+    FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
         .splitCsv(header: true, sep: ',')
         .map { row -> tuple(row.id, row) }
         .combine(schema_filter_set)
