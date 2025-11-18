@@ -10,7 +10,7 @@ process UPDATE_CGMLST_FILE {
     tuple path(outdir), path(species_schemas), val(ready)
     
     output:
-    path("cgmlst_schemas_list.csv"), emit: cgmls_list
+    path("cgmlst_schemas.csv"), emit: cgmls_list
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,7 +22,7 @@ process UPDATE_CGMLST_FILE {
     update_cgmlst_schemas.py \
         $outdir \
         $species_schemas \
-        'cgmlst_schemas_list.csv'
+        'cgmlst_schemas.csv'
     
     """
 }
