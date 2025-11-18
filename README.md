@@ -76,7 +76,7 @@ nextflow run CorGe \
   -profile singularity
 ```
 
-- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species, so the file will automatically reflect that (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). Use this file for downstream runs. Example cgMLST schema file:
+- **Step 3. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
 ```
 species,cgmlst_path
@@ -362,6 +362,7 @@ Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis 
 ## 📜 License
 
 This project is released under the **MIT License**.
+
 
 
 
