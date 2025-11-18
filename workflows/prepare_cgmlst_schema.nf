@@ -90,34 +90,36 @@ def multiqc_report = []
 workflow PREPARE_CGMLST_SCHEMA {
 
     ch_versions = Channel.empty()
-
+    // MODULE: Get the latest schema urls
     FETCH_CGMLST_SCHEMAS(params.schema_info)
-
     // Broadcast the list to use in filtering
     Channel
         .from(schemaList.toSet())
         .set { schema_filter_set }
+    //format schema_filter into a proper channel
+    schema_filter_set.map{
+        id -> [id:id]
+    }
+    .set{ch_schema_filter}
 
-    FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
+     FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
         .splitCsv(header: true, sep: ',')
-        .map { row -> tuple(row.id, row) }
-        .combine(schema_filter_set)
-        .filter { id, row, id_set -> id_set.contains(id) }
-        .map { id, row, id_set -> tuple(id, row) }  // Remove id_set for downstream
+        .map { row -> [[id:row.id], row] }
+        .join(ch_schema_filter)
         .set { selected_schema_data }
-
+    //Format the channel for downstream
     selected_schema_data
-        .map { id, row -> 
-            tuple(id, row.schema_name, row.url_alleles, "${params.trn_files}/${row.trn}")
+        .map { id, row ->
+            tuple(row.id, row.schema_name, row.url_alleles, "${params.trn_files}/${row.trn}")
         }
         .set { schema_channel }
-
+    schema_channel.view()
 
     // MODULE: Download the cgMLST schemas
     DOWNLOAD_CGMLST_SCHEMA(
         schema_channel
     )
-    
+
     UNZIP_CGMLST_SCHEMA(
         DOWNLOAD_CGMLST_SCHEMA.out.alleles_zip
     )
@@ -126,7 +128,7 @@ workflow PREPARE_CGMLST_SCHEMA {
     CONFIGURE_CGMLST_SCHEMA(
         UNZIP_CGMLST_SCHEMA.out.alleles
     )
-    
+
     // Wait for all schema dirs to finish
     CONFIGURE_CGMLST_SCHEMA.out.schema
         .collect()

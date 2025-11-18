@@ -13,3 +13,4 @@ python_notebooks/*
 *data*
 mrsa_*
 results*
+*.csv
