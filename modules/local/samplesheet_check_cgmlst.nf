@@ -1,5 +1,6 @@
-process CLEAN_FASTA {
-    tag "${meta.species}"
+
+process SAMPLESHEET_CHECK_CGMLST {
+    tag "$samplesheet_cgmlst"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"
@@ -8,21 +9,20 @@ process CLEAN_FASTA {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    tuple val(meta), path(snps_alignment)
+    path samplesheet_cgmlst
 
     output:
-    tuple val(meta), path('*.fasta'), emit: cleaned_snps_alignment
+    path '*.csv'       , emit: csv
     path "versions.yml", emit: versions
 
     when:
     task.ext.when == null || task.ext.when
 
-    script:
-    def args = task.ext.args ?: ''
-    species = task.ext.species ?: "${meta.species}"
-
+    script: // This script is bundled with the pipeline, in nf-core/corgeplus/bin/
     """
-    clean_fasta.py $snps_alignment $species
+    check_samplesheet_cgmlst.py \\
+        $samplesheet_cgmlst \\
+        samplesheet_cgmlst.valid.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

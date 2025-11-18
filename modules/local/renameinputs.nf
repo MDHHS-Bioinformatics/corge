@@ -3,10 +3,10 @@ process RENAME_INPUTS {
     label 'process_low'
 
     input:
-    tuple val(meta),path(gff), path(reference)
+    tuple val(meta), path(reference)
 
     output:
-    tuple val(meta), path("renamed_files/*.gff"), path("renamed_files/*.fna"), emit:renamed_files
+    tuple val(meta), path("*.fna"), emit:renamed_files
     //path "versions.yml" , emit: versions
 
     when:
@@ -15,17 +15,15 @@ process RENAME_INPUTS {
     script:
     def args = task.ext.args ?: ''
     def prefix = task.ext.prefix ?: "${meta.id}"
+    species = task.ext.species ?: "${meta.species}"
 
     """
     mkdir -p renamed_files
 
-    #rename the gff file
-    newname="renamed_files/${prefix}.gff"
-    mv *.gff "\$newname"
-
     #rename the fna file
     newname="renamed_files/${prefix}.fna"
     mv *.fna "\$newname"
+    mv renamed_files/*.fna .
 
 
 

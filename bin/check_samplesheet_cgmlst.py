@@ -14,9 +14,6 @@ from pathlib import Path
 logger = logging.getLogger()
 
 
-from pathlib import Path
-from collections import Counter
-
 class RowChecker:
     """
     Define a service that can validate and transform each given row.
@@ -24,101 +21,57 @@ class RowChecker:
     Attributes:
         modified (list): A list of dicts, where each dict corresponds to a previously
             validated and transformed row. The order of rows is maintained.
+
     """
 
-    VALID_FASTQ_FORMATS = (
+    VALID_FORMATS = (
         ".fq.gz",
         ".fastq.gz",
     )
 
-    VALID_ASSEMBLY_FORMATS = (
-        ".fasta", ".fasta.gz",
-        ".fna", ".fna.gz",
-        ".fa", ".fa.gz"
-    )
-
-    VALID_GFF_FORMATS = (
-        ".gff",
-        ".gff3",
-    )
-
     def __init__(
         self,
-        sample_col="sample",
-        assembly_col="assembly",
         species_col="species",
-        #single_col="single_end",
+        species_path_col="cgmlst_path",
         **kwargs,
     ):
         """
         Initialize the row checker with the expected column names.
+
+        Args:
+            species_col (str): The name of the column that contains the species name
+                (default "species").
+            species_path_col (str): The name of the column that contains the path
+                to the respective species's cgMLST data (default "cgmlst_path").
+
+
         """
         super().__init__(**kwargs)
-        self._sample_col = sample_col
-        self._assembly_col = assembly_col
         self._species_col = species_col
-        #self._single_col = single_col
+        self._species_path_col = species_path_col
         self._seen = set()
         self.modified = []
 
     def validate_and_transform(self, row):
         """
         Perform all validations on the given row and insert the read pairing status.
+
+        Args:
+            row (dict): A mapping from column headers (keys) to elements of that row
+                (values).
+
         """
-        self._validate_sample(row)
-        self._validate_assembly(row)
-        self._validate_species(row)
-        self._seen.add((row[self._sample_col], row[self._assembly_col]))
+        self._validate_pair(row)
+        self._seen.add((row[self._species_col], row[self._species_path_col]))
         self.modified.append(row)
 
-    def _validate_sample(self, row):
-        """Assert that the sample name exists and convert spaces to underscores."""
-        if not row[self._sample_col].strip():
-            raise AssertionError("Sample input is required.")
-        row[self._sample_col] = row[self._sample_col].replace(" ", "_")
 
-    def _validate_assembly(self, row):
-        """Assert that the assembly entry is non-empty and has the right format."""
-        assembly = row.get(self._assembly_col, "")
-        if assembly and not any(assembly.endswith(ext) for ext in self.VALID_ASSEMBLY_FORMATS):
-            raise AssertionError(
-                f"The Assembly file has an unrecognized extension: {assembly}\n"
-                f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"
-            )
+    def _validate_pair(self, row):
+        """Assert that the species name is found in the respective path. Report status."""
+        if row[self._species_col] and row[self._species_path_col]:
+            if row[self._species_col] not in row[self._species_path_col]:
+                raise AssertionError(f"The species name {row[self._species_col]} was not found in the path {row[self._species_path_col]}. Species name is expected in its cgMLST path")
 
-    def _validate_species(self, row):
-        """Assert that the inputted species name is formatted correctly."""
-        species = row.get(self._species_col, "")
-        row[self._species_col] = species.replace(' ', '_')
-
-    def _validate_fastq_format(self, filename):
-        """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(ext) for ext in self.VALID_FASTQ_FORMATS):
-            raise AssertionError(
-                f"The FASTQ file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_FASTQ_FORMATS)}"
-            )
-
-    def _validate_assembly_format(self, filename):
-        """Assert that a given filename has one of the expected assembly extensions."""
-        if not any(filename.endswith(ext) for ext in self.VALID_ASSEMBLY_FORMATS):
-            raise AssertionError(
-                f"The assembly file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"
-            )
-
-    def validate_unique_samples(self):
-        """
-        Assert that the combination of sample name and FASTQ filename is unique.
-        Also append _T{n} to sample names for multiple runs.
-        """
-        if len(self._seen) != len(self.modified):
-            raise AssertionError("The pair of sample name and FASTQ must be unique.")
-        seen = Counter()
-        for row in self.modified:
-            sample = row[self._sample_col]
-            seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
 
 
 def read_head(handle, num_lines=10):
@@ -150,8 +103,8 @@ def sniff_format(handle):
     handle.seek(0)
     sniffer = csv.Sniffer()
     if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
-        sys.exit(1)
+        logger.critical("The given sample sheet does not appear to contain a header.This warning is not always accurate")
+        #sys.exit(1)
     dialect = sniffer.sniff(peek)
     return dialect
 
@@ -182,15 +135,15 @@ def check_samplesheet(file_in, file_out):
         https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
 
     """
-    #required_columns = {"sample", "fastq_1", "fastq_2"}
+    required_columns = {"species", "cgmlst_path"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
         # Validate the existence of the expected header columns.
-        # if not required_columns.issubset(reader.fieldnames):
-        #     req_cols = ", ".join(required_columns)
-        #     logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
-        #     sys.exit(1)
+        if not required_columns.issubset(reader.fieldnames):
+            req_cols = ", ".join(required_columns)
+            logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
+            sys.exit(1)
         # Validate each row.
         checker = RowChecker()
         for i, row in enumerate(reader):
@@ -201,7 +154,6 @@ def check_samplesheet(file_in, file_out):
                 sys.exit(1)
         #checker.validate_unique_samples()
     header = list(reader.fieldnames)
-    #header.insert(1, "single_end")
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_out.open(mode="w", newline="") as out_handle:
         writer = csv.DictWriter(out_handle, header, delimiter=",")

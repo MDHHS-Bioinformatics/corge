@@ -20,7 +20,8 @@ process MASHTREE {
 
     script:
     def args = task.ext.args ?: ''
-    species = task.ext.species ?: "${meta.species}"
+    def species = task.ext.species ?: meta.species
+    //species = task.ext.species ?: "${meta.species}"
     """
     mashtree \\
         $args \\

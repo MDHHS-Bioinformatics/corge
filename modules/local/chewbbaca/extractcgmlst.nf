@@ -1,5 +1,5 @@
 
-process CHEWBBACA_JOINPROFILES {
+process CHEWBBACA_EXTRACTCGMLST {
     tag "$meta.species"
     label 'process_single'
     conda "bioconda::chewbbaca=3.4.2"
@@ -8,10 +8,11 @@ process CHEWBBACA_JOINPROFILES {
         'quay.io/biocontainers/chewbbaca:3.4.2--pyhdfd78af_0' }"
 
     input:
-    tuple val(meta), path(new_alleles), path(old_alleles)
+    tuple val(meta), path(alleles)
 
     output:
-    tuple val(meta), path("joined_results_alleles.tsv"), emit: joined_alleles
+    tuple val(meta), path("masked_results_alleles.tsv"), emit: masked_alleles
+    tuple val(meta), path("masked/"),emit: masked_results
     path "versions.yml"           , emit: versions
 
     when:
@@ -22,14 +23,16 @@ process CHEWBBACA_JOINPROFILES {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    #crete previous directory to disambiguate files
-    mkdir previous
-    mv $old_alleles previous/
+    #make the masked results folder
+    mkdir masked
 
+    chewBBACA.py ExtractCgMLST \
+        --input-file $alleles \
+        --output-directory masked/ \
+        --threshold 0
 
-    chewBBACA.py JoinProfiles \
-        --profiles $new_alleles previous/$old_alleles \
-        --output-file joined_results_alleles.tsv
+    #get the threshold 0 .tsv file and renamed for our purpose
+    mv masked/cgMLST0.tsv masked_results_alleles.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
