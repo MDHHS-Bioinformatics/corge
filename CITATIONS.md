@@ -1,4 +1,4 @@
-# nf-core/corgeplus: Citations
+# CorGe+: Citations
 
 ## [nf-core](https://pubmed.ncbi.nlm.nih.gov/32055031/)
 
@@ -10,10 +10,33 @@
 
 ## Pipeline tools
 
-- [FastQC](https://www.bioinformatics.babraham.ac.uk/projects/fastqc/)
+- [ChewBBACA](https://doi.org/10.1099/mgen.0.000166)
+  > Silva M, Machado MP, Silva DN, Rossi M, Moran-Gilad J, Santos S, Ramirez M, Carriço JA. *chewBBACA: A complete suite for gene-by-gene schema creation and strain identification.* Microb Genom. 2018 Mar;4(3):e000166. doi: 10.1099/mgen.0.000166. PMID: 29543149; PMCID: PMC5885018. 
+
+- [ReporTree](https://doi.org/10.1186/s13073-023-01196-1)
+
+  > Mixão, V., Pinto, M., Sobral, D. et al. ReporTree: a surveillance-oriented tool to strengthen the linkage between pathogen genetic clusters and epidemiological data. Genome Med 15, 43 (2023). https://doi.org/10.1186/s13073-023-01196-1
+
+- [Mashtree](https://doi.org/10.21105/joss.01762)
+
+  > Katz LS, Griswold T, Morrison SS, et al. *Mashtree: a rapid comparison of whole genome sequence files.* J Open Source Softw. 2019;4(44):1762. doi:10.21105/joss.01762.
+
+- [Parsnp](https://doi.org/10.1186/s13059-014-0524-x)
+
+  > Treangen TJ, Ondov BD, Koren S, Phillippy AM. *The Harvest suite for rapid core-genome alignment and visualization of thousands of intraspecific microbial genomes.* Genome Biol. 2014 Nov 26;15(11):524. doi:10.1186/s13059-014-0524-x. PMID: 25442590; PMCID: PMC4262892.
+  > *(Parsnp is part of the Harvest suite.)*
+
+- [Microreact](https://doi.org/10.1099/mgen.0.000093)
+
+  > Argimón S, Abudahab K, Goater RJE, et al. *Microreact: visualizing and sharing data for genomic epidemiology and phylogeography.* Microb Genom. 2016;2(11):e000093. doi:10.1099/mgen.0.000093.
+
+- [cgmlst.org](https://cgmlst.org/)
+
+  > Ridom GmbH. *cgmlst.org Nomenclature Server.* Accessed 2025.
 
 - [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
   > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+---
 
 ## Software packaging/containerisation tools
 
