@@ -38,6 +38,8 @@ if (params.outdir) { ch_db = file("${params.outdir}/cgmlst_schemas") } else { ex
 // Create db path if it does not exist
 ch_db.exists() ?: ch_db.mkdirs()
 
+def outdir_abs = file(params.outdir).toAbsolutePath().toString()
+println "Absolute outdir: $outdir_abs"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -96,16 +98,12 @@ workflow PREPARE_CGMLST_SCHEMA {
     Channel
         .from(schemaList.toSet())
         .set { schema_filter_set }
-    //format schema_filter into a proper channel
-    schema_filter_set.map{
-        id -> [id:id]
-    }
-    .set{ch_schema_filter}
+    // schema_filter_set.view()
 
-     FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
+    FETCH_CGMLST_SCHEMAS.out.schemas_info_updated
         .splitCsv(header: true, sep: ',')
-        .map { row -> [[id:row.id], row] }
-        .join(ch_schema_filter)
+        .map { row -> tuple(row.id, row) }
+        .join(schema_filter_set)
         .set { selected_schema_data }
     //Format the channel for downstream
     selected_schema_data
@@ -137,7 +135,7 @@ workflow PREPARE_CGMLST_SCHEMA {
 
     // Combine static path and species file with completion signal
     Channel
-        .of(tuple(file("$params.outdir/cgmlst_schemas"), file(params.species_schemas)))
+        .of(tuple(val(outdir_abs), file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
 
@@ -145,8 +143,6 @@ workflow PREPARE_CGMLST_SCHEMA {
     UPDATE_CGMLST_FILE(
         update_ch
     )
-        //.map{paths, ready -> tuple([[outdir, species_schemas], gff])}
-
 }
 
 /*
