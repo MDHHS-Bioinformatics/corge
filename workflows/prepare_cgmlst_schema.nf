@@ -38,6 +38,8 @@ if (params.outdir) { ch_db = file("${params.outdir}/cgmlst_schemas") } else { ex
 // Create db path if it does not exist
 ch_db.exists() ?: ch_db.mkdirs()
 
+def outdir_abs = file(params.outdir).toAbsolutePath().toString()
+println "Absolute outdir: $outdir_abs"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -134,7 +136,7 @@ workflow PREPARE_CGMLST_SCHEMA {
 
     // Combine static path and species file with completion signal
     Channel
-        .of(tuple(file(params.outdir), file(params.species_schemas)))
+        .of(tuple(val(outdir_abs), file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
 

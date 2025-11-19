@@ -7,7 +7,7 @@ process UPDATE_CGMLST_FILE {
         'https://quay.io/repository/biocontainers/pandas/manifest/sha256:509adc4983db6c608fa516bea822c29bf34d5b3f039d331fc705fc27492a0987' }"
 
     input:
-    tuple path(outdir), path(species_schemas), val(ready)
+    tuple val(outdir), path(species_schemas), val(ready)
     
     output:
     path("cgmlst_schemas.csv"), emit: cgmls_list
