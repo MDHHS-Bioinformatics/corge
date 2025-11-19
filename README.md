@@ -48,7 +48,6 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
 2. Install any of [`Docker`](https://docs.docker.com/engine/installation/), [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) (you can follow [this tutorial](https://singularity-tutorial.github.io/01-installation/)), [`Podman`](https://podman.io/), [`Shifter`](https://nersc.gitlab.io/development/shifter/how-to-use/) or [`Charliecloud`](https://hpc.github.io/charliecloud/) for full pipeline reproducibility _(you can use [`Conda`](https://conda.io/miniconda.html) both to install Nextflow itself and also to manage software within pipelines. Please only use it within pipelines as a last resort; see [docs](https://nf-co.re/usage/configuration#basic-configuration-profiles))_.
-3. Download this repository.
 
 > [!NOTE]  
 > If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later.
@@ -62,14 +61,14 @@ You only need to download each species’ cgMLST schema **once**. CorGe+ can aut
 - **Step 1. Download the schemas**: Find the schema ID in [`cgMLST schema IDs`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/cgmlst_schemas_id.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`.
 
 ```bash
-nextflow run CorGe \
+nextflow run MI-Bioinformatics/CorGe \
   --mode schema \
   --schema_ids s1,s20 \
   --outdir corge \
   -profile singularity
 ```
 
-- **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas_list.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas_list.csv` for downstream runs. Example cgMLST schema file:
+- **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
 ```
 species,cgmlst_path
@@ -98,8 +97,8 @@ Include:
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
 ISO2,/path/iso2.fasta,Escherichia coli
-ISO3/path/iso2.fasta,Acinetobacter baumannii
-ISO4,/path/iso2.fasta,Acinetobacter baumannii
+ISO3/path/iso3.fasta,Acinetobacter baumannii
+ISO4,/path/iso4.fasta,Acinetobacter baumannii
 ```
 
 ### 4. Run your analyses
@@ -107,7 +106,7 @@ ISO4,/path/iso2.fasta,Acinetobacter baumannii
 ### Basic run
 
 ```bash
-nextflow run CorGe \
+nextflow run MI-Bioinformatics/CorGe \
   --input manifest.csv \
   --schema_file cgmlst_schemas.csv \
   --outdir corge \
@@ -119,7 +118,7 @@ Default clustering thresholds: `15, 20, 40, 150` (alleles for cgMLST or SNPs for
 ### With custom thresholds
 
 ```bash
-nextflow run CorGe \
+nextflow run MI-Bioinformatics/CorGe \
   --input manifest.csv \
   --schema_file cgmlst_schemas.csv \
   --outdir results \
