@@ -135,7 +135,7 @@ workflow PREPARE_CGMLST_SCHEMA {
 
     // Combine static path and species file with completion signal
     Channel
-        .of(tuple(val(outdir_abs), file(params.species_schemas)))
+        .of(tuple((outdir_abs), file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
 
