@@ -1,4 +1,4 @@
-process MAKE_POODLE_MANIFEST {
+process MAKE_POODLE_MANIFEST_MASTER {
     tag "$meta.species"
     label 'process_single'
 
@@ -11,6 +11,7 @@ process MAKE_POODLE_MANIFEST {
     input:
     tuple val(meta), path(genomic_context_groups)
     val(outdir_abs)
+    path(master_paths)
 
     output:
 
@@ -26,7 +27,10 @@ process MAKE_POODLE_MANIFEST {
     species = task.ext.species ?: "${meta.species}"
     // Determine which input to use: prioritize master_paths, fallback to phoenix or bactopia paths, or nothing
     def sample_paths = ''
-    if (params.phoenix_path) {
+    if (master_paths) {
+        sample_paths = "--master_paths '${master_paths}'"
+    }
+    else if (params.phoenix_path) {
         sample_paths = "--phoenix_path '${params.phoenix_path}'"
     }
     else if (params.bactopia_path) {
