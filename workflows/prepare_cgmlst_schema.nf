@@ -11,35 +11,40 @@ WorkflowCorgeplus.initialise(params, log)
 
 // TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check schema path parameters to see if they exist
-def checkPathParamList = [ params.schema_info, params.trn_files,  params.species_schemas]
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+// Define schemaList/outdir_abs at script level (before the if block)
+def schemaList = []
+def outdir_abs = []
+if (params.mode == 'schema') { //following params only need to be validated for schema mode
+    def checkPathParamList = [ params.schema_info, params.trn_files,  params.species_schemas]
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-if (params.schema_ids == null) {
-     exit 1, 'Missing --schema_ids.  Give e.g. "s12" or "s12,s24,s36".'}
+    if (params.schema_ids == null) {
+        exit 1, 'Missing --schema_ids.  Give e.g. "s12" or "s12,s24,s36".'}
 
-def raw = params.schema_ids?.toString() ?: ''
-def schemaList = raw.split(/,\s*/).collect { it.trim() }.unique()
+    def raw = params.schema_ids?.toString() ?: ''
+    schemaList = raw.split(/,\s*/).collect { it.trim() }.unique()
 
-// Define allowed schema pattern: s1 to s40
-def validRe = ~/^s([1-9]|[1-3]\d|40)$/
-def invalid = schemaList.findAll { !(it ==~ validRe) }
+    // Define allowed schema pattern: s1 to s40
+    def validRe = ~/^s([1-9]|[1-3]\d|40)$/
+    def invalid = schemaList.findAll { !(it ==~ validRe) }
 
-// Perform validation
-if( !schemaList || invalid ) {
-    exit 1, "Invalid --schema_ids value(s): ${ invalid.join(', ') }  " +
-            "Allowed range is s1–s40, comma‑separated."
+    // Perform validation
+    if( !schemaList || invalid ) {
+        exit 1, "Invalid --schema_ids value(s): ${ invalid.join(', ') }  " +
+                "Allowed range is s1–s40, comma‑separated."
+    }
+
+    println "Schemas requested: ${schemaList.join(', ')}"   // => s24,s25
+
+    // Check mandatory parameters
+    if (params.outdir) { ch_db = file("${params.outdir}/cgmlst_schemas") } else { exit 1, 'CorGe outdir not specified!' }
+
+    // Create db path if it does not exist
+    ch_db.exists() ?: ch_db.mkdirs()
+
+    outdir_abs = file(params.outdir).toAbsolutePath().toString()
+    println "Absolute outdir: $outdir_abs"
 }
-
-println "Schemas requested: ${schemaList.join(', ')}"   // => s24,s25
-
-// Check mandatory parameters
-if (params.outdir) { ch_db = file("${params.outdir}/cgmlst_schemas") } else { exit 1, 'CorGe outdir not specified!' }
-
-// Create db path if it does not exist
-ch_db.exists() ?: ch_db.mkdirs()
-
-def outdir_abs = file(params.outdir).toAbsolutePath().toString()
-println "Absolute outdir: $outdir_abs"
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
