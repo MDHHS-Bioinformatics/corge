@@ -23,6 +23,7 @@ if (params.mode in ['default', 'npr']) {
     }
 }
 def outdir_abs = file(params.outdir).toAbsolutePath().toString()
+def master_paths = params.master_paths ? file(params.master_paths) : null
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +46,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/make_poodle_manifest.nf'
+include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/make_poodle_manifest_master.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -181,8 +183,11 @@ workflow CORGEPLUS {
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     
-    MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs)
-    ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)
+    if (!params.master_paths){MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs)
+        ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)}
+
+    if (params.master_paths){MAKE_POODLE_MANIFEST_MASTER(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs, master_paths)
+    ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST_MASTER.out.versions)}
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
