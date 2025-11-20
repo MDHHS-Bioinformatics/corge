@@ -1,0 +1,51 @@
+process MAKE_POODLE_MANIFEST {
+    tag "$meta.species"
+    label 'process_single'
+
+    conda "conda-forge::pandas=2.2.3"
+    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
+        'https://depot.galaxyproject.org/singularity/pandas%3A2.2.1' :
+        'https://quay.io/repository/biocontainers/pandas/manifest/sha256:509adc4983db6c608fa516bea822c29bf34d5b3f039d331fc705fc27492a0987' }"
+
+
+    input:
+    tuple val(meta), val(outdir_abs), path(genomic_context_groups)
+
+    output:
+
+    tuple val(meta), path("poodle_samplesheets/"), emit: poodle_samplesheets
+    path "versions.yml"           , emit: versions
+
+    when:
+    task.ext.when == null || task.ext.when
+
+    script:
+    def args = task.ext.args ?: ''
+    def thresholds = params.thresholds ?: ''
+    species = task.ext.species ?: "${meta.species}"
+    // Determine which input to use: prioritize master_paths, fallback to phoenix or bactopia paths, or nothing
+    def sample_paths = ''
+    if (params.master_paths) {
+        sample_paths = "--master_paths '${params.master_paths}'"
+    }
+    else if (params.phoenix_path) {
+        sample_paths = "--phoenix_path '${params.phoenix_path}'"
+    }
+    else if (params.bactopia_path) {
+        sample_paths = "--bactopia_path '${params.bactopia_path}'"
+    }
+
+    """
+    make_poodle_manifest.py \
+        --species $species \
+        --outdir ${outdir_abs} \
+        --thresholds ${thresholds} \
+        --groups ${genomic_context_groups} \
+        ${sample_paths}
+
+    cat <<-END_VERSIONS > versions.yml
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
+    """
+}
