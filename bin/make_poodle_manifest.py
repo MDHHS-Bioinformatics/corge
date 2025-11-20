@@ -29,7 +29,7 @@ def parse_args():
         "--outdir",
         required=True,
         help="Output directory for poodle_manifest_HC<threshold>.csv, "
-             "and base for default assembly paths: outdir/species/assemblies/<sample>.fasta",
+             "and base for default assembly paths: outdir/species/assemblies/<sample>.fna",
     )
     parser.add_argument(
         "--master_paths",
@@ -109,8 +109,8 @@ def build_paths_from_bactopia(sample, bactopia_path):
 
 
 def get_default_assembly_path(outdir, species, sample):
-    # From original spec: $outdir/$species/assemblies/<sample>.fasta
-    return os.path.join(outdir, species, "assemblies", f"{sample}.fasta")
+    # From original spec: $outdir/$species/assemblies/<sample>.fna
+    return os.path.join(outdir, species, "assemblies", f"{sample}.fna")
 
 
 def get_assembly_metrics(assembly_path, cache):
