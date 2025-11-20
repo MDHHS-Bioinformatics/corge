@@ -1,0 +1,41 @@
+id,schema_name_website,schema_name,url_alleles,trn
+s1,Acinetobacter baumannii cgMLST,Acinetobacter_baumannii,https://www.cgmlst.org/ncs/schema/Abaumannii2299/alleles/,Acinetobacter_baumannii.trn
+s2,Bacillus anthracis cgMLST,Bacillus_anthracis,https://www.cgmlst.org/ncs/schema/Banthracis2304/alleles/,Bacillus_anthracis.trn
+s3,Bordetella pertussis cgMLST,Bordetella_pertussis,https://www.cgmlst.org/ncs/schema/Bpertussis2304/alleles/,Bordetella_pertussis.trn
+s4,Brucella melitensis cgMLST,Brucella_melitensis,https://www.cgmlst.org/ncs/schema/Bmelitensis2307/alleles/,Brucella_melitensis.trn
+s5,Brucella spp. cgMLST,Brucella_spp,https://www.cgmlst.org/ncs/schema/Brucella2305/alleles/,Brucella_melitensis.trn
+s6,Burkholderia mallei (FLI) cgMLST,Burkholderia_mallei_FLI,https://www.cgmlst.org/ncs/schema/Bmallei_fli2300/alleles/,Burkholderia_mallei.trn
+s7,Burkholderia mallei (RKI) cgMLST,Burkholderia_mallei_RKI,https://www.cgmlst.org/ncs/schema/Bmallei_rki2304/alleles/,Burkholderia_mallei.trn
+s8,Burkholderia pseudomallei cgMLST,Burkholderia_pseudomallei,https://www.cgmlst.org/ncs/schema/Bpseudomallei2303/alleles/,Burkholderia_pseudomallei.trn
+s9,Campylobacter jejuni/coli cgMLST,Campylobacter_jejuni_coli,https://www.cgmlst.org/ncs/schema/Cjejuni2302/alleles/,Campylobacter_jejuni.trn
+s10,Citrobacter freundii cgMLST,Citrobacter_freundii,https://www.cgmlst.org/ncs/schema/Cfreundii2000/alleles/,Citrobacter_freundii.trn
+s11,Citrobacter freundii/portucalensis/braakii/europaeus cgMLST,Citrobacter_freundii_portucalensis_braakii_europaeus,https://www.cgmlst.org/ncs/schema/Cfreundii2001/alleles/,Citrobacter_freundii.trn
+s12,Clostridioides difficile cgMLST,Clostridioides_difficile,https://www.cgmlst.org/ncs/schema/Cdifficile2292/alleles/,Clostridioides_difficile.trn
+s13,Clostridium perfringens cgMLST,Clostridium_perfringens,https://www.cgmlst.org/ncs/schema/Cperfringens2303/alleles/,Clostridium_perfringens.trn
+s14,Corynebacterium diphtheriae cgMLST,Corynebacterium_diphtheriae,https://www.cgmlst.org/ncs/schema/Cdiphtheriae2297/alleles/,Corynebacterium_diphtheriae.trn
+s15,Corynebacterium pseudotuberculosis cgMLST,Corynebacterium_pseudotuberculosis,https://www.cgmlst.org/ncs/schema/Cpseudotuberculosis2303/alleles/,Corynebacterium_pseudotuberculosis.trn
+s16,Cronobacter sakazakii/malonaticus cgMLST,Cronobacter_sakazakii_malonaticus,https://www.cgmlst.org/ncs/schema/Csakazakii2299/alleles/,Cronobacter_sakazakii.trn
+s17,Enterobacter hormaechei cgMLST,Enterobacter_hormaechei,https://www.cgmlst.org/ncs/schema/Ehormaechei337/alleles/,Enterobacter_hormaechei.trn
+s18,Enterococcus faecalis cgMLST,Enterococcus_faecalis,https://www.cgmlst.org/ncs/schema/Efaecalis2299/alleles/,Enterococcus_faecalis.trn
+s19,Enterococcus faecium cgMLST,Enterococcus_faecium,https://www.cgmlst.org/ncs/schema/Efaecium2299/alleles/,Enterococcus_faecium.trn
+s20,Escherichia coli cgMLST,Escherichia_coli,https://www.cgmlst.org/ncs/schema/Ecoli2298/alleles/,Escherichia_coli.trn
+s21,Francisella tularensis cgMLST,Francisella_tularensis,https://www.cgmlst.org/ncs/schema/Ftularensis2304/alleles/,Francisella_tularensis.trn
+s22,Klebsiella oxytoca/grimontii/michiganensis/pasteurii cgMLST,Klebsiella_oxytoca_grimontii_michiganensis_pasteurii,https://www.cgmlst.org/ncs/schema/Koxytoca2301/alleles/,Klebsiella_oxytoca.trn
+s23,Klebsiella pneumoniae/variicola/quasipneumoniae cgMLST,Klebsiella_pneumoniae_variicola_quasipneumoniae,https://www.cgmlst.org/ncs/schema/Kpneumoniae2303/alleles/,Klebsiella_pneumoniae.trn
+s24,Legionella pneumophila cgMLST,Legionella_pneumophila,https://www.cgmlst.org/ncs/schema/Lpneumophila2298/alleles/,Legionella_pneumophila.trn
+s25,Listeria monocytogenes cgMLST,Listeria_monocytogenes,https://www.cgmlst.org/ncs/schema/Lmonocytogenes2302/alleles,Listeria_monocytogenes.trn
+s26,Morganella morganii cgMLST,Morganella_morganii,https://www.cgmlst.org/ncs/schema/Mmorganii338/alleles/,Morganella_morganii.trn
+s27,Mycobacterium tuberculosis/bovis/africanum/canettii cgMLST,Mycobacterium_tuberculosis_bovis_africanum_canettii,https://www.cgmlst.org/ncs/schema/Mtuberculosis2303/alleles/,Mycobacterium_tuberculosis.trn
+s28,Mycobacteroides abscessus cgMLST,Mycobacteroides_abscessus,https://www.cgmlst.org/ncs/schema/Mabscessus2300/alleles/,Mycobacteroides_abscessus.trn
+s29,Mycoplasma gallisepticum cgMLST,Mycoplasma_gallisepticum,https://www.cgmlst.org/ncs/schema/Mgallisepticum2303/alleles/,Mycoplasma_gallisepticum.trn
+s30,Paenibacillus larvae cgMLST,Paenibacillus_larvae,https://www.cgmlst.org/ncs/schema/Plarvae2302/alleles/,Paenibacillus_larvae.trn
+s31,Proteus mirabilis cgMLST,Proteus_mirabilis,https://www.cgmlst.org/ncs/schema/Pmirabilis340/alleles/,Proteus_mirabilis.trn
+s32,Providencia stuartii cgMLST,Providencia_stuartii,https://www.cgmlst.org/ncs/schema/Pstuartii1119/alleles/,Providencia_stuartii.trn
+s33,Pseudomonas aeruginosa cgMLST,Pseudomonas_aeruginosa,https://www.cgmlst.org/ncs/schema/Paeruginosa2303/alleles/,Pseudomonas_aeruginosa.trn
+s34,Salmonella enterica cgMLST,Salmonella_enterica,https://www.cgmlst.org/ncs/schema/Senterica2308/alleles/,Salmonella_enterica.trn
+s35,Serratia marcescens cgMLST,Serratia_marcescens,https://www.cgmlst.org/ncs/schema/Smarcescens2306/alleles/,Serratia_marcescens.trn
+s36,Staphylococcus argenteus cgMLST,Staphylococcus_argenteus,https://www.cgmlst.org/ncs/schema/Sargenteus1101/alleles/,Staphylococcus_argenteus.trn
+s37,Staphylococcus aureus cgMLST,Staphylococcus_aureus,https://www.cgmlst.org/ncs/schema/Saureus2306/alleles/,Staphylococcus_aureus.trn
+s38,Staphylococcus capitis cgMLST,Staphylococcus_capitis,https://www.cgmlst.org/ncs/schema/Scapitis2303/alleles/,Staphylococcus_capitis.trn
+s39,Streptococcus pyogenes cgMLST,Streptococcus_pyogenes,https://www.cgmlst.org/ncs/schema/Spyogenes2301/alleles/,Streptococcus_pyogenes.trn
+s40,Yersinia enterocolitica cgMLST,Yersinia_enterocolitica,https://www.cgmlst.org/ncs/schema/Yenterocolitica2301/alleles/,Yersinia_enterocolitica.trn
