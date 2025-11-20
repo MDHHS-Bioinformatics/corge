@@ -12,7 +12,9 @@
 
 nextflow.enable.dsl = 2
 
-
+include { CORGEPLUS }         from './workflows/corgeplus'
+include { CORGEPLUS_NPR }     from './workflows/corgeplus_npr'
+include { PREPARE_CGMLST_SCHEMA } from './workflows/prepare_cgmlst_schema'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -28,24 +30,18 @@ WorkflowMain.initialise(workflow, params, log)
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
-if (params.mode == 'default'){
-    include { CORGEPLUS } from './workflows/corgeplus'
-} else if (params.mode == 'npr') {
-    include { CORGEPLUS_NPR } from './workflows/corgeplus_npr.nf'
-}
 //
 // WORKFLOW: Run main nf-core/corgeplus analysis pipeline
 //
-workflow NFCORE_CORGEPLUS {
-    //
-    //WORKFLOW: The standard option. When using previous samples from your master manifest
-    if (params.mode=='default') {
-        CORGEPLUS ()
-    //
-    //WORKFLOW: For ad hoc analysis. Use if you want to focus on solely a couple of samples in isolation from any other results
-    } else if (params.mode=='npr') {
+workflow {
+    if (params.mode == 'default') {
+        CORGEPLUS()
+    } else if (params.mode == 'npr') {
         CORGEPLUS_NPR()
-
+    } else if (params.mode == 'schema') {
+        PREPARE_CGMLST_SCHEMA()
+    } else {
+        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'npr', 'schema'."
     }
 }
 
@@ -59,9 +55,6 @@ workflow NFCORE_CORGEPLUS {
 // WORKFLOW: Execute a single named workflow for the pipeline
 // See: https://github.com/nf-core/rnaseq/issues/619
 //
-workflow {
-    NFCORE_CORGEPLUS ()
-}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

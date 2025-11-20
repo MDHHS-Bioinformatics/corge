@@ -15,7 +15,13 @@ def checkPathParamList = [ params.input, params.multiqc_config]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
-if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+if (params.mode in ['default', 'npr']) {
+    if (params.input) {
+        ch_input = file(params.input)
+    } else {
+        exit 1, 'Input samplesheet not specified! (--input is required for mode: ' + params.mode + ')'
+    }
+}
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~

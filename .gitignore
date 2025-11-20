@@ -5,7 +5,6 @@ data/
 testing/
 testing*
 *.pyc
-*.csv
 *results*
 logs/*
 *.fasta
@@ -14,3 +13,4 @@ python_notebooks/*
 *data*
 mrsa_*
 results*
+*.csv

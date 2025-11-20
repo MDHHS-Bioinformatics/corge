@@ -3,7 +3,7 @@
 //
 
 include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
-include { RENAME_INPUTS     } from '../../modules/local/renameinputs.nf'
+include { RENAME_INPUTS     } from '../../modules/local/renameinputs'
 
 workflow INPUT_CHECK {
     take:
