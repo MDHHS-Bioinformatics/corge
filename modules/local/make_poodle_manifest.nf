@@ -9,7 +9,8 @@ process MAKE_POODLE_MANIFEST {
 
 
     input:
-    tuple val(meta), val(outdir_abs), path(genomic_context_groups)
+    tuple val(meta), path(genomic_context_groups)
+    val(outdir_abs)
 
     output:
 
