@@ -108,7 +108,7 @@ ISO4,/path/iso4.fasta,Acinetobacter baumannii
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
   --input manifest.csv \
-  --schema_file cgmlst_schemas.csv \
+  --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge \
   -profile singularity
 ```
@@ -120,7 +120,7 @@ Default clustering thresholds: `15, 20, 40, 150` (alleles for cgMLST or SNPs for
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
   --input manifest.csv \
-  --schema_file cgmlst_schemas.csv \
+  --cgmlst_schemas cgmlst_schemas.csv \
   --outdir results \
   --thresholds 1,10,100,1000 \
   -profile singularity
@@ -134,7 +134,7 @@ nextflow run MI-Bioinformatics/CorGe \
 | --------------------------------- | :------: | -------------- | ------------------------------------------------------------------------------------ |
 | `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
 | `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
-| `--schema_file`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
+| `--cgmlst_schemas`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
 | `--thresholds`           |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
 | `--mode`                 |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
 | `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                    |
@@ -142,6 +142,9 @@ nextflow run MI-Bioinformatics/CorGe \
 | `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
 | `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
 | `--max_time`             |     –    | `24.h`              | Max time in hours                               |             
+| `--master_paths`   | – | – | CSV file containing paths to reads and annotations for all samples in the database (`sample,fastq_1,fastq_2,gff`). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests. |
+| `--phoenix_path`   | – | – | Absolute path to a PHoeNIx results directory (`/path/to/phoenix`). CorGe+ will infer read and annotation paths (sample IDs must match). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests.  |
+| `--bactopia_path`  | – | – | Absolute path to a Bactopia results directory (`/path/to/bactopia`). CorGe+ will infer read and annotation paths (sample IDs must match). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests. |
 ---
 
 
@@ -153,7 +156,7 @@ CorGe+ was created to make **genomic epidemiology, routine surveillance, and out
 * 🧬 **Group genomes by allelic or SNP distance** using cgMLST or core-genome alignment.
 * 🔗 **Identify potential linkages** based on allelic distances (cgMLST) or SNP distances (Parsnp).
 * 📤 **Export clean, shareable outputs** (CSV tables + Microreact visualizations).
-* 🧩 **Feed selected genomic context groups** into downstream pipelines like **PoODLE** for high-quality SNP and pangenome analyses.
+* 🧩 **Feed selected genomic context groups** into downstream pipelines like [`PoODLE`](#-poodle-samplesheets) for high-quality SNP and pangenome analyses.
 
 When the first question is *“Are these isolates related?”*, CorGe+ gives you a fast answer.
 
@@ -260,6 +263,22 @@ These tables define groups of samples for downstream analysis, using the standar
 
 ---
 
+### 📝 **PoODLE samplesheets**
+
+[**PoODLE**](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
+
+CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold. The required columns are:
+
+```
+sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
+```
+
+The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
+
+For each cluster, CorGe+ selects a reference genome based on the best assembly quality (fewest contigs, longest length, and alphabetical tie-break).
+
+---
+
 ### 🧬 Microreact export
 
 CorGe+ generates a `.microreact` file that brings together **two complementary genetic perspectives**:
@@ -303,7 +322,7 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
 * **Different group IDs across runs**: Expected when using **Parsnp**, because reference choice and sample composition affect cluster boundaries. For **stable and reproducible** group IDs, prefer cgMLST.
 
 * **Missing schema for a species**
-  → Use `--mode schema` to download schemas and provide the path with `--schema_file`.
+  → Use `--mode schema` to download schemas and provide the path with `--cgmlst_schemas`.
   → If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
   → Rename or remove the old species subdirectory in your `outdir` to prevent conflicts when the pipeline checks for prior results.
 
