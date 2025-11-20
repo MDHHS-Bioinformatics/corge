@@ -135,11 +135,17 @@ workflow CORGEPLUS {
     )
     ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
 
+    template_microreact = file(params.microreact_template)
 
     //Create an empty channel to store all the speices that have cgmlst for microreact
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions.join(CHEWBBACA_ANALYSIS.out.dist_tree)
-        .map{meta,partitions_tsv,dist_tree -> [[species:meta.species],partitions_tsv,dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
+    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
+        .join(CHEWBBACA_ANALYSIS.out.dist_tree)
+        .map { meta, partitions_tsv, dist_tree ->
+            [[species: meta.species], partitions_tsv, dist_tree]
+        }
+        .join(MASHTREE_CORGE.out.mashtree_tree)
+        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
@@ -152,7 +158,9 @@ workflow CORGEPLUS {
     //First join the parsnp results
     ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
+        .join(MASHTREE_CORGE.out.mashtree_tree)         
+        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
@@ -173,7 +181,7 @@ workflow CORGEPLUS {
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     
-    MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, val(outdir_abs))
+    MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs)
     ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
