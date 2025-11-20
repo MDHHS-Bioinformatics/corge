@@ -16,6 +16,7 @@ for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true
 
 // Check mandatory parameters
 if (params.input) { ch_input = file(params.input) } else { exit 1, 'Input samplesheet not specified!' }
+def outdir_abs = file(params.outdir).toAbsolutePath().toString()
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -35,8 +36,9 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
-include { MICROREACT as MICROREACT_CGMLST           } from '../modules/local/microreact.nf'
+include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact.nf'
+include { MAKE_POODLE_MANIFEST                   } from '../modules/local/make_poodle_manifest.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -164,6 +166,9 @@ workflow CORGEPLUS {
         PARSNP_ANALYSIS.out.cluster_composition
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
+    
+    MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, val(outdir_abs))
+    ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
