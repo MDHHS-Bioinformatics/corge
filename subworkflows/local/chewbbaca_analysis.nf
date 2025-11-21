@@ -3,6 +3,7 @@ include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allele
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
 include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
 include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
+include { CHECK_METADATA            } from '../../modules/local/check_metadata.nf'
 include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
 include { REPORTREE_CGMLST_METADATA } from '../../modules/local/reportree/reportree_cgmlst_metadata.nf'
 
@@ -24,18 +25,11 @@ def get_previous_alleles_tsv(species ) {
     def previous_alleles_path = file("${params.outdir}/${species}/cgMLST/masked_results_alleles.tsv", checkIfExists: false)
     return previous_alleles_path
 }
-//Function to check if the previous partitions file
-def check_previous_partitions_tsv(species) {
-    // Create the path to where the previous partitions tsv are stored
-    def previous_partitions_path = file("${params.outdir}/${species}/ReporTree/${species}_partitions.tsv", checkIfExists: false)
-    return previous_partitions_path.exists()
+def get_previous_partitions_tsv(species) {
+    def p = "${params.outdir}/${species}/ReporTree/${species}_partitions.tsv"
+    return new File(p).exists() ? p : null
 }
-//Function to return the previous partitions table (assuming it exists)
-def get_previous_partitions_tsv(species ) {
-    // Create the path to where the previous partitions tsv are stored
-    def previous_partitions_path = file("${params.outdir}/${species}/ReporTree/${species}_partitions.tsv", checkIfExists: false)
-    return previous_partitions_path
-}
+
 workflow CHEWBBACA_ANALYSIS {
 
     take:
@@ -113,17 +107,27 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_EXTRACTCGMLST(
         DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
     )
-
     //
-    // MODULE: Run reportree on multiple samples for a species with a cgMLST
+    // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
+    if(params.metadata) {
+        CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
+    ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
     //
     //
-    // Run reportree depending on metadata presence
+    // Check if there are previous partitions to keep consistent nomenclature
+    // 
+    CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        .map { meta, _ -> 
+            def prev = get_previous_partitions_tsv(meta.species)
+            [ meta, prev ]
+        }
+        .set { ch_previous_partitions }
     //
-    
+    // MODULE: Run reportree depending on metadata presence
+    //
     reportree = params.metadata ?
-        REPORTREE_CGMLST_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata)) :
-        REPORTREE_CGMLST(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles)
+        REPORTREE_CGMLST_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, CHECK_METADATA.out.metadata, ch_previous_partitions) :
+        REPORTREE_CGMLST(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, ch_previous_partitions)
 
     // Collect versions
     ch_versions = params.metadata ?
