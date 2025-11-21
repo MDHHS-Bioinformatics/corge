@@ -9,14 +9,10 @@ process BACTERIAL_LINKAGE {
         'https://depot.galaxyproject.org/singularity/pandas%3A2.2.1' :
         'https://quay.io/repository/biocontainers/pandas/manifest/sha256:509adc4983db6c608fa516bea822c29bf34d5b3f039d331fc705fc27492a0987' }"
 
-
     input:
     tuple val(meta), path(dist_hamming)
 
     output:
-    // TODO nf-core: Named file extensions MUST be emitted for ALL output channels
-    // path "*.bam", emit: bam
-    // TODO nf-core: List additional required output channels/values here
     tuple val(meta), path("*_potential_linkages.csv"), emit: potential_linkages
     path "versions.yml"           , emit: versions
 
@@ -33,7 +29,6 @@ process BACTERIAL_LINKAGE {
         --species $species \
         --dist-hamming $dist_hamming \
         --output ${species}_potential_linkages.csv
-
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
