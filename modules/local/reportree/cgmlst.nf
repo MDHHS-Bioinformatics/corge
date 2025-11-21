@@ -3,10 +3,11 @@ process REPORTREE_CGMLST {
     label 'process_medium'
 
 
-    container "reportree_local_v2.6.0.sif"
+    container "reportree_v2.6.0.sif"
 
     input:
     tuple val(meta), path(allele_table)
+    path old_partitions optional true
 
     output:
     tuple val(meta), path("ReporTree/")                                 , emit: reportree_results
@@ -22,6 +23,8 @@ process REPORTREE_CGMLST {
     script:
     def args = task.ext.args ?: ''
     species = task.ext.prefix ?: "${meta.species}"
+    def partitions = ''
+    if (old_partitions) {old_partitions = "--nomenclature-file '${old_partitions}'"}  
 
     """
     mkdir ReporTree
@@ -33,6 +36,7 @@ process REPORTREE_CGMLST {
         --method MSTreeV2 \
         --analysis HC \
         --n_proc $task.cpus \
+        $partitions
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
