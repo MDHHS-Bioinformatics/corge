@@ -34,7 +34,7 @@ process MAKE_POODLE_MANIFEST {
     }
 
     """
-    make_poodle_manifest.py \
+    python3 make_poodle_manifest.py \
         --species $species \
         --outdir ${outdir_abs} \
         --thresholds ${thresholds} \
