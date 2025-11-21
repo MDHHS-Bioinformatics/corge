@@ -2,7 +2,6 @@
 include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
 include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
-include { SUBSET_LIMS               } from '../../modules/local/subset_lims.nf'
 include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
 include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
 

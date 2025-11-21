@@ -61,16 +61,16 @@ class RowChecker:
                 (values).
 
         """
-        self._validate_pair(row)
+        #self._validate_pair(row)
         self._seen.add((row[self._species_col], row[self._species_path_col]))
         self.modified.append(row)
 
 
-    def _validate_pair(self, row):
-        """Assert that the species name is found in the respective path. Report status."""
-        if row[self._species_col] and row[self._species_path_col]:
-            if row[self._species_col] not in row[self._species_path_col]:
-                raise AssertionError(f"The species name {row[self._species_col]} was not found in the path {row[self._species_path_col]}. Species name is expected in its cgMLST path")
+    # def _validate_pair(self, row):
+    #     """Assert that the species name is found in the respective path. Report status."""
+    #     if row[self._species_col] and row[self._species_path_col]:
+    #         if row[self._species_col] not in row[self._species_path_col]:
+    #             raise AssertionError(f"The species name {row[self._species_col]} was not found in the path {row[self._species_path_col]}. Species name is expected in its cgMLST path")
 
 
 
