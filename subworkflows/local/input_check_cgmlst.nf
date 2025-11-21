@@ -20,6 +20,9 @@ workflow INPUT_CHECK_CGMLST {
     //join the cgmlst paths with the species_count channel
     joined_species_count = species_count
     .join(cgmlst_paths.map{ meta, path -> [meta.species, [meta, path]]}, remainder:true)
+    .map{ species, count, temp -> //change any species that may have zero counts resulting in null to zero
+        [species, count ?: 0, temp]
+    }
 
     //Now branch based on if a cgmlst is a avaiable or not
     joined_species_count
