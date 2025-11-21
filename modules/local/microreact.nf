@@ -9,7 +9,8 @@ process MICROREACT {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    tuple val(meta), path(partitions), path(single_HC), path(mashtree)
+    tuple val(meta), path(partitions), path(single_HC), path(mashtree), path(template_microreact)
+
     output:
     path '*.microreact'       , emit: microreact
     path "versions.yml"       , emit: versions
@@ -22,13 +23,12 @@ process MICROREACT {
     def thresholds = params.thresholds ?: ''
     species = task.ext.prefix ?: "${meta.species}"
 
-
     """
     make_microreact.py --species $species --partitions ${thresholds} \
         --partitions-tsv $partitions \
         --reportree-tree $single_HC \
         --mash-tree $mashtree \
-        --template $params.microreact_template \
+        --template $template_microreact \
         --output ${species}_corge.microreact
 
     cat <<-END_VERSIONS > versions.yml

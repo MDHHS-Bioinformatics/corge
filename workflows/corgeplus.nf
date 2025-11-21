@@ -22,6 +22,8 @@ if (params.mode in ['default', 'npr']) {
         exit 1, 'Input samplesheet not specified! (--input is required for mode: ' + params.mode + ')'
     }
 }
+def outdir_abs = file(params.outdir).toAbsolutePath().toString()
+def master_paths = params.master_paths ? file(params.master_paths) : null
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -41,8 +43,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
-include { MICROREACT as MICROREACT_CGMLST           } from '../modules/local/microreact.nf'
+include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact.nf'
+include { MAKE_POODLE_MANIFEST                   } from '../modules/local/make_poodle_manifest.nf'
+include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/make_poodle_manifest_master.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -133,11 +137,17 @@ workflow CORGEPLUS {
     )
     ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
 
+    template_microreact = file(params.microreact_template)
 
     //Create an empty channel to store all the speices that have cgmlst for microreact
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions.join(CHEWBBACA_ANALYSIS.out.dist_tree)
-        .map{meta,partitions_tsv,dist_tree -> [[species:meta.species],partitions_tsv,dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
+    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
+        .join(CHEWBBACA_ANALYSIS.out.dist_tree)
+        .map { meta, partitions_tsv, dist_tree ->
+            [[species: meta.species], partitions_tsv, dist_tree]
+        }
+        .join(MASHTREE_CORGE.out.mashtree_tree)
+        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
@@ -150,7 +160,9 @@ workflow CORGEPLUS {
     //First join the parsnp results
     ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree) // Then join the mashtree tree
+        .join(MASHTREE_CORGE.out.mashtree_tree)         
+        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
     //
     // MICROREACT: Summary plot with distance trees and selected partitions
@@ -170,6 +182,12 @@ workflow CORGEPLUS {
         PARSNP_ANALYSIS.out.cluster_composition
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
+    
+    if (!params.master_paths){MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs)
+        ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)}
+
+    if (params.master_paths){MAKE_POODLE_MANIFEST_MASTER(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs, master_paths)
+    ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST_MASTER.out.versions)}
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
