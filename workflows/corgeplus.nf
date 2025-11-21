@@ -182,7 +182,9 @@ workflow CORGEPLUS {
         PARSNP_ANALYSIS.out.cluster_composition
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
-    
+    //
+    // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
+    //
     if (!params.master_paths){MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs)
         ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)}
 
