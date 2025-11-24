@@ -10,11 +10,11 @@ process REPORTREE_CGMLST {
     tuple val(meta), path(previous_partitions)
 
     output:
-    tuple val(meta), path("ReporTree/")                                 , emit: reportree_results
-    tuple val(meta), path("ReporTree/*_clusterComposition.tsv")         , emit: cluster_composition
-    tuple val(meta), path("ReporTree/*_dist_hamming.tsv")               , emit: dist_hamming
-    tuple val(meta), path("ReporTree/*_partitions.tsv")                 , emit: partitions
-    tuple val(meta), path("ReporTree/*_single_HC.nwk")                  , emit: single_HC
+    tuple val(meta), path("ReporTree/")                                               , emit: reportree_results
+    tuple val(meta), path("ReporTree/${meta.species}_clusterComposition.tsv")         , emit: cluster_composition
+    tuple val(meta), path("ReporTree/${meta.species}_dist_hamming.tsv")               , emit: dist_hamming
+    tuple val(meta), path("ReporTree/${meta.species}_partitions.tsv")                 , emit: partitions
+    tuple val(meta), path("ReporTree/${meta.species}_single_HC.nwk")                  , emit: single_HC
     path "versions.yml", emit: versions
 
     when:
@@ -23,8 +23,7 @@ process REPORTREE_CGMLST {
     script:
     def args = task.ext.args ?: ''
     species = task.ext.prefix ?: "${meta.species}"
-    def partitions = (previous_partitions != null && previous_partitions != "") ? "--nomenclature-file $previous_partitions" : ""
-
+    def partitions = previous_partitions ? "--nomenclature-file ${previous_partitions}" : ""
     """
     mkdir ReporTree
 
