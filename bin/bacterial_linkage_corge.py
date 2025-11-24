@@ -38,7 +38,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
             ]
 
             if not linked:
-                return 'NA'
+                return 'None'
 
             # Sort by distance (ascending)
             linked_sorted = sorted(linked, key=lambda x: x[1])
@@ -69,7 +69,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
     # -----------------------------
     strong_linkages = format_linkages(matrix_df, 0, 10, include_threshold=True)
     intermediate_linkages = format_linkages(matrix_df, 10, 40)
-    lineage_level = format_linkages(matrix_df, 40, 100)
+    lineage_level = format_linkages(matrix_df, 40, 150)
 
     # -----------------------------
     # Build results table
@@ -83,9 +83,9 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
     })
 
     # Fill missing safely
-    result_df['strong_linkages'] = result_df['strong_linkages'].fillna('NA')
-    result_df['intermediate_linkages'] = result_df['intermediate_linkages'].fillna('NA')
-    result_df['lineage_level'] = result_df['lineage_level'].fillna('NA')
+    result_df['strong_linkages'] = result_df['strong_linkages'].fillna('None')
+    result_df['intermediate_linkages'] = result_df['intermediate_linkages'].fillna('None')
+    result_df['lineage_level'] = result_df['lineage_level'].fillna('None')
 
     # -----------------------------
     # Save to CSV
