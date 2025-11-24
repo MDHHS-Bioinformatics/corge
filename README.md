@@ -112,7 +112,7 @@ nextflow run MI-Bioinformatics/CorGe \
   -profile singularity
 ```
 
-Default clustering thresholds: `15, 20, 40, 150` (alleles for cgMLST or SNPs for Parsnp) — customizable via `--thresholds 1,10,100,1000`.
+Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp) — customizable via `--thresholds 1,10,100,1000`.
 
 ### With custom thresholds
 
@@ -129,23 +129,58 @@ nextflow run MI-Bioinformatics/CorGe \
 
 ## Parameters
 
-|          Parameter             | Required | Default        | Description                                                                              |
-| --------------------------------- | :------: | -------------- | ------------------------------------------------------------------------------------ |
-| `--input`                |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                               |
-| `--outdir`               |     ✓    | `$PWD/corge`   | Output directory root.                                                                                  |
-| `--cgmlst_schemas`          |     –    | –              | CSV mapping absolute paths to cgMLST schemas (`species,cgmlst_path`). When absent, Parsnp is used for species with no schema.            |
-| `--thresholds`           |     –    | `15,20,40,150` | Allelic/SNP distance cutoffs for grouping samples. Thresholds are comma-separated integers.                                        |
-| `--mode`                 |     –    | `default`          | `default` (default) or `schema` for **schema download workflow**.                                           |
-| `--schema_ids`           |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                    |
-| `-profile`               |     ✓    | –       | Execution profile (`docker`, `singularity`, `podman`, `charliecloud`, `shifter`, `conda`, `institute`). |
-| `--max_memory`           |     –    | `128.GB`              | Max memory in GB                                                          |
-| `--max_cpus`             |     –    | `16`              | Max number of CPUs                                                          |
-| `--max_time`             |     –    | `24.h`              | Max time in hours                               |             
-| `--master_paths`   | – | – | CSV file containing paths to reads and annotations for all samples in the database (`sample,fastq_1,fastq_2,gff`). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests. |
-| `--phoenix_path`   | – | – | Absolute path to a PHoeNIx results directory (`/path/to/phoenix`). CorGe+ will infer read and annotation paths (sample IDs must match). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests.  |
-| `--bactopia_path`  | – | – | Absolute path to a Bactopia results directory (`/path/to/bactopia`). CorGe+ will infer read and annotation paths (sample IDs must match). Used to populate [`PoODLE`](#-poodle-samplesheets) manifests. |
+### **📥 Input & Core Parameters**
+
+| Parameter          | Required | Default        | Description                                                                                                |
+| ------------------ | :------: | -------------- | ---------------------------------------------------------------------------------------------------------- |
+| `--input`          |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                                  |
+| `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root.                                                                                     |
+| `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema. |
+| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.                                                 |
+| `--mode`           |     ✓    | `default`      | `default` or `schema` for **schema-download workflow**.                                                          |
+| `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                                    |
+
 ---
 
+### ⚙️ **Execution Configuration**
+
+| Parameter      | Required | Default  | Description                                                                                                                      |
+| -------------- | :------: | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| `-profile`     |     ✓    | –        | Execution profile (`docker` or `singularity`).                                                             |
+| `--max_memory` |     ✓    | `128.GB` | Maximum memory allocation.                                                                                                       |
+| `--max_cpus`   |     ✓    | `16`     | Maximum CPUs allowed.                                                                                                            |
+| `--max_time`   |     ✓    | `24.h`   | Maximum execution time.                                                                                                          |
+| `-resume`      |     –    | –        | Reuse cached results from previous runs when inputs and code haven't changed. Ideal for interrupted runs. |
+
+---
+
+### **📦 Data Source Options (for PoODLE Manifests)**
+These options let CorGe+ automatically populate the [`PoODLE`](#-poodle-samplesheets) manifests with read and annotation paths. They are optional, but only one should be used per run. If none are provided PoODLE manifests will contain empty placeholders for fastq and gff paths and you will need to fill them manually before running PoODLE.
+
+| Parameter         | Required | Default | Description                                                                                       |
+| ----------------- | :------: | ------- | ------------------------------------------------------------------------------------------------- |
+| `--master_paths`  |     –    | –       | CSV with explicit absolute paths to reads and annotations (`sample,fastq_1,fastq_2,gff`). Use this when you already have all paths from the database organized in a single file.  |
+| `--phoenix_path`  |     –    | –       | Absolute path to a PHoeNIx results directory. CorGe+ will infer read and annotation paths based on sample IDs. Use if your data was processed with PHoeNIx.                                         |
+| `--bactopia_path` |     –    | –       | Absolute path to a Bactopia results directory. CorGe+ will infer read and annotation paths based on sample IDs. Use if your data was processed with Bactopia.                                        |
+
+---
+
+### 🌳 **ReporTree Options**
+These parameters configure how clustering results are summarized, filtered, and reported using ReporTree.
+They are optional, but highly recommended when producing lineage, temporal, or metadata-based reports.
+
+More details about the following options in [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
+
+| Parameter                  | Required | Default        | Description                                                                                                                                                                                                                                               |
+| -------------------------- | :------: | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `--metadata`               |     –    | –              | Metadata table (CSV/TSV) used for reporting. Must include **all samples** (new + previous) for the species. Sample IDs in the first column must match CorGe+ names. Recommended to include a `date` column for temporal summaries.                        |
+| `--columns_summary_report` |     –    | `n_sequence,lineage,n_country,country,n_region,first_seq_date,last_seq_date,timespan_days` | Metadata columns to summarize per cluster. Supports counts (`n_country`), distributions (`country`), and—if a `date` column exists—temporal measures (first/last sample date and time span). Useful for generating cluster-level epidemiological summaries. |
+| `--metadata2report`        |     –    | –              | Additional metadata columns for which **separate** summary reports should be created. Useful when tracking specific fields (e.g.,`st,source,serotype,AMR_profile`).                                                                                   |
+| `--filter`                 |     –    | –              | Filter samples before analysis using expressions such as `'country == USA'` or `'country == USA;date > 2024-01-01'`. Supports multiple conditions and multiple columns.                                                                                   |
+| `--frequency_matrix`       |     –    | –              | Generate frequency matrices showing the proportion of samples for variable combinations (e.g., `'lineage,iso_week'` → lineage distribution over time). Supports multiple matrices.                                                                        |
+| `--count_matrix`           |     –    | –              | Same as `--frequency_matrix` but outputs raw counts instead of percentages. Useful for plotting absolute numbers across time or categories.                                                                                                               |
+
+---
 
 ## 🔍 Designed for bacterial surveillance
 
@@ -237,7 +272,7 @@ Identifies **strong** or **intermediate** linkages between samples based on **al
 * `sample`
 * `strong_linkages` — highly similar isolates (0-10)
 * `intermediate_linkage` — moderately similar isolates (11-40)
-* `lineage_level` — less similar isolates (41-100)
+* `lineage_level` — less similar isolates (41-150)
 
 ---
 
