@@ -19,7 +19,7 @@ process CHECK_METADATA {
     species = meta.species
 
     """
-   check_metadata.py \
+    check_metadata.py \
         --metadata ${metadata} \
         --input ${masked_alleles} \
         --species ${species} 
@@ -29,5 +29,4 @@ process CHECK_METADATA {
         python: \$(python --version | sed 's/Python //g')
     END_VERSIONS
     """
-
 }
