@@ -7,14 +7,14 @@ process REPORTREE_CGMLST_METADATA {
     input:
     tuple val(meta), path(allele_table)
     tuple val(meta), path(metadata)
-    tuple val(meta), path(previous_partitions) optional true
+    tuple val(meta), path(previous_partitions)
 
     output:
-    tuple val(meta), path("ReporTree/")                                 , emit: reportree_results
-    tuple val(meta), path("ReporTree/*_clusterComposition.tsv")         , emit: cluster_composition
-    tuple val(meta), path("ReporTree/*_dist_hamming.tsv")               , emit: dist_hamming
-    tuple val(meta), path("ReporTree/*_partitions.tsv")                 , emit: partitions
-    tuple val(meta), path("ReporTree/*_single_HC.nwk")                  , emit: single_HC
+    tuple val(meta), path("ReporTree/")                                               , emit: reportree_results
+    tuple val(meta), path("ReporTree/${meta.species}_clusterComposition.tsv")         , emit: cluster_composition
+    tuple val(meta), path("ReporTree/${meta.species}_dist_hamming.tsv")               , emit: dist_hamming
+    tuple val(meta), path("ReporTree/${meta.species}_partitions.tsv")                 , emit: partitions
+    tuple val(meta), path("ReporTree/${meta.species}_single_HC.nwk")                  , emit: single_HC
     path "versions.yml", emit: versions
 
     when:
@@ -33,8 +33,7 @@ process REPORTREE_CGMLST_METADATA {
     if (params.frequency_matrix) {frequency_matrix = "--frequency-matrix '${params.frequency_matrix}'"}  
     def count_matrix = ''
     if (params.count_matrix) {count_matrix = "--count-matrix '${params.count_matrix}'"}  
-    def partitions = ''
-    if (previous_partitions) {previous_partitions = "--nomenclature-file '${previous_partitions}'"}  
+    def partitions = (previous_partitions != null && previous_partitions != "") ? "--nomenclature-file $previous_partitions" : ""
 
     """
     #mv $allele_table results_alleles.tsv
