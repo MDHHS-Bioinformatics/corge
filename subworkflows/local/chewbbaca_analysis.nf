@@ -27,8 +27,9 @@ def get_previous_alleles_tsv(species ) {
 }
 def get_previous_partitions_tsv(species) {
     def p = "${params.outdir}/${species}/ReporTree/${species}_partitions.tsv"
-    return new File(p).exists() ? p : null
+    return new File(p).exists() ? file(p) : null
 }
+
 
 workflow CHEWBBACA_ANALYSIS {
 
@@ -125,20 +126,30 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Run reportree depending on metadata presence
     //
-    reportree = params.metadata ?
-        REPORTREE_CGMLST_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, CHECK_METADATA.out.metadata, ch_previous_partitions) :
-        REPORTREE_CGMLST(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, ch_previous_partitions)
+    if (params.metadata) {
 
-    // Collect versions
-    ch_versions = params.metadata ?
-        ch_versions.mix(REPORTREE_CGMLST_METADATA.out.versions) :
-        ch_versions.mix(REPORTREE_CGMLST.out.versions)
+        reportree = REPORTREE_CGMLST_METADATA(
+            CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
+            CHECK_METADATA.out.metadata,
+            ch_previous_partitions
+        )
+
+    } else {
+
+        reportree = REPORTREE_CGMLST(
+            CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
+            ch_previous_partitions
+        )
+    }
+
+    // mix versions from the *invoked* process
+    ch_versions = ch_versions.mix(reportree.versions)
 
     emit:
-    dist_hamming        = reportree.out.dist_hamming          //channel: [val (meta), results ]
-    partitions          = reportree.out.partitions            //channel" [val (meta), partitions_summary]
-    dist_tree           = reportree.out.single_HC             //channel: [val(meta), single_hc]
-    cluster_composition = reportree.out.cluster_composition   //channel: [val(meta), cluster_composition]
+    dist_hamming        = reportree.dist_hamming          //channel: [val (meta), dist_hamming ]
+    partitions          = reportree.partitions            //channel" [val (meta), partitions_summary]
+    dist_tree           = reportree.single_HC             //channel: [val(meta), single_hc]
+    cluster_composition = reportree.cluster_composition   //channel: [val(meta), cluster_composition]
     versions            = ch_versions                         //channel: [ versions.yml ]
 }
 
