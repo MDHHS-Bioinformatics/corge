@@ -84,8 +84,8 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
 
 > [!NOTE]
-> If your species’ schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
-> You could also download schemas from **Chewie-NS**, create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> If a species schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
+> You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
 
 ### 3. Prepare your manifest file
 Include:
@@ -221,7 +221,7 @@ Parsnp is triggered when a species lacks a schema.
 * Recommended: **≥5 samples** for meaningful alignments.
 * Minimum: **2 samples**, but expect longer runtimes and reduced SNP accuracy.
 * Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~100 SNPs) when evaluating potential linkages.
-* For downstream confirmation, use an hqSNP workflow (e.g., **Snippy**).
+* For downstream confirmation, use an hqSNP workflow (e.g., [`Snippy`](https://github.com/tseemann/snippy) and [`Gubbins`](https://github.com/nickjcroucher/gubbins)).
 
 ---
 
@@ -328,6 +328,9 @@ Each partition corresponds to a hierarchical clustering level and includes the m
 To visualize, upload the `.microreact` file to [`Microreact`](https://microreact.org/upload)
 
 ### ![Microreact example](docs/images/corge_microreact_example.png)
+
+> [!TIP]  
+> You can also explore groups interactively by uploading the ReporTree files `.nwk` and `metadata_w_partitions.tsv`/`partitions.tsv` to [`GrapeTree`](https://github.com/achtman-lab/GrapeTree), [`SPREAD`](https://github.com/genpat-it/spread) or [`Auspice`](https://auspice.us/). These tools run entirely in your browser for quick and private visualization.
 
 ---
 
