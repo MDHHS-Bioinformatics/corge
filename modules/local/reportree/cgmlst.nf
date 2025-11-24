@@ -7,7 +7,7 @@ process REPORTREE_CGMLST {
 
     input:
     tuple val(meta), path(allele_table)
-    path old_partitions optional true
+    tuple val(meta), path(previous_partitions)
 
     output:
     tuple val(meta), path("ReporTree/")                                 , emit: reportree_results
@@ -23,8 +23,7 @@ process REPORTREE_CGMLST {
     script:
     def args = task.ext.args ?: ''
     species = task.ext.prefix ?: "${meta.species}"
-    def partitions = ''
-    if (old_partitions) {old_partitions = "--nomenclature-file '${old_partitions}'"}  
+    def partitions = (previous_partitions != null && previous_partitions != "") ? "--nomenclature-file $previous_partitions" : ""
 
     """
     mkdir ReporTree
