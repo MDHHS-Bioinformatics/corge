@@ -67,8 +67,8 @@ workflow PARSNP_ANALYSIS {
     else {
         CLEAN_FASTA.out.cleaned_snps_alignment
         .map { meta, _ -> 
-            def no_metadata = []
-            [ meta, no_metadata ]
+            def metadata = []
+            [ meta, metadata ]
         }
         .set { ch_metadata }
     }
@@ -88,7 +88,7 @@ workflow PARSNP_ANALYSIS {
     //
     REPORTREE_PARSNP(
         CLEAN_FASTA.out.cleaned_snps_alignment,
-        ch_metadata,
+        ch_metadata.metadata,
         ch_previous_partitions
     )
     ch_versions = ch_versions.mix(REPORTREE_PARSNP.out.versions)

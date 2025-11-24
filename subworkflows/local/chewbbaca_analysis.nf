@@ -115,8 +115,8 @@ workflow CHEWBBACA_ANALYSIS {
     else {
         CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
         .map { meta, _ -> 
-            def no_metadata = []
-            [ meta, no_metadata ]
+            def metadata = []
+            [ meta, metadata ]
         }
         .set { ch_metadata }
     }
@@ -135,7 +135,7 @@ workflow CHEWBBACA_ANALYSIS {
     //
     REPORTREE_CGMLST(
             CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
-            ch_metadata,
+            ch_metadata.metadata,
             ch_previous_partitions
         )
 
