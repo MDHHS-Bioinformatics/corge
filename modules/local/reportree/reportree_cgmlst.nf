@@ -1,4 +1,4 @@
-process REPORTREE_CGMLST_METADATA {
+process REPORTREE_CGMLST {
     tag "$meta.species"
     label 'process_medium'
 
@@ -33,15 +33,14 @@ process REPORTREE_CGMLST_METADATA {
     if (params.frequency_matrix) {frequency_matrix = "--frequency-matrix '${params.frequency_matrix}'"}  
     def count_matrix = ''
     if (params.count_matrix) {count_matrix = "--count-matrix '${params.count_matrix}'"}  
-    def partitions = (previous_partitions != null && previous_partitions != "") ? "--nomenclature-file $previous_partitions" : ""
-
+    def metadata = metadata ? "--metadata ${metadata}" : ""
+    def partitions = previous_partitions ? "--nomenclature-file ${previous_partitions}" : ""
     """
-    #mv $allele_table results_alleles.tsv
     mkdir ReporTree
 
     echo $species
     reportree.py \
-        --metadata $metadata \
+        $metadata \
         --output ReporTree/${species} \
         --allele-profile $allele_table \
         --method MSTreeV2 \
