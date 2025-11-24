@@ -11,7 +11,7 @@ process PARSNP {
 
     output:
     tuple val(meta), path("results/") , emit: results
-    tuple val(meta), path("results/parsnp.snps.mblocks"), emit: snps_alingment
+    tuple val(meta), path("results/parsnp.snps.mblocks"), emit: snps_alignment
     path "versions.yml", emit: versions
 
     when:
@@ -37,9 +37,6 @@ process PARSNP {
         --threads $task.cpus \
         $args \
         --output-dir results > parsnp.log 2>&1
-
-    #Convert ginger file to multi-fasta
-    harvesttools -i results/parsnp.ggr -S results/snps_alingment.fasta >> parsnp.log 2>&1
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
