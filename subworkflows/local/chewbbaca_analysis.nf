@@ -4,8 +4,7 @@ include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinpr
 include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
 include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
 include { CHECK_METADATA            } from '../../modules/local/check_metadata.nf'
-include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
-include { REPORTREE_CGMLST_METADATA } from '../../modules/local/reportree/reportree_cgmlst_metadata.nf'
+include { REPORTREE_CGMLST          } from '../../modules/local/reportree/reportree_cgmlst.nf'
 
 //Function for creating the path to the schema for a species
 def include_schema(species) {
@@ -111,8 +110,16 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
     if(params.metadata) {
-        CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
+        ch_metadata = CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
     ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
+    else {
+        CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        .map { meta, _ -> 
+            def no_metadata = []
+            [ meta, no_metadata ]
+        }
+        .set { ch_metadata }
+    }
     //
     //
     // Check if there are previous partitions to keep consistent nomenclature
@@ -126,30 +133,20 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Run reportree depending on metadata presence
     //
-    if (params.metadata) {
-
-        reportree = REPORTREE_CGMLST_METADATA(
+    REPORTREE_CGMLST(
             CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
-            CHECK_METADATA.out.metadata,
+            ch_metadata,
             ch_previous_partitions
         )
-
-    } else {
-
-        reportree = REPORTREE_CGMLST(
-            CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
-            ch_previous_partitions
-        )
-    }
 
     // mix versions from the *invoked* process
-    ch_versions = ch_versions.mix(reportree.versions)
+    ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
 
     emit:
-    dist_hamming        = reportree.dist_hamming          //channel: [val (meta), dist_hamming ]
-    partitions          = reportree.partitions            //channel" [val (meta), partitions_summary]
-    dist_tree           = reportree.single_HC             //channel: [val(meta), single_hc]
-    cluster_composition = reportree.cluster_composition   //channel: [val(meta), cluster_composition]
+    dist_hamming        = REPORTREE_CGMLST.out.dist_hamming          //channel: [val (meta), dist_hamming ]
+    partitions          = REPORTREE_CGMLST.out.partitions            //channel" [val (meta), partitions_summary]
+    dist_tree           = REPORTREE_CGMLST.out.single_HC             //channel: [val(meta), single_hc]
+    cluster_composition = REPORTREE_CGMLST.out.cluster_composition   //channel: [val(meta), cluster_composition]
     versions            = ch_versions                         //channel: [ versions.yml ]
 }
 
