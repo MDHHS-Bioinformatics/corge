@@ -27,7 +27,7 @@ def get_previous_alleles_tsv(species ) {
 }
 def get_previous_partitions_tsv(species) {
     def p = "${params.outdir}/${species}/ReporTree/${species}_partitions.tsv"
-    return new File(p).exists() ? file(p) : null
+    return new File(p).exists() ? file(p) : []
 }
 
 
