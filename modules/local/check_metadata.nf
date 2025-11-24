@@ -13,12 +13,13 @@ process CHECK_METADATA {
 
     output:
     tuple val(meta), path("${meta.species}_metadata.tsv") , emit: metadata
+    path "versions.yml", emit: versions
 
     script:
     species = meta.species
 
     """
-    python3 check_metadata.py \
+   check_metadata.py \
         --metadata ${metadata} \
         --input ${masked_alleles} \
         --species ${species} 
