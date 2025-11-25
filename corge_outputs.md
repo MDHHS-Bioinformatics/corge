@@ -5,22 +5,22 @@
             │    └── 📄 <sample>.fasta (one Fasta per sample)
             ├── 📁 cgMLST
             │   ├── 📁 joined
-            │   │   └── 📄 joined_results_alleles.tsv
+            │   │   └── 📄 <Species>_joined_results_alleles.tsv
             │   ├── 📁 masked
-            │   │    ├── 📄 Presence_Abscence.tsv
-            │   |    ├── 📄 cgMLST0.tsv
-            │   |    ├── 📄 cgMLSTschema0.txt
-            │   |    ├── 📄 masked_results_alleles.tsv
-            │   |    └── 📄 cgMLST.html
+            │   │    ├── 📄 <Species>_Presence_Abscence.tsv
+            │   |    ├── 📄 <Species>_masked_results_alleles.tsv
+            │   |    ├── 📄 <Species>_cgMLSTschema0.txt
+            │   |    ├── 📄 <Species>_masked_results_alleles.tsv
+            │   |    └── 📄 <Species>_cgMLST.html
             │   └── 📁 new
-            │       ├── 📄 cds_coordinates.tsv
-            │       ├── 📄 invalid_cds.txt
-            │       ├── 📄 loci_summary_stats.tsv
-            │       ├── 📄 logging_info.txt
-            │       ├── 📄 paralogous_loci.tsv
-            │       ├── 📄 results_alleles.tsv
-            │       ├── 📄 results_contigsInfo.tsv
-            │       └── 📄 results_statistics.tsv
+            │       ├── 📄 <Species>_new_cds_coordinates.tsv
+            │       ├── 📄 <Species>_new_invalid_cds.txt
+            │       ├── 📄 <Species>_new_loci_summary_stats.tsv
+            │       ├── 📄 <Species>_new_logging_info.txt
+            │       ├── 📄 <Species>_new_paralogous_loci.tsv
+            │       ├── 📄 <Species>_new_results_alleles.tsv
+            │       ├── 📄 <Species>_new_results_contigsInfo.tsv
+            │       └── 📄 <Species>_new_results_statistics.tsv
             ├── 📁 linkage_analysis
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
@@ -31,6 +31,8 @@
             │   └── 📄 <Species>_mash_rooted.tre
             ├── 📁 microreact
             │   └── 📄 <Species>_corge.microreact
+            ├── 📁 poodle_samplesheets
+            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv
             └── 📁 ReporTree
                  ├── 📄 <Species>_clusterComposition.tsv
                  ├── 📄 <Species>_dist_hamming.tsv
@@ -47,16 +49,14 @@
             ├── 📁 assemblies
             │    └── 📄 <sample>.fasta (one Fasta per sample)
             ├── 📁 parsnp
-            │   ├── 📁 config
-            │   ├── 📁 log
-            │   ├── 📄 <sample>.fasta.ref
-            │   ├── 📄 parsnp.ggr
-            │   ├── 📄 parsnp.snps.mblocks
-            │   ├── 📄 parsnp.xmfa
-            │   ├── 📄 parsnpAligner.ini
-            │   ├── 📄 paralogous_loci.tsv
-            │   ├── 📄 snps_alignment_no_ref.fasta
-            │   └── 📄 snps_alignment.fasta
+            │   ├── 📄 <Species>_parsnp.ggr
+            │   ├── 📄 <Species>_parsnp.maf
+            │   ├── 📄 <Species>_parsnp.rec
+            │   ├── 📄 <Species>_parsnp.snps.mblocks
+            │   ├── 📄 <Species>_parsnp.xmfa
+            │   ├── 📄 <Species>_parsnpAligner.ini
+            │   ├── 📄 <Species>_parsnpAligner.log
+            │   └── 📄 <Species>_snps_alignment.fasta
             ├── 📁 linkage_analysis
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
@@ -67,6 +67,8 @@
             │   └── 📄 <Species>_mash_rooted.tre
             ├── 📁 microreact
             │   └── 📄 <Species>_corge.microreact
+            ├── 📁 poodle_samplesheets
+            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv
             └── 📁 ReporTree
                  ├── 📄 <Species>_clusterComposition.tsv
                  ├── 📄 <Species>_dist_hamming.tsv
