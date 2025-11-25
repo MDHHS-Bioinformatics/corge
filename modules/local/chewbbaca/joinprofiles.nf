@@ -11,7 +11,7 @@ process CHEWBBACA_JOINPROFILES {
     tuple val(meta), path(new_alleles), path(old_alleles)
 
     output:
-    tuple val(meta), path("joined_results_alleles.tsv"), emit: joined_alleles
+    tuple val(meta), path("${meta.species}_joined_results_alleles.tsv"), emit: joined_alleles
     path "versions.yml"           , emit: versions
 
     when:
@@ -29,7 +29,7 @@ process CHEWBBACA_JOINPROFILES {
 
     chewBBACA.py JoinProfiles \
         --profiles $new_alleles previous/$old_alleles \
-        --output-file joined_results_alleles.tsv
+        --output-file ${species}_joined_results_alleles.tsv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
