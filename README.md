@@ -46,7 +46,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 ### 1. Install prerequisites
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
-2. Install any of [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility.
+2. Install [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility.
 
 > [!NOTE]  
 > If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later.
@@ -90,7 +90,7 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ### 3. Prepare your manifest file
 Include:
 * `sample`: unique ID (no spaces recommended)
-* `assembly`: absolute path to FASTA assembly for the sample
+* `assembly`: absolute path to FASTA assembly for the sample (uncompressed FASTA only; .gz or .zip not supported)
 * `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Any spaces in the name will be automatically replaced with underscores.
 ```
 sample,assembly,species
@@ -152,10 +152,13 @@ nextflow run MI-Bioinformatics/CorGe \
 | `--max_time`   |     ✓    | `24.h`   | Maximum execution time.                                                                                                          |
 | `-resume`      |     –    | –        | Reuse cached results from previous runs when inputs and code haven't changed. Ideal for interrupted runs. |
 
+More NextFlow configuration options [`here`](https://www.nextflow.io/docs/latest/reference/config.html).
+
 ---
 
 ### **📦 Data Source Options (for PoODLE Manifests)**
-These options let CorGe+ automatically populate the [`PoODLE`](#-poodle-samplesheets) manifests with read and annotation paths. They are optional, but only one should be used per run. If none are provided PoODLE manifests will contain empty placeholders for fastq and gff paths and you will need to fill them manually before running PoODLE.
+[`PoODLE`](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
+These options allow CorGe+ to automatically fill PoODLE manifests with read and annotation paths. They are optional, but only **one** may be used per run. If none are provided, the [`PoODLE samplesheets`](#-poodle-samplesheets) will contain empty placeholders for FASTQ and GFF paths, which you must fill in manually before running PoODLE.
 
 | Parameter         | Required | Default | Description                                                                                       |
 | ----------------- | :------: | ------- | ------------------------------------------------------------------------------------------------- |
@@ -166,19 +169,18 @@ These options let CorGe+ automatically populate the [`PoODLE`](#-poodle-samplesh
 ---
 
 ### 🌳 **ReporTree Options**
-These parameters configure how clustering results are summarized, filtered, and reported using ReporTree.
-They are optional, but highly recommended when producing lineage, temporal, or metadata-based reports.
-
-More details about the following options in [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
+ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
 
 | Parameter                  | Required | Default        | Description                                                                                                                                                                                                                                               |
 | -------------------------- | :------: | -------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `--metadata`               |     –    | –              | Metadata table (CSV/TSV) used for reporting. Must include **all samples** (new + previous) for the species. Sample IDs in the first column must match CorGe+ names. Recommended to include a `date` column for temporal summaries.                        |
+| `--metadata`               |     –    | –              | Metadata table (CSV/TSV) used for reporting. Must include **all samples** (new + previous) for the species. Sample IDs in the first column must match CorGe+ names. Recommended to include a `date` column (YYYY-MM-DD) for temporal summaries.                        |
 | `--columns_summary_report` |     –    | Predefined set | Metadata columns to summarize per cluster. Supports counts (`n_country`), distributions (`country`), and—if a `date` column exists—temporal measures (first/last sample date and time span). Useful for generating cluster-level epidemiological summaries. (default: `n_sequence,lineage,n_country,country,n_region,first_seq_date,last_seq_date,timespan_days`)|
 | `--metadata2report`        |     –    | –              | Additional metadata columns for which **separate** summary reports should be created. Useful when tracking specific fields (e.g.,`st,source,serotype,AMR_profile`).                                                                                   |
 | `--filter`                 |     –    | –              | Filter samples before analysis using expressions such as `'country == USA'` or `'country == USA;date > 2024-01-01'`. Supports multiple conditions and multiple columns.                                                                                   |
 | `--frequency_matrix`       |     –    | –              | Generate frequency matrices showing the proportion of samples for variable combinations (e.g., `'lineage,iso_week'` → lineage distribution over time). Supports multiple matrices.                                                                        |
 | `--count_matrix`           |     –    | –              | Same as `--frequency_matrix` but outputs raw counts instead of percentages. Useful for plotting absolute numbers across time or categories.                                                                                                               |
+
+More details about these options in [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
 
 ---
 
@@ -203,6 +205,9 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 
 ---
 
+>[!NOTE]
+>**Disclaimer**: This pipeline is only for investigation and epidemiology use. *The data presented in this pipeline has not been validated or subjected to CLIA standards for diagnosing and treating disease. Relatedness by WGS should not replace epidemiological investigations for determining linkage.*
+
 ## 🧭 When to use what
 
 ### **🔹 cgMLST (ChewBBACA)** — *preferred method*
@@ -220,14 +225,14 @@ Parsnp is triggered when a species lacks a schema.
 
 * Recommended: **≥5 samples** for meaningful alignments.
 * Minimum: **2 samples**, but expect longer runtimes and reduced SNP accuracy.
-* Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~100 SNPs) when evaluating potential linkages.
+* Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~150 SNPs) when evaluating potential linkages.
 * For downstream confirmation, use an hqSNP workflow (e.g., [`Snippy`](https://github.com/tseemann/snippy) and [`Gubbins`](https://github.com/nickjcroucher/gubbins)).
 
 ---
 
 ### **🔹 Group thresholds (allelic or SNP distance cutoffs)**
 
-Thresholds determine **which samples are grouped together** for downstream high-resolution analysis (hqSNPs, recombination filtering, pangenome comparisons).
+Thresholds determine **which samples are grouped together** for downstream high-resolution analysis like [**PoODLE**](https://github.com/MI-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons).
 These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
 
 **Practical guidance from surveillance experience:**
@@ -298,6 +303,7 @@ These tables define groups of samples for downstream analysis, using the standar
 ---
 
 ### 📝 **PoODLE samplesheets**
+<img src="docs/images/corge_poodle.png" alt="CorGe PoODLE" width="200" align="right"/>
 
 [**PoODLE**](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
 
@@ -310,6 +316,7 @@ sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
 The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
 For each cluster, CorGe+ selects a reference genome based on the best assembly quality (fewest contigs, longest length, and alphabetical tie-break).
+
 
 ---
 
@@ -342,7 +349,7 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
 
 * **Parsnp-specific guidance:**
   * Prefer **≥5 samples** to obtain meaningful alignments.
-  * Treat SNP distances as inflated; use **higher SNP thresholds** (~100 SNPs) when evaluating potential linkages.
+  * Treat SNP distances as inflated; use **higher SNP thresholds** (~150 SNPs) when evaluating potential linkages.
 
 * **Disk cleanup:** After the pipeline completes, you may safely remove the Nextflow `work/` directory to reclaim space.
 
@@ -401,7 +408,7 @@ An extensive list of references for the tools used by the pipeline can be found 
 
 ## Credits & Community
 
-Corge was developed within the **nf-core** ecosystem by MDHHS Genomics Analysis Unit with Karla Vasco and Douglas Maldonado-Torres as main mainteiners.
+CorGe+ was built and is maintained by the Genomics Analysis Unit at the Michigan Department of Health & Human Services (MDHHS). This pipeline was developed by [Karla Vasco](https://github.com/vascokarla) and [Douglas Maldonado-Torres](https://github.com/MTDouglas).
 
 📢 Contributions, issues, and pull requests are welcome — help make bacterial surveillance reproducible and accessible for everyone!
 
