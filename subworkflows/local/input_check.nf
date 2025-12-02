@@ -1,48 +1,17 @@
 //
-// Check input samplesheet and get read channels
+// Check input samplesheet and get species count and sample assemblies channels
 //
 
-include { SAMPLESHEET_CHECK } from '../../modules/local/samplesheet_check'
-include { RENAME_INPUTS     } from '../../modules/local/renameinputs'
-
-workflow INPUT_CHECK {
-    take:
-    samplesheet // file: /path/to/samplesheet.csv
-
-    main:
-    ch_versions = Channel.empty()
-    SAMPLESHEET_CHECK ( samplesheet )
-        .csv
-        .splitCsv ( header:true, sep:',' )
-        .map { create_assembly_channel(it) }
-        .set { assemblies }
-    count_species(assemblies)
-    .set{species_count}
-    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK.out.versions)
-
-    //Rename the input files if desired
-    prepped_assemblies = Channel.empty()
-    if (params.rename_files) {
-        //Rename the files
-        RENAME_INPUTS(assemblies)
-        prepped_assemblies = prepped_assemblies.mix(RENAME_INPUTS.out.renamed_files)
-    }
-    else {
-        prepped_assemblies = prepped_assemblies.mix(assemblies)
-    }
-
-    emit:
-    species_count
-    ch_sample_assemblies = prepped_assemblies // channel: [ val(meta), assembly ]
-    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
-}
-
-// Function to get list of [ meta, [ fastq_1, fastq_2 ] ]
+/*
+=============================================================================================================================
+    SUBWORKFLOW FUNCTIONS
+=============================================================================================================================
+*/
+// Function to get list of [ meta, assembly ]
 def create_assembly_channel(LinkedHashMap row) {
     // create meta map
     def meta = [:]
     meta.id         = row.sample
-    //meta.single_end = row.single_end ? row.single_end.toBoolean() : false
     meta.species    = row.species
 
     // add paths to the assemblies and gffs
@@ -69,3 +38,56 @@ def count_species(input_channel) {
 
     return counts
 }
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+
+include { SAMPLESHEET_CHECK } from '../../modules/local/pre_processing/samplesheet_check.nf'
+include { RENAME_INPUTS     } from '../../modules/local/pre_processing/renameinputs.nf'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN SUBWORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+workflow INPUT_CHECK {
+    take:
+    samplesheet // file: /path/to/samplesheet.csv
+
+    main:
+    ch_versions = Channel.empty()
+    SAMPLESHEET_CHECK ( samplesheet )
+        .csv
+        .splitCsv ( header:true, sep:',' )
+        .map { create_assembly_channel(it) }
+        .set { assemblies }
+    count_species(assemblies)
+    .set{species_count}
+    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK.out.versions)
+    //
+    // Rename the input files if desired
+    //
+    prepped_assemblies = Channel.empty()
+    if (params.rename_files) {
+        // Rename the files
+        RENAME_INPUTS(assemblies)
+        prepped_assemblies = prepped_assemblies.mix(RENAME_INPUTS.out.renamed_files)
+    }
+    else {
+        prepped_assemblies = prepped_assemblies.mix(assemblies)
+    }
+
+    emit:
+    species_count                             // channel: [ val(species), val(count) ]
+    ch_sample_assemblies = prepped_assemblies // channel: [ val(meta), assembly ]
+    versions = SAMPLESHEET_CHECK.out.versions // channel: [ versions.yml ]
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
