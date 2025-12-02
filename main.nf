@@ -1,19 +1,16 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    nf-core/corgeplus
+    MI-Bioinformatics/CorGe
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/nf-core/corgeplus
+    Github : https://github.com/MI-Bioinformatics/CorGe
 
-    Website: https://nf-co.re/corgeplus
-    Slack  : https://nfcore.slack.com/channels/corgeplus
 ----------------------------------------------------------------------------------------
 */
 
 nextflow.enable.dsl = 2
 
-include { CORGEPLUS }         from './workflows/corgeplus'
-include { CORGEPLUS_NPR }     from './workflows/corgeplus_npr'
+include { CORGEPLUS             } from './workflows/corgeplus'
 include { PREPARE_CGMLST_SCHEMA } from './workflows/prepare_cgmlst_schema'
 
 /*
@@ -31,30 +28,18 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 //
-// WORKFLOW: Run main nf-core/corgeplus analysis pipeline
+// WORKFLOW: Run main MI-Bioinformatics/CorGe analysis pipeline
 //
 workflow {
     if (params.mode == 'default') {
         CORGEPLUS()
-    } else if (params.mode == 'npr') {
-        CORGEPLUS_NPR()
     } else if (params.mode == 'schema') {
         PREPARE_CGMLST_SCHEMA()
     } else {
-        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'npr', 'schema'."
+        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'schema'."
     }
 }
 
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    RUN ALL WORKFLOWS
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-
-//
-// WORKFLOW: Execute a single named workflow for the pipeline
-// See: https://github.com/nf-core/rnaseq/issues/619
-//
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
