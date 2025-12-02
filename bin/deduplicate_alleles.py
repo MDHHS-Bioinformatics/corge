@@ -21,7 +21,7 @@ def main(argv=None):
     #read the dataframe
     df = pd.read_csv(args.alleles_table,sep='\t')
     # Deduplicate the DataFrame based on the 'FILE' column
-    deduplicated_df = df.drop_duplicates(subset='FILE', keep='first')
+    deduplicated_df = df.drop_duplicates(subset='FILE', keep='last')
     # Format species argument
     species = args.species.replace(' ', '_')
     print('made it to the end')
