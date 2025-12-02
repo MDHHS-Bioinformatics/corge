@@ -15,7 +15,7 @@ process MAKE_POODLE_MANIFEST_MASTER {
 
     output:
 
-    tuple val(meta), path("poodle_samplesheets/"), emit: poodle_samplesheets
+    tuple val(meta), path("poodle_samplesheets/"),  optional: true, emit: poodle_samplesheets
     path "versions.yml"           , emit: versions
 
     when:
@@ -38,7 +38,7 @@ process MAKE_POODLE_MANIFEST_MASTER {
     }
 
     """
-    python3 make_poodle_manifest.py \
+    make_poodle_manifest.py \
         --species $species \
         --outdir ${outdir_abs} \
         --thresholds ${thresholds} \
