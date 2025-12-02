@@ -6,7 +6,7 @@ include { CHECK_METADATA_MSA    } from '../../modules/local/check_metadata_msa.n
 //Function to get all the previous assembly files for each species
 def get_previous_assemblies(species ) {
     // Create the path to get the previous fasta files
-    def previous_assemblies = file("${params.previous_results}/${species}/assemblies/*.{fasta,fa,fas}")
+    def previous_assemblies = file("${params.outdir}/${species}/assemblies/*.{fasta,fa,fas,fna}")
     return previous_assemblies
 }
 
@@ -66,7 +66,7 @@ workflow PARSNP_ANALYSIS {
     ch_versions = ch_versions.mix(CHECK_METADATA_MSA.out.versions)}
     else {
         CLEAN_FASTA.out.cleaned_snps_alignment
-        .map { meta, _ -> 
+        .map { meta, _ ->
             def metadata = []
             [ meta, metadata ]
         }
@@ -75,9 +75,9 @@ workflow PARSNP_ANALYSIS {
     //
     //
     // Check if there are previous partitions to keep consistent nomenclature
-    // 
+    //
     CLEAN_FASTA.out.cleaned_snps_alignment
-        .map { meta, _ -> 
+        .map { meta, _ ->
             def prev = get_previous_partitions_tsv(meta.species)
             [ meta, prev ]
         }

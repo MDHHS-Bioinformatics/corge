@@ -4,7 +4,7 @@ include { ROOT_TREE             } from '../../modules/local/root_tree.nf'
 //Function to get all the previous assembly files for each species
 def get_previous_assemblies(species ) {
     // Create the path to get the previous fasta files
-    def previous_assemblies = file("${params.previous_results}/${species}/assemblies/*.{fasta,fa,fas,fna}")
+    def previous_assemblies = file("${params.outdir}/${species}/assemblies/*.{fasta,fa,fas,fna}")
     return previous_assemblies
 }
 

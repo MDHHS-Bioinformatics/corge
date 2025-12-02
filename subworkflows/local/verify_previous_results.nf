@@ -9,7 +9,7 @@ workflow VERIFY_PREVIOUS_RESULTS {
     total_counts_nocgmlst = Channel.empty()
 
     //Check the previous results
-    if (params.previous_results){
+    if (params.outdir){
         //count the number of fasta files for species with a cgmlst
         count_fasta_files_cgmlst(species_counts_cgmlst)
         .set{previous_cgmlst_counts}
@@ -43,7 +43,7 @@ def count_fasta_files_cgmlst(input_channel) {
     return input_channel.map { meta, path_to_cgmlst ->
         def species = meta.species
         def input_count = meta.count
-        def fasta_files = file("${params.previous_results}/${species}/assemblies/*.{fasta,fa,fas}")
+        def fasta_files = file("${params.outdir}/${species}/assemblies/*.{fasta,fa,fas,fna}")
         def count = fasta_files.size()  // Simply get the size - will be 0 if no files found
 
         return [[species:species, count:count + input_count], path_to_cgmlst]
@@ -54,7 +54,7 @@ def count_fasta_files_nocgmlst(input_channel) {
         def actualMeta = meta[0]  // Get the first (and only) element of the list
         def species = actualMeta.species
         def input_count = actualMeta.count
-        def fasta_files = file("${params.previous_results}/${species}/assemblies/*.{fasta,fa,fas}")
+        def fasta_files = file("${params.outdir}/${species}/assemblies/*.{fasta,fa,fas,fna}")
         def count = fasta_files.size()
 
         return [[species:species, count:count + input_count]]
