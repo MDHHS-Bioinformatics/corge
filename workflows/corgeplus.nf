@@ -9,13 +9,12 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowCorgeplus.initialise(params, log)
 
-// TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check input path parameters to see if they exist
 def checkPathParamList = [ params.input, params.multiqc_config]
 for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
 // Check mandatory parameters
-if (params.mode in ['default', 'npr']) {
+if (params.mode == 'default') {
     if (params.input) {
         ch_input = file(params.input)
     } else {
@@ -43,10 +42,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
-include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact.nf'
-include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact.nf'
-include { MAKE_POODLE_MANIFEST                   } from '../modules/local/make_poodle_manifest.nf'
-include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/make_poodle_manifest_master.nf'
+include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/post_processing/microreact.nf'
+include { MICROREACT as MICROREACT_SNP           } from '../modules/local/post_processing/microreact.nf'
+include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
+include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/post_processing/make_poodle_manifest_master.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -137,9 +136,12 @@ workflow CORGEPLUS {
     )
     ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
 
+    //
+    // MODULE: Make a Microreact file with distance trees and selected groups
+    //
     template_microreact = file(params.microreact_template)
 
-    //Create an empty channel to store all the speices that have cgmlst for microreact
+    // Using cgMLST results
     ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
         .join(CHEWBBACA_ANALYSIS.out.dist_tree)
         .map { meta, partitions_tsv, dist_tree ->
@@ -149,24 +151,18 @@ workflow CORGEPLUS {
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
-    //
-    // MICROREACT: Summary plot with distance trees and selected partitions
-    //
     MICROREACT_CGMLST(
         ch_cgmlst_microreact
     )
     ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
 
-    //First join the parsnp results
+    // Using Parsnp results
     ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
         .join(MASHTREE_CORGE.out.mashtree_tree)         
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
-    //
-    // MICROREACT: Summary plot with distance trees and selected partitions
-    //
     MICROREACT_SNP(
         ch_parsnp_microreact
     )
