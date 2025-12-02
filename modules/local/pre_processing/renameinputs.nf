@@ -3,11 +3,10 @@ process RENAME_INPUTS {
     label 'process_low'
 
     input:
-    tuple val(meta), path(reference)
+    tuple val(meta), path(assembly)
 
     output:
-    tuple val(meta), path("*.fna"), emit:renamed_files
-    //path "versions.yml" , emit: versions
+    tuple val(meta), path("${meta.id}.fna"), emit:renamed_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -18,14 +17,8 @@ process RENAME_INPUTS {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    mkdir -p renamed_files
-
-    #rename the fna file
-    newname="renamed_files/${prefix}.fna"
-    mv *.fna "\$newname"
-    mv renamed_files/*.fna .
-
-
+    # rename the assembly file
+    mv ${assembly} "${prefix}.fna"
 
     """
 }

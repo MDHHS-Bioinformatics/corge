@@ -21,7 +21,7 @@ process FETCH_CGMLST_SCHEMAS {
     def args = task.ext.args ?: ''
 
     """
-    python3 update_cgmlst_urls.py $schemas_info 'schemas_updated.csv'
+    update_cgmlst_urls.py $schemas_info 'schemas_updated.csv'
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
