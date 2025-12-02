@@ -26,20 +26,11 @@ class RowChecker:
             validated and transformed row. The order of rows is maintained.
     """
 
-    VALID_FASTQ_FORMATS = (
-        ".fq.gz",
-        ".fastq.gz",
-    )
-
     VALID_ASSEMBLY_FORMATS = (
-        ".fasta", ".fasta.gz",
-        ".fna", ".fna.gz",
-        ".fa", ".fa.gz"
-    )
-
-    VALID_GFF_FORMATS = (
-        ".gff",
-        ".gff3",
+        ".fasta", 
+        ".fna", 
+        ".fa",
+        ".fas"
     )
 
     def __init__(
@@ -47,7 +38,6 @@ class RowChecker:
         sample_col="sample",
         assembly_col="assembly",
         species_col="species",
-        #single_col="single_end",
         **kwargs,
     ):
         """
@@ -57,7 +47,6 @@ class RowChecker:
         self._sample_col = sample_col
         self._assembly_col = assembly_col
         self._species_col = species_col
-        #self._single_col = single_col
         self._seen = set()
         self.modified = []
 
@@ -90,35 +79,6 @@ class RowChecker:
         """Assert that the inputted species name is formatted correctly."""
         species = row.get(self._species_col, "")
         row[self._species_col] = species.replace(' ', '_')
-
-    def _validate_fastq_format(self, filename):
-        """Assert that a given filename has one of the expected FASTQ extensions."""
-        if not any(filename.endswith(ext) for ext in self.VALID_FASTQ_FORMATS):
-            raise AssertionError(
-                f"The FASTQ file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_FASTQ_FORMATS)}"
-            )
-
-    def _validate_assembly_format(self, filename):
-        """Assert that a given filename has one of the expected assembly extensions."""
-        if not any(filename.endswith(ext) for ext in self.VALID_ASSEMBLY_FORMATS):
-            raise AssertionError(
-                f"The assembly file has an unrecognized extension: {filename}\n"
-                f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"
-            )
-
-    def validate_unique_samples(self):
-        """
-        Assert that the combination of sample name and FASTQ filename is unique.
-        Also append _T{n} to sample names for multiple runs.
-        """
-        if len(self._seen) != len(self.modified):
-            raise AssertionError("The pair of sample name and FASTQ must be unique.")
-        seen = Counter()
-        for row in self.modified:
-            sample = row[self._sample_col]
-            seen[sample] += 1
-            row[self._sample_col] = f"{sample}_T{seen[sample]}"
 
 
 def read_head(handle, num_lines=10):
@@ -158,10 +118,7 @@ def sniff_format(handle):
 
 def check_samplesheet(file_in, file_out):
     """
-    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
-
-    Validate the general shape of the table, expected columns, and each row. Also add
-    an additional column which records whether one or two FASTQ reads were found.
+    Validate the general shape of the table, expected columns, and each row. 
 
     Args:
         file_in (pathlib.Path): The given tabular samplesheet. The format can be either
@@ -170,28 +127,18 @@ def check_samplesheet(file_in, file_out):
             be created; always in CSV format.
 
     Example:
-        This function checks that the samplesheet follows the following structure,
-        see also the `viral recon samplesheet`_::
+        This function checks that the samplesheet follows the following structure:
 
-            sample,fastq_1,fastq_2
-            SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-            SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-            SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
-
-    .. _viral recon samplesheet:
-        https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
+            sample,assembly,species
+            ISO1,/path/iso1.fasta,Escherichia_coli
+            ISO2,/path/iso2.fasta,Escherichia coli
+            ISO3/path/iso3.fasta,Acinetobacter baumannii
+            ISO4,/path/iso4.fasta,Acinetobacter baumannii
 
     """
-    #required_columns = {"sample", "fastq_1", "fastq_2"}
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
+
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
-        # Validate the existence of the expected header columns.
-        # if not required_columns.issubset(reader.fieldnames):
-        #     req_cols = ", ".join(required_columns)
-        #     logger.critical(f"The sample sheet **must** contain these column headers: {req_cols}.")
-        #     sys.exit(1)
-        # Validate each row.
         checker = RowChecker()
         for i, row in enumerate(reader):
             try:
@@ -199,10 +146,7 @@ def check_samplesheet(file_in, file_out):
             except AssertionError as error:
                 logger.critical(f"{str(error)} On line {i + 2}.")
                 sys.exit(1)
-        #checker.validate_unique_samples()
     header = list(reader.fieldnames)
-    #header.insert(1, "single_end")
-    # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
     with file_out.open(mode="w", newline="") as out_handle:
         writer = csv.DictWriter(out_handle, header, delimiter=",")
         writer.writeheader()
