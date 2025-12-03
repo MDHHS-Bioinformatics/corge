@@ -108,7 +108,7 @@ workflow PARSNP_ANALYSIS {
         ch_versions = ch_versions.mix(CHECK_METADATA_MSA.out.versions)}
     else {
         CLEAN_FASTA.out.cleaned_snps_alignment
-        .map { meta, _ -> 
+        .map { meta, _ ->
             def metadata = []
             tuple( meta, metadata)
         }

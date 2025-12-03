@@ -14,7 +14,7 @@ process MAKE_POODLE_MANIFEST {
 
     output:
 
-    tuple val(meta), path("poodle_samplesheets/"), emit: poodle_samplesheets
+    tuple val(meta), path("poodle_samplesheets/"), optional: true, emit: poodle_samplesheets
     path "versions.yml"           , emit: versions
 
     when:
