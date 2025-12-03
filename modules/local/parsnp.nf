@@ -10,8 +10,8 @@ process PARSNP {
     tuple val(meta), path("assemblies/*")
 
     output:
-    tuple val(meta), path("results/") , emit: results
-    tuple val(meta), path("results/parsnp.snps.mblocks"), emit: snps_alingment
+    tuple val(meta), path("${meta.species}_parsnp*")            , emit: results
+    tuple val(meta), path("${meta.species}_parsnp.snps.mblocks"), emit: snps_alignment
     path "versions.yml", emit: versions
 
     when:
@@ -36,10 +36,16 @@ process PARSNP {
         --force-overwrite \
         --threads $task.cpus \
         $args \
-        --output-dir results > parsnp.log 2>&1
+        --output-dir results
+    
+    # Moving relevant log to results
+    mv results/log/parsnpAligner.log results/
 
-    #Convert ginger file to multi-fasta
-    harvesttools -i results/parsnp.ggr -S results/snps_alingment.fasta >> parsnp.log 2>&1
+    # Move and rename with species prefix
+    for f in results/*; do
+        base=\$(basename "\$f")
+        mv "\$f" "${species}_\${base}"
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

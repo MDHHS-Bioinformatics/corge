@@ -3,7 +3,8 @@ include { CHEWBBACA_ALLELECALL      } from '../../modules/local/chewbbaca/allele
 include { CHEWBBACA_JOINPROFILES    } from '../../modules/local/chewbbaca/joinprofiles.nf'
 include { CHEWBBACA_EXTRACTCGMLST   } from '../../modules/local/chewbbaca/extractcgmlst.nf'
 include { DEDUPLICATE_ALLELES       } from '../../modules/local/deduplicate_alleles.nf'
-include { REPORTREE_CGMLST          } from '../../modules/local/reportree/cgmlst.nf'
+include { CHECK_METADATA            } from '../../modules/local/check_metadata.nf'
+include { REPORTREE_CGMLST          } from '../../modules/local/reportree/reportree_cgmlst.nf'
 
 //Function for creating the path to the schema for a species
 def include_schema(species) {
@@ -14,15 +15,21 @@ def include_schema(species) {
 //Function to check if the previous allele table exists
 def check_previous_alleles_tsv(species) {
     // Create the path to where the previous alleles tsv are stored
-    def previous_alleles_path = file("${params.previous_results}/${species}/cgMLST/masked_results_alleles.tsv", checkIfExists: false)
+    def previous_alleles_path = file("${params.outdir}/${species}/cgMLST/masked/${species}_masked_results_alleles.tsv", checkIfExists: false)
     return previous_alleles_path.exists()
 }
 //Function to return the previous allele table (assuming it exists)
 def get_previous_alleles_tsv(species ) {
     // Create the path to where the previous alleles tsv are stored
-    def previous_alleles_path = file("${params.previous_results}/${species}/cgMLST/masked_results_alleles.tsv", checkIfExists: false)
+    def previous_alleles_path = file("${params.outdir}/${species}/cgMLST/masked/${species}_masked_results_alleles.tsv", checkIfExists: false)
     return previous_alleles_path
 }
+def get_previous_partitions_tsv(species) {
+    def p = "${params.outdir}/${species}/ReporTree/${species}_partitions.tsv"
+    return new File(p).exists() ? file(p) : []
+}
+
+
 workflow CHEWBBACA_ANALYSIS {
 
     take:
@@ -100,23 +107,46 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_EXTRACTCGMLST(
         DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
     )
-
     //
-    // MODULE: Run reportree on multiple samples for a species with a cgMLST
+    // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
+    if(params.metadata) {
+        ch_metadata = CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
+    ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
+    else {
+        CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        .map { meta, _ -> 
+            def metadata = []
+            [ meta, metadata ]
+        }
+        .set { ch_metadata }
+    }
+    //
+    //
+    // Check if there are previous partitions to keep consistent nomenclature
+    // 
+    CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        .map { meta, _ -> 
+            def prev = get_previous_partitions_tsv(meta.species)
+            [ meta, prev ]
+        }
+        .set { ch_previous_partitions }
+    //
+    // MODULE: Run reportree depending on metadata presence
     //
     REPORTREE_CGMLST(
-        CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
-    )
+            CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
+            ch_metadata.metadata,
+            ch_previous_partitions
+        )
+
+    // mix versions from the *invoked* process
     ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
 
-
     emit:
-    dist_hamming        = REPORTREE_CGMLST.out.dist_hamming //channel: [val (meta), results ]
-    partitions          = REPORTREE_CGMLST.out.partitions   //channel" [val (meta), partitions_summary]
-    dist_tree           = REPORTREE_CGMLST.out.single_HC    //channel: [val(meta), single_hc]
-    cluster_composition = REPORTREE_CGMLST.out.cluster_composition //channel: [val(meta), cluster_composition]
-
-
-    versions = ch_versions                     // channel: [ versions.yml ]
+    dist_hamming        = REPORTREE_CGMLST.out.dist_hamming          //channel: [val (meta), dist_hamming ]
+    partitions          = REPORTREE_CGMLST.out.partitions            //channel" [val (meta), partitions_summary]
+    dist_tree           = REPORTREE_CGMLST.out.single_HC             //channel: [val(meta), single_hc]
+    cluster_composition = REPORTREE_CGMLST.out.cluster_composition   //channel: [val(meta), cluster_composition]
+    versions            = ch_versions                         //channel: [ versions.yml ]
 }
 

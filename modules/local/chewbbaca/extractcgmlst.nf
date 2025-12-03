@@ -11,9 +11,9 @@ process CHEWBBACA_EXTRACTCGMLST {
     tuple val(meta), path(alleles)
 
     output:
-    tuple val(meta), path("masked_results_alleles.tsv"), emit: masked_alleles
-    tuple val(meta), path("masked/"),emit: masked_results
-    path "versions.yml"           , emit: versions
+    tuple val(meta), path("masked/${meta.species}_masked_results_alleles.tsv"), emit: masked_alleles
+    tuple val(meta), path("masked/")                          , emit: masked_results
+    path "versions.yml"                                       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -32,7 +32,12 @@ process CHEWBBACA_EXTRACTCGMLST {
         --threshold 0
 
     #get the threshold 0 .tsv file and renamed for our purpose
-    mv masked/cgMLST0.tsv masked_results_alleles.tsv
+    mv masked/cgMLST0.tsv masked/masked_results_alleles.tsv
+
+    # Rename results
+    for f in masked/*; do
+        mv "\$f" "masked/${species}_\$(basename "\$f")"
+    done
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

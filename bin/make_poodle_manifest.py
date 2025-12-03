@@ -247,6 +247,10 @@ def process_threshold(
 
     df = pd.read_csv(group_path)
 
+    # Filter: keep only groups with length > 1
+    if "group_length" in df.columns:
+        df = df[df["group_length"] > 1]
+
     # Map group_name -> (species_name, list of sample_ids)
     groups = {}
     for _, row in df.iterrows():

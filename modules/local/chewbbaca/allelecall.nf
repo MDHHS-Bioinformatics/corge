@@ -11,7 +11,7 @@ process CHEWBBACA_ALLELECALL {
 
     output:
     tuple val(meta), path("new/*") , emit: results
-    tuple val(meta), path("new/new_results_alleles.tsv"), emit: results_alleles
+    tuple val(meta), path("new/${meta.species}_new_results_alleles.tsv"), emit: results_alleles
     path "versions.yml"           , emit: versions
 
     when:
@@ -34,9 +34,11 @@ process CHEWBBACA_ALLELECALL {
         --cpu $task.cpus
 
     # Rename the prefix of the results files
+    rm -rf dummy_dir/
+    
     for file in new/*; do
         if [ -f "\$file" ]; then
-            mv -n "\$file" "new/new_\$(basename "\$file")" || echo "Failed to move \$file"
+            mv -n "\$file" "new/${species}_new_\$(basename "\$file")" || echo "Failed to move \$file"
         fi
     done
     cat <<-END_VERSIONS > versions.yml

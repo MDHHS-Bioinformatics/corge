@@ -1,7 +1,5 @@
-
-
-process BACTERIAL_LINKAGE {
-    tag  "$meta.species"
+process CHECK_METADATA_MSA {
+    tag "$meta.species"
     label 'process_single'
 
     conda "conda-forge::pandas=2.2.3"
@@ -10,26 +8,22 @@ process BACTERIAL_LINKAGE {
         'https://quay.io/repository/biocontainers/pandas/manifest/sha256:509adc4983db6c608fa516bea822c29bf34d5b3f039d331fc705fc27492a0987' }"
 
     input:
-    tuple val(meta), path(dist_hamming)
+    tuple val(meta), path(msa)
+    path metadata
 
     output:
-    tuple val(meta), path("*_potential_linkages.csv"), emit: potential_linkages
-    path "versions.yml"           , emit: versions
-
-    when:
-    task.ext.when == null || task.ext.when
+    tuple val(meta), path("${meta.species}_metadata.tsv") , emit: metadata
+    path "versions.yml", emit: versions
 
     script:
-    def args = task.ext.args ?: ''
-    species = task.ext.species ?: "${meta.species}"
+    species = meta.species
 
     """
-    echo $species
-    bacterial_linkage_corge.py \
-        --species $species \
-        --dist-hamming $dist_hamming \
-        --output ${species}_potential_linkages.csv
-
+    check_metadata_msa.py \
+        --metadata ${metadata} \
+        --msa ${msa} \
+        --species ${species} 
+            
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
         python: \$(python --version | sed 's/Python //g')
