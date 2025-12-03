@@ -131,13 +131,14 @@ workflow CHEWBBACA_ANALYSIS {
     // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
     //
     if(params.metadata) {
-        ch_metadata = CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
-    ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
+        CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
+        ch_metadata = CHECK_METADATA.out.metadata
+        ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
     else {
         CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
         .map { meta, _ -> 
             def metadata = []
-            [ meta, metadata ]
+            tuple( meta, metadata)
         }
         .set { ch_metadata }
     }
@@ -156,7 +157,7 @@ workflow CHEWBBACA_ANALYSIS {
     //
     REPORTREE_CGMLST(
             CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
-            ch_metadata.metadata,
+            ch_metadata,
             ch_previous_partitions
         )
     ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
