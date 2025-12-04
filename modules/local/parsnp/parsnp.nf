@@ -49,7 +49,7 @@ process PARSNP {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        parsnp: \$(parsnp -V 2>&1 | tail -n 1)
+        parsnp: \$(parsnp -V 2>&1 | tail -n 1 | sed 's/^parsnp //')
     END_VERSIONS
     """
 }
