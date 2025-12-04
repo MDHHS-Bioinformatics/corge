@@ -147,7 +147,7 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 >[!Note]
->This command clones (downloads) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`) 
+>This command clones (downloads) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details at [Usage](docs/usage.md)
 
 ---
 
@@ -404,7 +404,7 @@ Each folder includes:
 * **PoODLE** manifests
 
 
-Detailed outputs can be found in the [`corge_outputs.md`](docs/corge_outputs.md) file.
+Details about outputs can be found in [`outputs.md`](docs/outputs.md) and the outputs tree in [`corge_outputs.md`](docs/outputs.md).
 
 ---
 
