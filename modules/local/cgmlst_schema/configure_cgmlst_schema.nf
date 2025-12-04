@@ -18,7 +18,6 @@ process CONFIGURE_CGMLST_SCHEMA {
 
     script:
     def args = task.ext.args ?: ''
-    //def schema_path = file(file(params.schema_dir).resolve(species))
 
     """
     chewBBACA.py PrepExternalSchema -g $alleles -o ${name}_cgMLST --ptf $trn --cpu $task.cpus

@@ -20,7 +20,6 @@ process CHEWBBACA_ALLELECALL {
     script:
     def args = task.ext.args ?: ''
     species = task.ext.species ?: "${meta.species}"
-    //def schema_path = file(file(params.schema_dir).resolve(species))
 
     """
     #first move all the new assmples to a directory
