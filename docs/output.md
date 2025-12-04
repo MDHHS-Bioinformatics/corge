@@ -67,7 +67,7 @@ Each partition corresponds to a hierarchical clustering level and includes the m
 
 To visualize, upload the `.microreact` file to [`Microreact/upload`](https://microreact.org/upload)
 
-### ![Microreact example](docs/images/corge_microreact_example.png)
+### ![Microreact example](images/corge_microreact_example.png)
 
 ### PoODLE samplesheets
 
