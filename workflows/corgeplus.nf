@@ -92,7 +92,7 @@ workflow CORGEPLUS {
     ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
 
     //
-    // SUBWORKFLOW: Read in csv containing cgmlst paths per species and validate they they exist
+    // SUBWORKFLOW: Read in csv containing cgmlst paths per species and validate they exist
     //
     INPUT_CHECK_CGMLST(
         file(params.cgmlst_schemas),
