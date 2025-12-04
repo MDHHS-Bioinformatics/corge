@@ -97,7 +97,7 @@ Include:
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
 ISO2,/path/iso2.fasta,Escherichia coli
-ISO3/path/iso3.fasta,Acinetobacter baumannii
+ISO3,/path/iso3.fasta,Acinetobacter baumannii
 ISO4,/path/iso4.fasta,Acinetobacter baumannii
 ```
 
