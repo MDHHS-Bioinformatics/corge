@@ -1,5 +1,11 @@
 # cgMLST schema provided
      📁 corge
+      ├── 📁 pipeline_info
+      │    ├── 📄 execution_report_<date-hour>.html (one per batch)
+      │    ├── 📄 execution_timeline_<date-hour>.html (one per batch)
+      │    ├── 📄 execution_trace_<date-hour>.txt (one per batch)
+      │    ├── 📄 software_versions.yml
+      │    └── 📄 samplesheet.valid.csv
       └── 📁 <Species>
             ├── 📁 assemblies
             │    └── 📄 <sample>.fasta (one Fasta per sample)
@@ -29,10 +35,12 @@
             │   ├── 📄 <Species>_mash.dist
             │   ├── 📄 <Species>_mash.dnd
             │   └── 📄 <Species>_mash_rooted.tre
+            ├── 📁 metadata
+            │   └── 📄 <Species>_metadata.tsv (curated metadata if provided)
             ├── 📁 microreact
             │   └── 📄 <Species>_corge.microreact
             ├── 📁 poodle_samplesheets
-            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv
+            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv (one per threshold)
             └── 📁 ReporTree
                  ├── 📄 <Species>_clusterComposition.tsv
                  ├── 📄 <Species>_dist_hamming.tsv
@@ -45,6 +53,12 @@
 
 # No cgMLST schema provided (Parsnp)
      📁 corge
+      ├── 📁 pipeline_info
+      │    ├── 📄 execution_report_<date-hour>.html (one per batch)
+      │    ├── 📄 execution_timeline_<date-hour>.html (one per batch)
+      │    ├── 📄 execution_trace_<date-hour>.txt (one per batch)
+      │    ├── 📄 software_versions.yml
+      │    └── 📄 samplesheet.valid.csv
       └── 📁 <Species>
             ├── 📁 assemblies
             │    └── 📄 <sample>.fasta (one Fasta per sample)
@@ -61,6 +75,8 @@
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
             │   └── 📄 <Species>-groups_HC<threshold>.csv (one per threshold)
+            ├── 📁 metadata
+            │   └── 📄 <Species>_metadata.tsv (curated metadata if provided)
             ├── 📁 mash
             │   ├── 📄 <Species>_mash.dist
             │   ├── 📄 <Species>_mash.dnd
@@ -68,7 +84,7 @@
             ├── 📁 microreact
             │   └── 📄 <Species>_corge.microreact
             ├── 📁 poodle_samplesheets
-            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv
+            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv (one per threshold)
             └── 📁 ReporTree
                  ├── 📄 <Species>_clusterComposition.tsv
                  ├── 📄 <Species>_dist_hamming.tsv
