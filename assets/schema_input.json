@@ -1,7 +1,7 @@
 {
     "$schema": "http://json-schema.org/draft-07/schema",
-    "$id": "https://raw.githubusercontent.com/nf-core/corgeplus/master/assets/schema_input.json",
-    "title": "nf-core/corgeplus pipeline - params.input schema",
+    "$id": "https://raw.githubusercontent.com/MI-Bioinformatics/CorGe/master/assets/schema_input.json",
+    "title": "MI-Bioinformatics/CorGe pipeline - params.input schema",
     "description": "Schema for the file provided with params.input",
     "type": "array",
     "items": {
@@ -12,25 +12,17 @@
                 "pattern": "^\\S+$",
                 "errorMessage": "Sample name must be provided and cannot contain spaces"
             },
-            "fastq_1": {
+            "assembly": {
                 "type": "string",
-                "pattern": "^\\S+\\.f(ast)?q\\.gz$",
-                "errorMessage": "FastQ file for reads 1 must be provided, cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'"
-            },
-            "fastq_2": {
-                "errorMessage": "FastQ file for reads 2 cannot contain spaces and must have extension '.fq.gz' or '.fastq.gz'",
-                "anyOf": [
-                    {
-                        "type": "string",
-                        "pattern": "^\\S+\\.f(ast)?q\\.gz$"
-                    },
-                    {
-                        "type": "string",
-                        "maxLength": 0
-                    }
-                ]
+                "pattern": "^\\S+\\.(fa|fna|fas|fasta)$",
+                "errorMessage": "Assembly file must be provided, cannot contain spaces and must have extension '.fa', 'fna', 'fas' or '.fasta'"
+            },    
+            "species": {
+                "type": "string",
+                "pattern": "^[A-Za-z0-9][A-Za-z0-9\\s\\-_]*$",
+                "errorMessage": "Species name must be provided and may contain letters, numbers, spaces, hyphens, or underscores"
             }
         },
-        "required": ["sample", "fastq_1"]
+        "required": ["sample", "assembly", "species"]
     }
 }

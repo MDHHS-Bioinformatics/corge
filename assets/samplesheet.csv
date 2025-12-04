@@ -1,3 +1,5 @@
-sample,fastq_1,fastq_2
-SAMPLE_PAIRED_END,/path/to/fastq/files/AEG588A1_S1_L002_R1_001.fastq.gz,/path/to/fastq/files/AEG588A1_S1_L002_R2_001.fastq.gz
-SAMPLE_SINGLE_END,/path/to/fastq/files/AEG588A4_S4_L003_R1_001.fastq.gz,
+sample,assembly,species
+ISO1,/path/iso1.fasta,Escherichia_coli
+ISO2,/path/iso2.fasta,Escherichia coli
+ISO3,/path/iso3.fasta,Acinetobacter baumannii
+ISO4,/path/iso4.fasta,Acinetobacter baumannii
