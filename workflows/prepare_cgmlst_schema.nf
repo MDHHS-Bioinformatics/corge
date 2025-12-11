@@ -9,7 +9,6 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowCorgeplus.initialise(params, log)
 
-// TODO nf-core: Add all file path parameters for the pipeline to the list below
 // Check schema path parameters to see if they exist
 // Define schemaList/outdir_abs at script level (before the if block)
 def schemaList = []
@@ -66,11 +65,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { FETCH_CGMLST_SCHEMAS } from '../modules/local/fetch_cgmlst_schemas'
-include { DOWNLOAD_CGMLST_SCHEMA } from '../modules/local/download_cgmlst_schema'
-include { UNZIP_CGMLST_SCHEMA } from '../modules/local/unzip_cgmlst_schema'
-include { CONFIGURE_CGMLST_SCHEMA } from '../modules/local/configure_cgmlst_schema'
-include { UPDATE_CGMLST_FILE } from '../modules/local/update_cgmlst_file'
+include { FETCH_CGMLST_SCHEMAS      } from '../modules/local/cgmlst_schema/fetch_cgmlst_schemas'
+include { DOWNLOAD_CGMLST_SCHEMA    } from '../modules/local/cgmlst_schema/download_cgmlst_schema'
+include { UNZIP_CGMLST_SCHEMA       } from '../modules/local/cgmlst_schema/unzip_cgmlst_schema'
+include { CONFIGURE_CGMLST_SCHEMA   } from '../modules/local/cgmlst_schema/configure_cgmlst_schema'
+include { UPDATE_CGMLST_FILE        } from '../modules/local/cgmlst_schema/update_cgmlst_file'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,7 +96,9 @@ def multiqc_report = []
 workflow PREPARE_CGMLST_SCHEMA {
 
     ch_versions = Channel.empty()
+    //
     // MODULE: Get the latest schema urls
+    //
     FETCH_CGMLST_SCHEMAS(params.schema_info)
     // Broadcast the list to use in filtering
     Channel
@@ -110,41 +111,50 @@ workflow PREPARE_CGMLST_SCHEMA {
         .map { row -> tuple(row.id, row) }
         .join(schema_filter_set)
         .set { selected_schema_data }
-    //Format the channel for downstream
+    //
+    // Format the channel for downstream
+    //
     selected_schema_data
         .map { id, row ->
             tuple(row.id, row.schema_name, row.url_alleles, "${params.trn_files}/${row.trn}")
         }
         .set { schema_channel }
-    schema_channel.view()
-
+    // schema_channel.view()
+    //
     // MODULE: Download the cgMLST schemas
+    //
     DOWNLOAD_CGMLST_SCHEMA(
         schema_channel
     )
-
+    //
+    // MODULE: Unzip cgMLST schema
+    //
     UNZIP_CGMLST_SCHEMA(
         DOWNLOAD_CGMLST_SCHEMA.out.alleles_zip
     )
-
+    //
     // MODULE: Configure the cgMLST schemas in chewbbaca format
+    //
     CONFIGURE_CGMLST_SCHEMA(
         UNZIP_CGMLST_SCHEMA.out.alleles
     )
-
+    //
     // Wait for all schema dirs to finish
+    //
     CONFIGURE_CGMLST_SCHEMA.out.schema
         .collect()
         .map { dirs -> true }  // just a signal
         .set { ready_ch }
-
+    //
     // Combine static path and species file with completion signal
+    //
     Channel
         .of(tuple((outdir_abs), file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
-
-    // Update cgMLST info file once all schemas were downloaded and configured as ChewBBACA format
+    //
+    // MODULE: Update cgMLST info file once all schemas were downloaded and configured as ChewBBACA format
+    //
     UPDATE_CGMLST_FILE(
         update_ch
     )

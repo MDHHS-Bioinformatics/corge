@@ -34,8 +34,9 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 3. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree) (method = `single`).
 4. Create potential linkage tables per species.
 5. Select groups per sample using user-defined thresholds.
-6. Run [`MashTree`](https://github.com/lskatz/mashtree).
-7. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees based on core genome and Mash distances.
+6. Generate [`PoODLE`](https://github.com/MI-Bioinformatics/poodle) manifests.
+7. Run [`MashTree`](https://github.com/lskatz/mashtree).
+8. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees based on core genome and Mash distances.
 
 ### ![CorGe workflow](docs/images/corge_workflow.png)
 
@@ -96,7 +97,7 @@ Include:
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
 ISO2,/path/iso2.fasta,Escherichia coli
-ISO3/path/iso3.fasta,Acinetobacter baumannii
+ISO3,/path/iso3.fasta,Acinetobacter baumannii
 ISO4,/path/iso4.fasta,Acinetobacter baumannii
 ```
 
@@ -125,6 +126,29 @@ nextflow run MI-Bioinformatics/CorGe \
   -profile singularity
 ```
 
+### Expert level
+
+```bash
+nextflow run MI-Bioinformatics/CorGe \
+  --input manifest.csv \
+  --cgmlst_schemas cgmlst_schemas.csv \
+  --outdir /path/to/corge \
+  --thresholds 5,10,20,30,150 \
+  --metadata full_lims_data.csv \
+  --columns_summary_report st,specimen_source,specimen_type,patient_county,submitter_name,date,first_seq_date,last_seq_date,timespan_days \
+  --metadata2report st \
+  --count_matrix st,specimen_source \
+  --phoenix_path /path/to/phx_output \
+  --max_memory 160.GB \
+  --max_cpus 24 \
+  --max_time 8.h \
+  -profile singularity
+
+```
+
+>[!Note]
+>This command clones (downloads) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+
 ---
 
 ## Parameters
@@ -140,7 +164,6 @@ nextflow run MI-Bioinformatics/CorGe \
 | `--mode`           |     ✓    | `default`      | `default` or `schema` for **schema-download workflow**.                                                          |
 | `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                                    |
 
----
 
 ### ⚙️ **Execution Configuration**
 
@@ -154,7 +177,6 @@ nextflow run MI-Bioinformatics/CorGe \
 
 More NextFlow configuration options [`here`](https://www.nextflow.io/docs/latest/reference/config.html).
 
----
 
 ### **📦 Data Source Options (for PoODLE Manifests)**
 [`PoODLE`](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
@@ -166,7 +188,6 @@ These options allow CorGe+ to automatically fill PoODLE manifests with read and 
 | `--phoenix_path`  |     –    | –       | Absolute path to a PHoeNIx results directory. CorGe+ will infer read and annotation paths based on sample IDs. Use if your data was processed with PHoeNIx.                                         |
 | `--bactopia_path` |     –    | –       | Absolute path to a Bactopia results directory. CorGe+ will infer read and annotation paths based on sample IDs. Use if your data was processed with Bactopia.                                        |
 
----
 
 ### 🌳 **ReporTree Options**
 ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
@@ -192,7 +213,7 @@ CorGe+ was created to make **genomic epidemiology, routine surveillance, and out
 * 🧬 **Group genomes by allelic or SNP distance** using cgMLST or core-genome alignment.
 * 🔗 **Identify potential linkages** based on allelic distances (cgMLST) or SNP distances (Parsnp).
 * 📤 **Export clean, shareable outputs** (CSV tables + Microreact visualizations).
-* 🧩 **Feed selected genomic context groups** into downstream pipelines like [`PoODLE`](#-poodle-samplesheets) for high-quality SNP and pangenome analyses.
+* 🧩 **Feed selected genomic context groups** into the downstream pipeline [`PoODLE`](#-poodle-samplesheets) for high-quality SNP and pangenome analyses.
 
 When the first question is *“Are these isolates related?”*, CorGe+ gives you a fast answer.
 
@@ -315,7 +336,7 @@ sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
 
 The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
-For each cluster, CorGe+ selects a reference genome based on the best assembly quality (fewest contigs, longest length, and alphabetical tie-break).
+For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
 
 
 ---
@@ -324,20 +345,20 @@ For each cluster, CorGe+ selects a reference genome based on the best assembly q
 
 CorGe+ generates a `.microreact` file that brings together **two complementary genetic perspectives**:
 
-* **Mashtree** — produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes, making it sensitive to horizontal gene transfer.
+* **Mashtree** — produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes.
 * **Core-genome distance tree** — prepared by ReporTree with the MSTreeV2 method, it's useful for visualizing genetic relatedness among isolates.
 
-By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which isolates to include in downstream high-resolution analyses.
+By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which group threshold to use in downstream high-resolution analyses.
 
 To aid interpretation, Microreact also displays **heatmaps per threshold**, using the ReporTree **partition nomenclature**.
 Each partition corresponds to a hierarchical clustering level and includes the method, numeric threshold, and distance unit. For example, threshold **15** corresponds to the partition `single-15x1.0`.
 
-To visualize, upload the `.microreact` file to [`Microreact`](https://microreact.org/upload)
+To visualize, upload the `.microreact` file to [`Microreact/upload`](https://microreact.org/upload)
 
 ### ![Microreact example](docs/images/corge_microreact_example.png)
 
 > [!TIP]  
-> You can also explore groups interactively by uploading the ReporTree files `.nwk` and `metadata_w_partitions.tsv`/`partitions.tsv` to [`GrapeTree`](https://github.com/achtman-lab/GrapeTree), [`SPREAD`](https://github.com/genpat-it/spread) or [`Auspice`](https://auspice.us/). These tools run entirely in your browser for quick and private visualization.
+> You can also explore groups interactively by uploading the ReporTree files `.nwk` and `metadata_w_partitions.tsv` or `partitions.tsv` to [`GrapeTree`](https://github.com/achtman-lab/GrapeTree), [`SPREAD`](https://github.com/genpat-it/spread) or [`Auspice`](https://auspice.us/). These tools run entirely in your browser for quick and private visualization.
 
 ---
 
@@ -361,14 +382,11 @@ To visualize, upload the `.microreact` file to [`Microreact`](https://microreact
 
 * **No clusters at a threshold**: Increase the value in `--thresholds`.
 
-* **Very small Parsnp alignment**:  Add more samples (≥5) or verify correct species labels.
-
 * **Different group IDs across runs**: Expected when using **Parsnp**, because reference choice and sample composition affect cluster boundaries. For **stable and reproducible** group IDs, prefer cgMLST.
 
-* **Missing schema for a species**
-  → Use `--mode schema` to download schemas and provide the path with `--cgmlst_schemas`.
-  → If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
-  → Rename or remove the old species subdirectory in your `outdir` to prevent conflicts when the pipeline checks for prior results.
+* **Using a cgMLST schema for a species after using Parsnp**
+  If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
+  Rename or remove the old species subdirectory that was analyzed with Parsnp in your `outdir` to prevent conflicts when the pipeline checks for prior results.
 
 ---
 
@@ -383,8 +401,10 @@ Each folder includes:
 * **MashTree** files
 * **Microreact** project file (`*.microreact`)
 * **ReporTree** distance and cluster files
+* **PoODLE** manifests
 
-Detailed outputs can be found in the [`corge_outputs.md`](corge_outputs.md) file.
+
+Details about outputs can be found in [`output.md`](docs/output.md) and the outputs tree in [`corge_outputs.md`](docs/corge_outputs.md).
 
 ---
 

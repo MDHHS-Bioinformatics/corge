@@ -1,60 +1,122 @@
-# nf-core/corgeplus: Output
+# MI-Bioinformatics/CorGe: Output
 
 ## Introduction
 
-This document describes the output produced by the pipeline. Most of the plots are taken from the MultiQC report, which summarises results at the end of the pipeline.
+This document describes the output produced by the pipeline. 
 
-The directories listed below will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
-
-<!-- TODO nf-core: Write this documentation describing your workflow's output -->
+The directories listed in [`corge_outputs.md`](../docs/corge_outputs.md) will be created in the results directory after the pipeline has finished. All paths are relative to the top-level results directory.
 
 ## Pipeline overview
 
 The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes data using the following steps:
 
-- [FastQC](#fastqc) - Raw read QC
-- [MultiQC](#multiqc) - Aggregate report describing results and QC from the whole pipeline
+- [cgMLST](#cgmlst) - ChewBBACA results for species with cgMLST schema
+- [Parsnp](#parsnp) - Parsnp results for species without cgMLST schema
+- [ReporTree](#reporTree) - ReporTree results with clustering and metadata information
+- [MashTree](#mashTree) - MashTree results
+- [Metadata](#metadata) - Metadata information for the species
+- [Microreact](#microreact) - Microreact file
+- [Genomic context groups](#genomic-context-groups) - Genomic context groups selected at the given thresholds
+- [Linkage analysis](#linkage-analysis) - File with per-sample information about strong, intermediate and lineage level thresholds
+- [PoODLE samplesheets](#poodle-samplesheets) - PoODLE manifests for downstream analysis
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 
-### FastQC
+### cgMLST
+Detailed output information for each sudirectory are shown below:
+- `new/`: Only cgMLST results for the last batch. More details: [AlleleCall](https://chewbbaca.readthedocs.io/en/latest/user/modules/AlleleCall.html)
+- `joined/`: Joined results from new and previous results. More details: [JoinProfile](https://chewbbaca.readthedocs.io/en/latest/user/modules/JoinProfiles.html)
+- `masked/`: Masked invalid and inferred loci alleles, used as input for ReporTree. More details: [ExtractCgMLST](https://chewbbaca.readthedocs.io/en/latest/user/modules/ExtractCgMLST.html)
 
-<details markdown="1">
-<summary>Output files</summary>
+### Parsnp
+For species **without** a cgMLST schema, CorGe+ uses **Parsnp** to generate core-genome alignments and SNP-based comparisons.
 
-- `fastqc/`
-  - `*_fastqc.html`: FastQC report containing quality metrics.
-  - `*_fastqc.zip`: Zip archive containing the FastQC report, tab-delimited data file and plot images.
+| File | Description |
+|------|-------------|
+| `<Species>_parsnp.ggr` | **Genome Graph Representation** — a binary file used internally by Parsnp to represent the alignment graph. |
+| `<Species>_parsnp.maf` | **Multiple Alignment Format (MAF)** — contains the core-genome alignment across all input genomes. |
+| `<Species>_parsnp.rec` | **Recombination Regions** — lists regions identified as recombinant and excluded from SNP analysis (if `--recomb-filter` is used). |
+| `<Species>_parsnp.snps.mblocks` | **SNP Blocks** — lists SNPs grouped into blocks, useful for downstream phylogenetic analysis. |
+| `<Species>_parsnp.xmfa` | **Extended Multi-FASTA Alignment (XMFA)** — alignment of core-genome regions in XMFA format, compatible with tools like Mauve. |
+| `<Species>_parsnpAligner.ini` | **Configuration File** — records the parameters and settings used during the Parsnp run. |
+| `<Species>_parsnpAligner.log` | **Log File** — detailed log of the Parsnp execution, including progress and any warnings or errors. |
+| `<Species>_snps_alignment.fasta` | **SNP Alignment** — FASTA file containing the core-genome SNP alignment with reference and assembly extensions removed, used for ReporTree. |
 
-</details>
+### ReporTree
+Details at [ReporTree-Main-Outputs](https://github.com/insapathogenomics/ReporTree/wiki/2.-Input-Output#main-output-files)
 
-[FastQC](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/) gives general quality metrics about your sequenced reads. It provides information about the quality score distribution across your reads, per base sequence content (%A/T/G/C), adapter contamination and overrepresented sequences. For further reading and documentation see the [FastQC help pages](http://www.bioinformatics.babraham.ac.uk/projects/fastqc/Help/).
+### MashTree
+MashTree generates:
 
-![MultiQC - FastQC sequence counts plot](images/mqc_fastqc_counts.png)
+- A Newick tree (.dnd)
+- A distance matrix
+- A midpoint-rooted tree used in the Microreact export
 
-![MultiQC - FastQC mean quality scores plot](images/mqc_fastqc_quality.png)
+### Metadata
+A filtered .tsv file is produced per species if the `--metadata` file is provided.
 
-![MultiQC - FastQC adapter content plot](images/mqc_fastqc_adapter.png)
+### Microreact
+CorGe+ generates a `.microreact` file that brings together **two complementary genetic perspectives**:
 
-> **NB:** The FastQC plots displayed in the MultiQC report shows _untrimmed_ reads. They may contain adapter sequence and potentially regions with low quality.
+* **Mashtree** — produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes.
+* **Core-genome distance tree** — prepared by ReporTree with the MSTreeV2 method, it's useful for visualizing genetic relatedness among isolates.
 
-### MultiQC
+By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which group threshold to use in downstream high-resolution analyses.
 
-<details markdown="1">
-<summary>Output files</summary>
+To aid interpretation, Microreact also displays **heatmaps per threshold**, using the ReporTree **partition nomenclature**.
+Each partition corresponds to a hierarchical clustering level and includes the method, numeric threshold, and distance unit. For example, threshold **15** corresponds to the partition `single-15x1.0`.
 
-- `multiqc/`
-  - `multiqc_report.html`: a standalone HTML file that can be viewed in your web browser.
-  - `multiqc_data/`: directory containing parsed statistics from the different tools used in the pipeline.
-  - `multiqc_plots/`: directory containing static images from the report in various formats.
+To visualize, upload the `.microreact` file to [`Microreact/upload`](https://microreact.org/upload)
 
-</details>
+### ![Microreact example](images/corge_microreact_example.png)
 
-[MultiQC](http://multiqc.info) is a visualization tool that generates a single HTML report summarising all samples in your project. Most of the pipeline QC results are visualised in the report and further statistics are available in the report data directory.
+### PoODLE samplesheets
 
-Results generated by MultiQC collate pipeline QC from supported tools e.g. FastQC. The pipeline has special steps which also allow the software versions to be reported in the MultiQC output for future traceability. For more information about how to use MultiQC reports, see <http://multiqc.info>.
+[**PoODLE**](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
+
+CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold if genomic context groups were identified. The required columns are:
+
+```
+sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
+```
+
+The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
+
+For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
+
+### Genomic context groups
+
+Files: `<Species>-groups_HC<threshold>.csv`
+One file is produced for **each threshold** selected with `--thresholds`.
+
+These tables define groups of samples for downstream analysis, using the standardized `HC<partition>-C<id>` nomenclature. Example: `HC20-C25`
+  * **Partition** corresponds to the *lowest distance at which two clusters merge* under single-linkage at the chosen threshold.
+  * **Cluster IDs** (`C1`, `C2`, …) are unique within each partition.
+  * Group names remain **stable across batches** because CorGe+ reuses `partitions.csv` from previous runs.
+
+  **Columns:**
+
+  * `sample`
+  * `species`
+  * `group_name` — stable cluster label in the form `HC<partition>-C<id>`
+  * `group_length` — number of samples in the group
+  * `group_samples` — comma-separated list of all samples in the group
+  * `report_date` — timestamp of the analysis
+
+### Linkage analysis
+
+File: `<Species>_potential_linkages.csv`
+Identifies **strong** or **intermediate** linkages between samples based on **allelic distances** (cgMLST) or **SNP distances** (Parsnp).
+
+**Columns:**
+
+* `sample`
+* `strong_linkages` — highly similar isolates (0-10)
+* `intermediate_linkage` — moderately similar isolates (11-40)
+* `lineage_level` — less similar isolates (41-150)
 
 ### Pipeline information
 
+### 
 <details markdown="1">
 <summary>Output files</summary>
 

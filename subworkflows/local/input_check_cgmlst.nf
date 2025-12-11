@@ -1,55 +1,22 @@
 
+//
+// Check the cgMLST schemas provided
+//
 
-include { SAMPLESHEET_CHECK_CGMLST } from '../../modules/local/samplesheet_check_cgmlst.nf'
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL MODULES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
 
-workflow INPUT_CHECK_CGMLST {
+include { SAMPLESHEET_CHECK_CGMLST } from '../../modules/local/pre_processing/samplesheet_check_cgmlst.nf'
 
-    take:
-    cgmlst_schemas  // csv file containg species and path species schemas
-    species_count   //channel: [species, counts]
-    main:
-    ch_versions = Channel.empty()
-
-    //Check to make sure everything in the cgmlst file looks good
-    SAMPLESHEET_CHECK_CGMLST ( cgmlst_schemas)
-        .csv
-        .splitCsv (header:true, sep:',')
-        .map{ create_cgmlst_channel(it)}
-        .set{cgmlst_paths}
-    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK_CGMLST.out.versions)
-    //join the cgmlst paths with the species_count channel
-    joined_species_count = species_count
-    .join(cgmlst_paths.map{ meta, path -> [meta.species, [meta, path]]}, remainder:true)
-    .map{ species, count, temp -> //change any species that may have zero counts resulting in null to zero
-        [species, count ?: 0, temp]
-    }
-
-    //Now branch based on if a cgmlst is a avaiable or not
-    joined_species_count
-    .branch {
-        schema_unavaiable: it[2] == null
-        chewbbaca: it[2] != null
-    }
-    .set{cgmlst_species_counts}
-
-    //Reformat channel for species witha  cgmlst
-    cgmlst_species_counts.chewbbaca.map{
-        species, count, inner_tuple -> [[species:species, count:count], inner_tuple[1]]
-    }
-    .set{cgmlst_species}
-    //Reformat channel for species with no cgmlst
-    cgmlst_species_counts.schema_unavaiable.map{
-        species, count, no_path -> [[species:species, count:count]]
-    }
-    .set{no_cgmlst_species}
-
-    emit:
-    species_counts_cgmlst  = cgmlst_species     // channel: [[species, count,], path_to_cgmlst]
-    species_count_nocgmlst = no_cgmlst_species  // channel: [[species, count]]
-    versions = ch_versions                     // channel: [ versions.yml ]
-}
-
-//Function to get set up our channel properly
+/*
+=============================================================================================================================
+    SUBWORKFLOW FUNCTIONS
+=============================================================================================================================
+*/
+// Function to set up cgMLST channel properly
 def create_cgmlst_channel(LinkedHashMap row) {
     //create meta map
     def meta = [:]
@@ -63,3 +30,68 @@ def create_cgmlst_channel(LinkedHashMap row) {
     }
     return cgmlst_channel
 }
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN SUBWORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+workflow INPUT_CHECK_CGMLST {
+
+    take:
+    cgmlst_schemas  // csv file containg species and path species schemas
+    species_count   // channel: [species, counts] from input manifest
+    
+    main:
+    ch_versions = Channel.empty()
+    //
+    // MODULE: Check cgmlst_schemas file to make sure everything looks good
+    //
+    SAMPLESHEET_CHECK_CGMLST (cgmlst_schemas)
+        .csv
+        .splitCsv (header:true, sep:',')
+        .map{ create_cgmlst_channel(it)}
+        .set{cgmlst_paths}
+    ch_versions = ch_versions.mix(SAMPLESHEET_CHECK_CGMLST.out.versions)
+    //
+    // Join the cgmlst paths with the species_count channel
+    //
+    joined_species_count = species_count
+    .join(cgmlst_paths.map{ meta, path -> [meta.species, [meta, path]]}, remainder:true)
+    .map{ species, count, temp -> //change any species that may have zero counts resulting in null to zero
+        [species, count ?: 0, temp]
+    }
+    //
+    // Now branch based on if a cgmlst is a available or not
+    joined_species_count
+    .branch {
+        schema_unavaiable: it[2] == null
+        chewbbaca: it[2] != null
+    }
+    .set{cgmlst_species_counts}
+    //
+    // Reformat channel for species with cgmlst
+    //
+    cgmlst_species_counts.chewbbaca.map{
+        species, count, inner_tuple -> [[species:species, count:count], inner_tuple[1]]
+    }
+    .set{cgmlst_species}
+    //
+    // Reformat channel for species with no cgmlst
+    //
+    cgmlst_species_counts.schema_unavaiable.map{
+        species, count, no_path -> [[species:species, count:count]]
+    }
+    .set{no_cgmlst_species}
+
+    emit:
+    species_counts_cgmlst  = cgmlst_species     // channel: [[species, count], path_to_cgmlst]
+    species_count_nocgmlst = no_cgmlst_species  // channel: [[species, count]]
+    versions = ch_versions                     // channel: [ versions.yml ]
+}
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/

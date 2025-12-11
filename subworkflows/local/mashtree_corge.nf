@@ -1,19 +1,38 @@
-include { MASHTREE              } from '../../modules/nf-core/mashtree/main'
-include { ROOT_TREE             } from '../../modules/local/root_tree.nf'
+//
+// Run MashTree using all assemblies in database
+//
+/*
+=============================================================================================================================
+    SUBWORKFLOW FUNCTIONS
+=============================================================================================================================
+*/
 
-//Function to get all the previous assembly files for each species
+// Function to get all the previous assembly files for each species
 def get_previous_assemblies(species ) {
     // Create the path to get the previous fasta files
     def previous_assemblies = file("${params.outdir}/${species}/assemblies/*.{fasta,fa,fas,fna}")
     return previous_assemblies
 }
 
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    IMPORT LOCAL AND NF-COR MODULES
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
+include { MASHTREE              } from '../../modules/nf-core/mashtree/main.nf'
+include { ROOT_TREE             } from '../../modules/local/post_processing/root_tree.nf'
+
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    RUN MAIN SUBWORKFLOW
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/
 workflow MASHTREE_CORGE {
 
     take:
-    ch_samples            //
-    ch_chewbbaca_species // [[speices, count], cgmlst] //counts included the latest assemblies
-    ch_parsnp_species    // [[species,count]] //counts included the latest assemblies
+    ch_samples           // channel: [ val(meta), assembly ]
+    ch_chewbbaca_species // channel: [[species, count], cgmlst] //counts included the latest assemblies
+    ch_parsnp_species    // channel: [[species,count]] //counts included the latest assemblies
 
     main:
 
@@ -45,7 +64,7 @@ workflow MASHTREE_CORGE {
     ch_all_assemblies = ch_samples_grouped_species.join(ch_previous_assemblies)
         .map{meta,new_assemblies, old_assemblies -> [meta,new_assemblies+old_assemblies]}
 
-    //If samples are reran, may cause occasional duplicates from inputs and old_assemblies
+    // If samples are reran, may cause occasional duplicates from inputs and old_assemblies
     //Deduplicate possible assemblies
     ch_deduplicated_assemblies = ch_all_assemblies
         .map{
@@ -71,7 +90,6 @@ workflow MASHTREE_CORGE {
        ch_deduplicated_assemblies //ch_all_assemblies
     )
     ch_versions = ch_versions.mix(MASHTREE.out.versions)
-
     //
     // MODULE: Root the MashTree tree
     //
@@ -81,9 +99,13 @@ workflow MASHTREE_CORGE {
     ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
 
     emit:
-    mashtree_tree       = ROOT_TREE.out.tre
-    mashtree_matrix     = MASHTREE.out.matrix
-
-    versions = ch_versions                     // channel: [ versions.yml ]
+    mashtree_tree       = ROOT_TREE.out.tre    //channel: [val(meta), tree]
+    mashtree_matrix     = MASHTREE.out.matrix  //channel: [val(meta), matrix]
+    versions            = ch_versions         // channel: [ versions.yml ]
 }
 
+/*
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    THE END
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+*/

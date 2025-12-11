@@ -1,6 +1,6 @@
-# nf-core/corgeplus: Documentation
+# MI-Bioinformatics/CorGe: Documentation
 
-The nf-core/corgeplus documentation is split into the following pages:
+The MI-Bioinformatics/CorGe documentation is split into the following pages:
 
 - [Usage](usage.md)
   - An overview of how the pipeline works, how to run it and a description of all of the different command-line flags.
