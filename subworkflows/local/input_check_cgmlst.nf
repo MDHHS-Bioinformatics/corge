@@ -65,7 +65,7 @@ workflow INPUT_CHECK_CGMLST {
     // Now branch based on if a cgmlst is a available or not
     joined_species_count
     .branch {
-        schema_unavaiable: it[2] == null
+        schema_unavailable: it[2] == null
         chewbbaca: it[2] != null
     }
     .set{cgmlst_species_counts}
@@ -79,7 +79,7 @@ workflow INPUT_CHECK_CGMLST {
     //
     // Reformat channel for species with no cgmlst
     //
-    cgmlst_species_counts.schema_unavaiable.map{
+    cgmlst_species_counts.schema_unavailable.map{
         species, count, no_path -> [[species:species, count:count]]
     }
     .set{no_cgmlst_species}
