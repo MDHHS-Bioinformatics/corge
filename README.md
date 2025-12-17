@@ -50,7 +50,10 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 2. Install [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility.
 
 > [!NOTE]  
-> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later.
+> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
+> ```
+> export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
+> ``````
 
 ---
 
@@ -83,6 +86,10 @@ Shigella_dysenteriae,/path/to/Escherichia_coli_cgMLST
 Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
 Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
+
+> [!TIP]
+> After the cgMLST schemas have been successfully downloaded, you can safely remove the `work` directory located at `<outdir>/work`.
+
 
 > [!NOTE]
 > If a species schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
@@ -127,6 +134,7 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 ### Expert level
+Using sample metadata and custom configuration:
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
@@ -146,9 +154,11 @@ nextflow run MI-Bioinformatics/CorGe \
 
 ```
 
->[!Note]
->This command clones (downloads) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+>[!NOTE]
+>These commands clone (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
 
+> [!TIP]
+> After the run has been successfully finished, you can safely remove the `work` directory located at `<outdir>/work`.
 ---
 
 ## Parameters
