@@ -24,11 +24,6 @@ class RowChecker:
 
     """
 
-    VALID_FORMATS = (
-        ".fq.gz",
-        ".fastq.gz",
-    )
-
     def __init__(
         self,
         species_col="species",
@@ -64,14 +59,6 @@ class RowChecker:
         #self._validate_pair(row)
         self._seen.add((row[self._species_col], row[self._species_path_col]))
         self.modified.append(row)
-
-
-    # def _validate_pair(self, row):
-    #     """Assert that the species name is found in the respective path. Report status."""
-    #     if row[self._species_col] and row[self._species_path_col]:
-    #         if row[self._species_col] not in row[self._species_path_col]:
-    #             raise AssertionError(f"The species name {row[self._species_col]} was not found in the path {row[self._species_path_col]}. Species name is expected in its cgMLST path")
-
 
 
 def read_head(handle, num_lines=10):
@@ -111,10 +98,7 @@ def sniff_format(handle):
 
 def check_samplesheet(file_in, file_out):
     """
-    Check that the tabular samplesheet has the structure expected by nf-core pipelines.
-
-    Validate the general shape of the table, expected columns, and each row. Also add
-    an additional column which records whether one or two FASTQ reads were found.
+    Validate the general shape of the table, expected columns, and each row. 
 
     Args:
         file_in (pathlib.Path): The given tabular samplesheet. The format can be either
@@ -123,17 +107,12 @@ def check_samplesheet(file_in, file_out):
             be created; always in CSV format.
 
     Example:
-        This function checks that the samplesheet follows the following structure,
-        see also the `viral recon samplesheet`_::
+        This function checks that the samplesheet follows the following structure:
 
-            sample,fastq_1,fastq_2
-            SAMPLE_PE,SAMPLE_PE_RUN1_1.fastq.gz,SAMPLE_PE_RUN1_2.fastq.gz
-            SAMPLE_PE,SAMPLE_PE_RUN2_1.fastq.gz,SAMPLE_PE_RUN2_2.fastq.gz
-            SAMPLE_SE,SAMPLE_SE_RUN1_1.fastq.gz,
-
-    .. _viral recon samplesheet:
-        https://raw.githubusercontent.com/nf-core/test-datasets/viralrecon/samplesheet/samplesheet_test_illumina_amplicon.csv
-
+        species,cgmlst_path
+        Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
+        Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+        Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
     """
     required_columns = {"species", "cgmlst_path"}
     # See https://docs.python.org/3.9/library/csv.html#id3 to read up on `newline=""`.
