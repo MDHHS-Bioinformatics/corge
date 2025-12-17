@@ -101,7 +101,7 @@ workflow CORGEPLUS {
     ch_versions = ch_versions.mix(INPUT_CHECK_CGMLST.out.versions)
 
     //
-    // SUBWORKFLOW: Check the previous results if provided and determine what analysis were be performed for each species
+    // SUBWORKFLOW: Check the previous results if provided and determine what analysis will be performed for each species
     //
     VERIFY_PREVIOUS_RESULTS(
         INPUT_CHECK_CGMLST.out.species_counts_cgmlst,
@@ -109,7 +109,7 @@ workflow CORGEPLUS {
     )
 
     //
-    //SUBWORKFLOW: Run ChewBBACA on samples with a schema
+    // SUBWORKFLOW: Run ChewBBACA on samples with a schema
     //
     CHEWBBACA_ANALYSIS (
         INPUT_CHECK.out.ch_sample_assemblies,
