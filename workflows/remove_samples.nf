@@ -41,6 +41,8 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 // MODULES
 include { DELETE_ASSEMBLIES                      } from '../modules/local/remove_samples/delete_assemblies.nf'
+include { MASHTREE                               } from '../modules/nf-core/mashtree/main.nf'
+include { ROOT_TREE                              } from '../modules/local/post_processing/root_tree.nf'
 include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/post_processing/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/post_processing/microreact.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
@@ -108,13 +110,28 @@ workflow REMOVE_SAMPLES {
     //
     // MODULE: Remove samples and generated updated cgmlst outputs, metadata and assemblies
     //
-    DELETE_ASSEMBLIES(INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove)
+    DELETE_ASSEMBLIES(INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
+                        outdir_abs)
 
     //
     //
     // MODULE: Run MashTree without the removed samples
-    MASHTREE(DELETE_ASSEMBLIES.out.updated_assemblies)
+    ch_updated_assemblies_with_meta =
+    DELETE_ASSEMBLIES.out.updated_assemblies
+        .map { species, assemblies ->
+            def meta = [ species: species ]
+            tuple(meta, assemblies)
+        }
+    MASHTREE(ch_updated_assemblies_with_meta)
     ch_versions = ch_versions.mix(MASHTREE.out.versions)
+
+    //
+    // MODULE: Root the MashTree tree
+    //
+    ROOT_TREE(
+        MASHTREE.out.tree
+    )
+    ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
 
     //
     // SUBWORKFLOW: Remove samples from cgMLST results and re-run ReporTree
@@ -122,17 +139,22 @@ workflow REMOVE_SAMPLES {
     REMOVE_CGMLST(
         INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
         VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca,
-        file(params.outdir))
+        outdir_abs)
     ch_versions = ch_versions.mix(REMOVE_CGMLST.out.versions)
     
     //
     // SUBWORKFLOW: Run Parsnp without the removed samples and re-run ReporTree
     //
+    ch_has_parsnp = VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
+    .map { true }
+    .ifEmpty { Channel.value(false) }
+
     REMOVE_PARSNP(
         INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
         DELETE_ASSEMBLIES.out.updated_assemblies,
         VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp,
-        file(params.outdir))
+        outdir_abs)
+    ch_versions = ch_versions.mix(REMOVE_PARSNP.out.versions)
 
     //
     // MODULE: Make a Microreact file with distance trees and selected groups
@@ -141,11 +163,11 @@ workflow REMOVE_SAMPLES {
 
     // Using cgMLST results
     ch_cgmlst_microreact = REMOVE_CGMLST.out.partitions
-        .join(REMOVE_CGMLST.out.single_HC)
+        .join(REMOVE_CGMLST.out.dist_tree)
         .map { meta, partitions_tsv, dist_tree ->
             [[species: meta.species], partitions_tsv, dist_tree]
         }
-        .join(MASHTREE.out.mashtree_tree)
+        .join(ROOT_TREE.out.tre)
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
@@ -157,7 +179,7 @@ workflow REMOVE_SAMPLES {
     // Using Parsnp results
     ch_parsnp_microreact = REMOVE_PARSNP.out.partitions.join(REMOVE_PARSNP.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(MASHTREE.out.mashtree_tree)         
+        .join(ROOT_TREE.out.tre)         
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
@@ -165,6 +187,7 @@ workflow REMOVE_SAMPLES {
         ch_parsnp_microreact
     )
     ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
+
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
@@ -175,6 +198,7 @@ workflow REMOVE_SAMPLES {
         REMOVE_PARSNP.out.cluster_composition
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
+    
     //
     // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
     //
