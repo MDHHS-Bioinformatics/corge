@@ -13,20 +13,15 @@ def create_channel(LinkedHashMap row) {
     def meta = [:]
     meta.id         = row.sample
     meta.species    = row.species
+    return meta
 }
 
 // Function to count how many samples for each species there are
 def count_species(input_channel) {
-    def counts = input_channel
-        .map { meta ->
-            [meta.species, 1]  // Extract species and assign initial count of 1
-        }
-        .groupTuple()  // Group by species
-        .map { species, counts ->
-            [species, counts.size()]  // Count occurrences of each species
-        }
-
-    return counts
+    input_channel
+        .map { meta -> tuple(meta.species, 1) } // Extract species and assign initial count of 1
+        .groupTuple() // Group by species
+        .map { species, counts -> tuple(species, counts.size()) } // Count occurrences of each species
 }
 
 /*
@@ -36,7 +31,7 @@ def count_species(input_channel) {
 */
 
 include { SAMPLESHEET_CHECK_RM } from '../../modules/local/pre_processing/samplesheet_check_rm.nf'
-include { RENAME_INPUTS     } from '../../modules/local/pre_processing/renameinputs.nf'
+include { RENAME_INPUTS        } from '../../modules/local/pre_processing/renameinputs.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -57,9 +52,6 @@ workflow INPUT_CHECK_REMOVE_SAMPLES {
     
     count_species(samples_rm)
     .set{species_count}
-
-    samples_to_remove_ch = Channel.empty()
-    samples_to_remove_ch.mix(samples_rm)
 
     ch_versions = ch_versions.mix(SAMPLESHEET_CHECK_RM.out.versions)
     
