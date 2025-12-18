@@ -22,7 +22,8 @@ workflow REMOVE_CGMLST {
     take:
     samples_to_remove      // channel: [ val(species), val(ids) ]
     species_to_chewbbaca   // channel: [[species, count], path_to_cgmlst_schema]
-
+    outdir                 // file(params.outdir)
+  
     main:
 
     ch_versions = Channel.empty()
@@ -32,27 +33,27 @@ workflow REMOVE_CGMLST {
     def (species, count) = info
     tuple(species, count, schema)
     }
-    .set(schemas_by_species)
+    .set {schemas_by_species}
 
     samples_to_remove
     .join(schemas_by_species) // [ species, ids, count, schema ]
     .map { species, ids, count, schema ->
     def meta = [species: species]
     tuple(meta, ids) }
-    .set(ch_samples_rm_cgmlst) 
+    .set{ch_samples_rm_cgmlst} 
 
     //
     // MODULE: Remove selected samples from masked alleles
     //
     REMOVE_FROM_ALLELES(ch_samples_rm_cgmlst, 
-                        file(params.outdir))
+                        outdir)
     ch_versions = ch_versions.mix(REMOVE_FROM_ALLELES.out.versions)
 
     //
     // MODULE: Remove selected samples from partitions
     //
     REMOVE_FROM_PARTITIONS(ch_samples_rm_cgmlst,
-                            file(params.outdir))
+                            outdir)
     ch_versions = ch_versions.mix(REMOVE_FROM_PARTITIONS.out.versions)
 
     //
