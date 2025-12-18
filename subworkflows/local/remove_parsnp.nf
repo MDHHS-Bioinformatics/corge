@@ -24,16 +24,28 @@ workflow REMOVE_PARSNP {
     samples_to_remove      // channel: [ val(species), val(ids) ]
     updated_assemblies     // channel: [ val(species), path(assemblies) ]
     ch_parsnp_species      // channel: [[species,count]] //counts included the latest assemblies
- 
+    outdir                 // file(params.outdir)
+
     main:
 
     ch_versions = Channel.empty()
+
+    // Determine which species are allowed to run Parsnp
+    ch_allowed_species = ch_parsnp_species
+    .filter { it[0].count > 1 }
+    .map { species_meta -> tuple(species_meta[0].species, true) }
+
+    ch_parsnp_assemblies = updated_assemblies
+        .join(ch_allowed_species)
+        .map { species, assemblies, _ ->
+            tuple(species, assemblies)
+        }
 
     //
     // MODULE: Run Parsnp on each unique species
     //
     PARSNP(
-        updated_assemblies
+        ch_parsnp_assemblies
     )
     ch_versions = ch_versions.mix(PARSNP.out.versions)
     //
@@ -64,20 +76,20 @@ workflow REMOVE_PARSNP {
     def (species, count) = info
     tuple(species, count)
     }
-    .set(schemas_by_species)
+    .set { schemas_by_species }
 
     samples_to_remove
     .join(schemas_by_species) // [ species, ids, count, schema ]
     .map { species, ids, count ->
     def meta = [species: species]
     tuple(meta, ids) }
-    .set(ch_samples_rm_parsnp) 
+    .set { ch_samples_rm_parsnp } 
 
     //
     // MODULE: Remove selected samples from partitions
     //
     REMOVE_FROM_PARTITIONS(ch_samples_rm_parsnp,
-                            file(params.outdir))
+                            outdir)
     ch_versions = ch_versions.mix(REMOVE_FROM_PARTITIONS.out.versions)
 
     //
