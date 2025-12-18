@@ -18,7 +18,7 @@ process SAMPLESHEET_CHECK_CGMLST {
     when:
     task.ext.when == null || task.ext.when
 
-    script: // This script is bundled with the pipeline, in nf-core/corgeplus/bin/
+    script:
     """
     check_samplesheet_cgmlst.py \\
         $samplesheet_cgmlst \\
