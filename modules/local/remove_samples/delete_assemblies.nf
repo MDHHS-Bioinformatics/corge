@@ -4,13 +4,16 @@ process DELETE_ASSEMBLIES {
 
     input:
     tuple val(species), val(ids)
+    path outdir
 
     output:
     tuple val(species), path("assemblies/*"), emit: updated_assemblies
 
     script:
     """
-    ASSEMBLY_DIR="${params.outdir}/${species}/assemblies"
+    # Resolve real path of outdir (not the staged symlink)
+    REAL_OUTDIR=\$(readlink -f "${outdir}")
+    ASSEMBLY_DIR="\${REAL_OUTDIR}/${species}/assemblies"
 
     if [[ ! -d "\$ASSEMBLY_DIR" ]]; then
         echo "WARNING: Assembly directory not found: \$ASSEMBLY_DIR" >&2
@@ -32,6 +35,7 @@ process DELETE_ASSEMBLIES {
             echo "Removing assembly: \$f"
             rm -f "\$f"
         else
+            # Symlink using REAL filesystem path
             ln -s "\$f" assemblies/
         fi
     done
