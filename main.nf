@@ -39,7 +39,7 @@ workflow {
     } else if (params.mode == 'remove') {
         REMOVE_SAMPLES()
     } else {
-        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'schema'."
+        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'schema', or 'remove'."
     }
 }
 
