@@ -20,10 +20,21 @@ process REMOVE_FROM_ALLELES {
 
     script:
     species = task.ext.species ?: "${meta.species}"
-    samples = task.ext.ids ?: ${ids.join(',')}
 
     """
-    remove_from_alleles.py --outdir $outdir --species $species --ids $samples
+
+    SRC="${outdir}/${meta.species}/cgMLST/masked/${meta.species}_masked_results_alleles.tsv"
+    OUT="${meta.species}_masked_results_alleles.tsv"
+
+    if [[ ! -f "\$SRC" ]]; then
+        echo "WARNING: alleles file not found: \$SRC" >&2
+    else
+        cp "\$SRC" "\$OUT"
+
+        remove_from_alleles.py \
+            --input "\$OUT" \
+            --ids "${ids.join(',')}"
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

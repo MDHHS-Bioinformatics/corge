@@ -1,5 +1,6 @@
 process REMOVE_FROM_PARTITIONS {
-    tag "$meta.species"
+
+    tag "${meta.species}"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"
@@ -15,15 +16,22 @@ process REMOVE_FROM_PARTITIONS {
     tuple val(meta), path("${meta.species}_partitions.tsv"), emit: partitions
     path "versions.yml", emit: versions
 
-    when:
-    task.ext.when == null || task.ext.when
-
     script:
-    species = task.ext.species ?: "${meta.species}"
-    samples = task.ext.ids ?: ${ids.join(',')}
-
     """
-    remove_from_partitions.py -outdir $outdir --species $species --ids $samples
+    SRC="${outdir}/${meta.species}/ReporTree/${meta.species}_partitions.tsv"
+    OUT="${meta.species}_partitions.tsv"
+
+    if [[ ! -f "\$SRC" ]]; then
+        echo "WARNING: partitions file not found: \$SRC" >&2
+        # satisfy Nextflow output contract
+        touch "\$OUT"
+    else
+        cp "\$SRC" "\$OUT"
+
+        remove_from_partitions.py \
+            --input "\$OUT" \
+            --ids "${ids.join(',')}"
+    fi
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
