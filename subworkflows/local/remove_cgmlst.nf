@@ -29,11 +29,11 @@ workflow REMOVE_CGMLST {
     ch_versions = Channel.empty()
 
     // Join samples to remove and schemas
-    species_to_chewbbaca.map { info, schema ->
-    def (species, count) = info
-    tuple(species, count, schema)
-    }
-    .set {schemas_by_species}
+    species_to_chewbbaca
+        .map { info, schema ->
+            tuple(info.species, info.count, schema)
+        }
+        .set { schemas_by_species }
 
     samples_to_remove
     .join(schemas_by_species) // [ species, ids, count, schema ]
