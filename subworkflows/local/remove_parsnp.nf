@@ -38,9 +38,9 @@ workflow REMOVE_PARSNP {
     ch_parsnp_assemblies = updated_assemblies
         .join(ch_allowed_species)
         .map { species, assemblies, _ ->
-            tuple(species, assemblies)
-        }
-
+            def meta = [ species: species ]
+            tuple(meta, assemblies)
+        }    
     //
     // MODULE: Run Parsnp on each unique species
     //
@@ -72,18 +72,20 @@ workflow REMOVE_PARSNP {
     }
 
     // Join samples to remove
-    ch_parsnp_species.map { info ->
-    def (species, count) = info
-    tuple(species, count)
-    }
-    .set { schemas_by_species }
+    ch_parsnp_species
+        .map { info ->
+            def meta = info[0]
+            tuple(meta.species, meta.count)
+        }
+        .set { schemas_by_species }
 
     samples_to_remove
-    .join(schemas_by_species) // [ species, ids, count, schema ]
-    .map { species, ids, count ->
-    def meta = [species: species]
-    tuple(meta, ids) }
-    .set { ch_samples_rm_parsnp } 
+        .join(schemas_by_species)
+        .map { species, ids, count ->
+            def meta = [ species: species ]
+            tuple(meta, ids)
+        }
+        .set { ch_samples_rm_parsnp }
 
     //
     // MODULE: Remove selected samples from partitions
