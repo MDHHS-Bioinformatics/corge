@@ -145,10 +145,6 @@ workflow REMOVE_SAMPLES {
     //
     // SUBWORKFLOW: Run Parsnp without the removed samples and re-run ReporTree
     //
-    ch_has_parsnp = VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
-    .map { true }
-    .ifEmpty { Channel.value(false) }
-
     REMOVE_PARSNP(
         INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
         DELETE_ASSEMBLIES.out.updated_assemblies,
