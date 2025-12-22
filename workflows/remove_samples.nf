@@ -9,20 +9,18 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowCorgeplus.initialise(params, log)
 
-// Check input path parameters to see if they exist
-def checkPathParamList = [ params.input, params.multiqc_config]
-for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
+// Check schema path parameters to see if they exist
+// Define schemaList/outdir_abs at script level (before the if block)
+def schemaList = []
+def outdir_abs = file(params.outdir).toAbsolutePath()
+if (params.mode == 'remove') { //following params only need to be validated for remove mode
+    def checkPathParamList = [ params.samples_to_remove, params.outdir]
+    for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-// Check mandatory parameters
-if (params.mode == 'default') {
-    if (params.input) {
-        ch_input = file(params.input)
-    } else {
-        exit 1, 'Input samplesheet not specified! (--input is required for mode: ' + params.mode + ')'
-    }
+    if (params.samples_to_remove == null) {
+        exit 1, 'Missing --samples_to_remove.  Provide a CSV file with columns: sample,species'}
 }
-def outdir_abs = file(params.outdir).toAbsolutePath().toString()
-def master_paths = params.master_paths ? file(params.master_paths) : null
+
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -42,6 +40,9 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
+include { DELETE_ASSEMBLIES                      } from '../modules/local/remove_samples/delete_assemblies.nf'
+include { MASHTREE                               } from '../modules/nf-core/mashtree/main.nf'
+include { ROOT_TREE                              } from '../modules/local/post_processing/root_tree.nf'
 include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/post_processing/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/post_processing/microreact.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
@@ -50,12 +51,11 @@ include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/post_p
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK                 } from '../subworkflows/local/input_check'
+include { INPUT_CHECK_REMOVE_SAMPLES  } from '../subworkflows/local/input_check_remove.nf'
 include { INPUT_CHECK_CGMLST          } from '../subworkflows/local/input_check_cgmlst.nf'
 include { VERIFY_PREVIOUS_RESULTS     } from '../subworkflows/local/verify_previous_results.nf'
-include { MASHTREE_CORGE              } from '../subworkflows/local/mashtree_corge.nf'
-include { CHEWBBACA_ANALYSIS          } from '../subworkflows/local/chewbbaca_analysis.nf'
-include { PARSNP_ANALYSIS             } from '../subworkflows/local/parsnp_analysis.nf'
+include { REMOVE_CGMLST               } from '../subworkflows/local/remove_cgmlst.nf'
+include { REMOVE_PARSNP               } from '../subworkflows/local/remove_parsnp.nf'
 include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_analysis.nf'
 
 /*
@@ -79,24 +79,23 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 // Info required for completion email and summary
 def multiqc_report = []
 
-workflow CORGEPLUS {
+
+workflow REMOVE_SAMPLES {
 
     ch_versions = Channel.empty()
-
     //
-    // SUBWORKFLOW: Read in samplesheet, validate and stage input files
+    // MODULE: Check input and split by species
     //
-    INPUT_CHECK (
-        ch_input
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK.out.versions)
+    INPUT_CHECK_REMOVE_SAMPLES(
+        file(params.samples_to_remove))
+    ch_versions = ch_versions.mix(INPUT_CHECK_REMOVE_SAMPLES.out.versions)
 
     //
     // SUBWORKFLOW: Read in csv containing cgmlst paths per species and validate they exist
     //
     INPUT_CHECK_CGMLST(
         file(params.cgmlst_schemas),
-        INPUT_CHECK.out.species_count
+        INPUT_CHECK_REMOVE_SAMPLES.out.species_count
     )
     ch_versions = ch_versions.mix(INPUT_CHECK_CGMLST.out.versions)
 
@@ -109,32 +108,49 @@ workflow CORGEPLUS {
     )
 
     //
-    // SUBWORKFLOW: Run ChewBBACA on samples with a schema
+    // MODULE: Remove samples and generated updated cgmlst outputs, metadata and assemblies
     //
-    CHEWBBACA_ANALYSIS (
-        INPUT_CHECK.out.ch_sample_assemblies,
-        VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca
-    )
-    ch_versions = ch_versions.mix(CHEWBBACA_ANALYSIS.out.versions)
+    DELETE_ASSEMBLIES(INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
+                        outdir_abs)
 
     //
-    // SUBWORKFLOW: Run Parsnp on samples without a schema
     //
-    PARSNP_ANALYSIS (
-        INPUT_CHECK.out.ch_sample_assemblies,
-        VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
-    )
-    ch_versions = ch_versions.mix(PARSNP_ANALYSIS.out.versions)
+    // MODULE: Run MashTree without the removed samples
+    ch_updated_assemblies_with_meta =
+    DELETE_ASSEMBLIES.out.updated_assemblies
+        .map { species, assemblies ->
+            def meta = [ species: species ]
+            tuple(meta, assemblies)
+        }
+    MASHTREE(ch_updated_assemblies_with_meta)
+    ch_versions = ch_versions.mix(MASHTREE.out.versions)
 
     //
-    // SUBWORKFLOW: Run MashTree and create microreact files
+    // MODULE: Root the MashTree tree
     //
-    MASHTREE_CORGE(
-        INPUT_CHECK.out.ch_sample_assemblies,
+    ROOT_TREE(
+        MASHTREE.out.tree
+    )
+    ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
+
+    //
+    // SUBWORKFLOW: Remove samples from cgMLST results and re-run ReporTree
+    //
+    REMOVE_CGMLST(
+        INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
         VERIFY_PREVIOUS_RESULTS.out.species_to_chewbbaca,
-        VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp
-    )
-    ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
+        outdir_abs)
+    ch_versions = ch_versions.mix(REMOVE_CGMLST.out.versions)
+    
+    //
+    // SUBWORKFLOW: Run Parsnp without the removed samples and re-run ReporTree
+    //
+    REMOVE_PARSNP(
+        INPUT_CHECK_REMOVE_SAMPLES.out.samples_to_remove,
+        DELETE_ASSEMBLIES.out.updated_assemblies,
+        VERIFY_PREVIOUS_RESULTS.out.species_to_parsnp,
+        outdir_abs)
+    ch_versions = ch_versions.mix(REMOVE_PARSNP.out.versions)
 
     //
     // MODULE: Make a Microreact file with distance trees and selected groups
@@ -142,12 +158,12 @@ workflow CORGEPLUS {
     template_microreact = file(params.microreact_template)
 
     // Using cgMLST results
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
-        .join(CHEWBBACA_ANALYSIS.out.dist_tree)
+    ch_cgmlst_microreact = REMOVE_CGMLST.out.partitions
+        .join(REMOVE_CGMLST.out.dist_tree)
         .map { meta, partitions_tsv, dist_tree ->
             [[species: meta.species], partitions_tsv, dist_tree]
         }
-        .join(MASHTREE_CORGE.out.mashtree_tree)
+        .join(ROOT_TREE.out.tre)
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
@@ -157,9 +173,9 @@ workflow CORGEPLUS {
     ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
 
     // Using Parsnp results
-    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
+    ch_parsnp_microreact = REMOVE_PARSNP.out.partitions.join(REMOVE_PARSNP.out.dist_tree)
         .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree)         
+        .join(ROOT_TREE.out.tre)         
         .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
             tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
@@ -172,12 +188,13 @@ workflow CORGEPLUS {
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
     LINKAGE_ANALYSIS(
-        CHEWBBACA_ANALYSIS.out.dist_hamming,
-        PARSNP_ANALYSIS.out.dist_hamming,
-        CHEWBBACA_ANALYSIS.out.cluster_composition,
-        PARSNP_ANALYSIS.out.cluster_composition
+        REMOVE_CGMLST.out.dist_hamming,
+        REMOVE_PARSNP.out.dist_hamming,
+        REMOVE_CGMLST.out.cluster_composition,
+        REMOVE_PARSNP.out.cluster_composition
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
+    
     //
     // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
     //
@@ -201,7 +218,7 @@ workflow CORGEPLUS {
 
 workflow.onComplete {
     if (params.email || params.email_on_fail) {
-        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log, multiqc_report)
+        NfcoreTemplate.email(workflow, params, summary_params, projectDir, log)
     }
     NfcoreTemplate.summary(workflow, params, log)
     if (params.hook_url) {

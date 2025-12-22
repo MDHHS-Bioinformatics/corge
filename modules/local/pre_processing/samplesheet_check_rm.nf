@@ -1,6 +1,6 @@
 
-process SAMPLESHEET_CHECK_CGMLST {
-    tag "$samplesheet_cgmlst"
+process SAMPLESHEET_CHECK_RM {
+    tag "$samplesheet_remove"
     label 'process_single'
 
     conda "conda-forge::python=3.8.3"
@@ -9,7 +9,7 @@ process SAMPLESHEET_CHECK_CGMLST {
         'quay.io/biocontainers/python:3.8.3' }"
 
     input:
-    path samplesheet_cgmlst
+    path samplesheet_remove
 
     output:
     path '*.csv'       , emit: csv
@@ -20,9 +20,9 @@ process SAMPLESHEET_CHECK_CGMLST {
 
     script:
     """
-    check_samplesheet_cgmlst.py \\
-        $samplesheet_cgmlst \\
-        samplesheet_cgmlst.valid.csv
+    check_samplesheet_remove.py \
+        $samplesheet_remove \
+        samplesheet_remove.valid.csv
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

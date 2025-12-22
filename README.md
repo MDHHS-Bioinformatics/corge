@@ -11,6 +11,8 @@ CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance 
 
 It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time. More details [below](#-designed-for-bacterial-surveillance)
 
+### ![CorGe flow](docs/images/corge_flow.png)
+
 # Table of Contents
 - [Pipeline summary](#-pipeline-summary)
 - [Quick Start](#-quick-start)
@@ -50,7 +52,10 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 2. Install [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility.
 
 > [!NOTE]  
-> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later.
+> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
+> ```
+> export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
+> ``````
 
 ---
 
@@ -68,6 +73,9 @@ nextflow run MI-Bioinformatics/CorGe \
   -profile singularity
 ```
 
+>[!NOTE]
+>These commands clone (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+
 - **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
 ```
@@ -83,6 +91,10 @@ Shigella_dysenteriae,/path/to/Escherichia_coli_cgMLST
 Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
 Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
+
+> [!TIP]
+> After the cgMLST schemas have been successfully downloaded, you can safely remove the `work` directory located at `<outdir>/work`.
+
 
 > [!NOTE]
 > If a species schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
@@ -127,6 +139,7 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 ### Expert level
+Using sample metadata and custom configuration:
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
@@ -146,9 +159,8 @@ nextflow run MI-Bioinformatics/CorGe \
 
 ```
 
->[!Note]
->This command clones (downloads) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
-
+> [!TIP]
+> After the run has been successfully finished, you can safely remove the `work` directory located at `<outdir>/work`.
 ---
 
 ## Parameters
@@ -161,8 +173,9 @@ nextflow run MI-Bioinformatics/CorGe \
 | `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root.                                                                                     |
 | `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema. |
 | `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.                                                 |
-| `--mode`           |     ✓    | `default`      | `default` or `schema` for **schema-download workflow**.                                                          |
+| `--mode`           |     ✓    | `default`      | `default`, `schema` for **schema-download workflow**, or `remove` to remove samples from database                                            |
 | `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                                    |
+| `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used.                                                    |
 
 
 ### ⚙️ **Execution Configuration**
@@ -178,7 +191,7 @@ nextflow run MI-Bioinformatics/CorGe \
 More NextFlow configuration options [`here`](https://www.nextflow.io/docs/latest/reference/config.html).
 
 
-### **📦 Data Source Options (for PoODLE Manifests)**
+### **📦 Data Source Options for PoODLE Manifests**
 [`PoODLE`](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
 These options allow CorGe+ to automatically fill PoODLE manifests with read and annotation paths. They are optional, but only **one** may be used per run. If none are provided, the [`PoODLE samplesheets`](#-poodle-samplesheets) will contain empty placeholders for FASTQ and GFF paths, which you must fill in manually before running PoODLE.
 
@@ -189,7 +202,7 @@ These options allow CorGe+ to automatically fill PoODLE manifests with read and 
 | `--bactopia_path` |     –    | –       | Absolute path to a Bactopia results directory. CorGe+ will infer read and annotation paths based on sample IDs. Use if your data was processed with Bactopia.                                        |
 
 
-### 🌳 **ReporTree Options**
+### 🌳 **ReporTree metadata options**
 ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
 
 | Parameter                  | Required | Default        | Description                                                                                                                                                                                                                                               |
@@ -388,6 +401,33 @@ To visualize, upload the `.microreact` file to [`Microreact/upload`](https://mic
   If samples were previously analyzed with Parsnp and you later obtain a cgMLST schema, **re-run all samples using cgMLST** for consistency.
   Rename or remove the old species subdirectory that was analyzed with Parsnp in your `outdir` to prevent conflicts when the pipeline checks for prior results.
 
+* **🗑️ Removing samples from the database**
+
+  If a sample has already been added to a CorGe+ database and needs to be removed (for example, due to contamination, mislabeling, or reanalysis), you can use the dedicated **`remove` mode**.
+
+  Create a CSV file listing the samples to remove, including their corresponding species:
+
+  ```csv
+  sample,species
+  ISO1,Escherichia_coli
+  ISO4,Acinetobacter_baumannii
+  ```
+
+  Then run CorGe+ in `remove` mode, pointing to the existing database and the cgMLST schema file used to build it. For consistency, include all the options priorly used, such as `--metadata`, `--columns_summary_report`, `--phoenix_path`, etc:
+
+  ```bash
+  nextflow run MI-Bioinformatics/CorGe \
+    --mode remove \
+    --samples_to_remove manifest_remove.csv \
+    --cgmlst_schemas cgmlst_schemas.csv \
+    --outdir corge \
+    --metadata metadata.csv \
+    --columns_summary_report st,specimen_source,date,first_seq_date,last_seq_date,timespan_days \
+    -profile singularity
+  ```
+
+  The specified samples will be removed from the database while preserving all remaining results and cluster nomenclature.
+
 ---
 
 ## 📊 Output overview
@@ -436,7 +476,7 @@ CorGe+ was built and is maintained by the Genomics Analysis Unit at the Michigan
 
 ## 📜 License
 
-This project is released under the **MIT License**.
+This project is released under the [**MIT License**](LICENSE).
 
 
 
