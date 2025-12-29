@@ -2,7 +2,7 @@ process REPORTREE_PARSNP {
     tag "$meta.species"
     label 'process_high'
 
-    container "reportree_v2.6.0.sif"
+    container "quay.io/vascok/reportree:2.6.0"
 
     input:
     tuple val(meta), path(snps_alignment_fasta)

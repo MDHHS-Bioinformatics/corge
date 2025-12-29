@@ -2,7 +2,7 @@ process REPORTREE_CGMLST {
     tag "$meta.species"
     label 'process_medium'
 
-    container "reportree_v2.6.0.sif"
+    container "quay.io/vascok/reportree:2.6.0"
 
     input:
     tuple val(meta), path(allele_table)
