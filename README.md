@@ -63,7 +63,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 
 You only need to download each species’ cgMLST schema **once**. CorGe+ can automatically fetch and prepare schemas from [`cgmlst.org`](https://cgmlst.org/).
 
-- **Step 1. Download the schemas**: Find the schema ID in [`cgMLST schema IDs`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/cgmlst_schemas_id.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`.
+- **Step 1. Download the schemas**: Find the schema ID in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`.
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
@@ -74,9 +74,9 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 >[!NOTE]
->These commands clone (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+>This command clones (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
 
-- **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](https://github.com/MI-Bioinformatics/CorGe/blob/feature/prepcgmlst/assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
+- **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
 ```
 species,cgmlst_path
@@ -125,7 +125,7 @@ nextflow run MI-Bioinformatics/CorGe \
   -profile singularity
 ```
 
-Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp) — customizable via `--thresholds 1,10,100,1000`.
+Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp).  More details about the default thresholds [below](#-group-thresholds-allelic-or-snp-distance-cutoffs). Customizable via `--thresholds 1,10,100,1000`. Reference thresholds from different sources are available at [`reference_thresholds.rmd`](assets/reference_thresholds.rmd). 
 
 ### With custom thresholds
 
@@ -170,12 +170,12 @@ nextflow run MI-Bioinformatics/CorGe \
 | Parameter          | Required | Default        | Description                                                                                                |
 | ------------------ | :------: | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | `--input`          |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                                  |
-| `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root.                                                                                     |
+| `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
 | `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema. |
-| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.                                                 |
-| `--mode`           |     ✓    | `default`      | `default`, `schema` for **schema-download workflow**, or `remove` to remove samples from database                                            |
-| `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                                                    |
-| `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used.                                                    |
+| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.     |
+| `--mode`           |     ✓    | `default`      | `default` to run core genome analysis with new isolates; `schema` for **schema-download workflow**; or `remove` to remove samples from database     |
+| `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
+| `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used  |
 
 
 ### ⚙️ **Execution Configuration**
@@ -239,7 +239,7 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 
 ---
 
->[!NOTE]
+>[!WARNING]
 >**Disclaimer**: This pipeline is only for investigation and epidemiology use. *The data presented in this pipeline has not been validated or subjected to CLIA standards for diagnosing and treating disease. Relatedness by WGS should not replace epidemiological investigations for determining linkage.*
 
 ## 🧭 When to use what
@@ -389,7 +389,7 @@ To visualize, upload the `.microreact` file to [`Microreact/upload`](https://mic
 
 * **Sample names:** Use unique sample names across all runs (both historical and new). If a sample name is reused, CorGe+ will overwrite the previous results for that sample with the most recent analysis.
 
----
+* **Running multiple jobs with the same cgMLST schema:** By default, ChewBBACA can discover and add new alleles to a cgMLST schema while it runs. CorGe+ takes advantage of this by analyzing all samples from the same species together, so any new alleles are added consistently within a single run. If you start **more than one CorGe+ run at the same time** using the **same schema directory**, those runs may interfere with each other and cause problems with how new alleles are named. **To avoid this**, we recommend running CorGe+ one batch at a time per schema. This is usually not a limitation, since a single batch can process many samples and multiple species in parallel. Still, it’s important to be aware of this when planning multiple analyses.
 
 ## 🛠 Troubleshooting
 
@@ -477,6 +477,7 @@ CorGe+ was built and is maintained by the Genomics Analysis Unit at the Michigan
 ## 📜 License
 
 This project is released under the [**MIT License**](LICENSE).
+
 
 
 
