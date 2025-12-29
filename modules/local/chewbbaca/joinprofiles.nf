@@ -2,10 +2,11 @@
 process CHEWBBACA_JOINPROFILES {
     tag "$meta.species"
     label 'process_single'
-    conda "bioconda::chewbbaca=3.4.2"
+    
+    conda "bioconda::chewbbaca=3.5.0"
     container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/chewbbaca:3.4.2--pyhdfd78af_0':
-        'quay.io/biocontainers/chewbbaca:3.4.2--pyhdfd78af_0' }"
+        'https://depot.galaxyproject.org/singularity/chewbbaca:3.5.0--pyhdfd78af_0':
+        'quay.io/biocontainers/chewbbaca:3.5.0--pyhdfd78af_0' }"
 
     input:
     tuple val(meta), path(new_alleles), path(old_alleles)
