@@ -16,7 +16,6 @@
             │   │    ├── 📄 <Species>_Presence_Abscence.tsv
             │   |    ├── 📄 <Species>_masked_results_alleles.tsv
             │   |    ├── 📄 <Species>_cgMLSTschema0.txt
-            │   |    ├── 📄 <Species>_masked_results_alleles.tsv
             │   |    └── 📄 <Species>_cgMLST.html
             │   └── 📁 new
             │       ├── 📄 <Species>_new_cds_coordinates.tsv
