@@ -127,6 +127,7 @@ workflow CHEWBBACA_ANALYSIS {
     CHEWBBACA_EXTRACTCGMLST(
         DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
     )
+    ch_versions = ch_versions.mix(CHEWBBACA_EXTRACTCGMLST.out.versions)
     //
     // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
     //
