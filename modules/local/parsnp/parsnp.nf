@@ -12,6 +12,7 @@ process PARSNP {
     output:
     tuple val(meta), path("${meta.species}_parsnp*")            , emit: results
     tuple val(meta), path("${meta.species}_parsnp.snps.mblocks"), emit: snps_alignment
+    tuple val(meta), path("${meta.species}_parsnp.xmfa")        , emit: xmfa
     path "versions.yml", emit: versions
 
     when:
