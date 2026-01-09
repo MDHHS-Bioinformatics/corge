@@ -51,6 +51,12 @@
                     "description": "Comma-separated distance thresholds for grouping (e.g., 15,20,40,150).",
                     "default": "15,20,40,150",
                     "fa_icon": "fas fa-sliders-h"
+                },
+                "tree": {
+                    "type": "boolean",
+                    "description": "Make a maximum-likelihood tree based on DNA multiple-sequence-alignment",
+                    "fa_icon": "fas fa-check-square",
+                    "help_text": "Make a maximum-likelihood tree based on DNA MSA. You may choose this option if you want a phylogenetic tree. It requires considerably more time and resources."
                 }
             }
         },
