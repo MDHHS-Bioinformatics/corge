@@ -28,7 +28,7 @@ def build_species_index(ps: pd.DataFrame) -> pd.DataFrame:
     idx['cluster_numeric'] = (
         idx['cluster']
         .str.split('_', expand=True)[1]
-        .astype(int)
+        .astype(float).astype(int)
     )
 
     # Build combined names
