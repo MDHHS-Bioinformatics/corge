@@ -41,7 +41,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 // MODULES
 include { DELETE_ASSEMBLIES                      } from '../modules/local/remove_samples/delete_assemblies.nf'
-include { ROOT_TREE as ROOT_TREE_MASHTREE        } from '../../modules/local/tree/root_tree.nf'
+include { ROOT_TREE as ROOT_TREE_MASHTREE        } from '../modules/local/tree/root_tree.nf'
 include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact/microreact.nf'
 include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact/microreact.nf'
 include { MICROREACT_ML as MICROREACT_ML_CGMLST  } from '../modules/local/microreact/microreact_ml.nf'
