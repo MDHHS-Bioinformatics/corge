@@ -90,14 +90,14 @@ You only need to download each species’ cgMLST schema **once**. CorGe+ can aut
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
+  -profile singularity \
   --mode schema \
   --schema_ids s1,s20 \
-  --outdir corge \
-  -profile singularity
+  --outdir corge
 ```
 
 >[!NOTE]
->This command clones (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+>This command clones (download) this repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
 
 - **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
@@ -127,7 +127,8 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 Include:
 * `sample`: unique ID (no spaces recommended)
 * `assembly`: absolute path to FASTA assembly for the sample (uncompressed FASTA only; .gz or .zip not supported)
-* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Any spaces in the name will be automatically replaced with underscores.
+* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Parsnp is triggered when a species lacks a cgMLST schema; for more details check [_When to use what_](#-when-to-use-what). Any spaces in the name will be automatically replaced with underscores.
+
 ```
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
@@ -162,7 +163,7 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 ### Expert level
-Using sample metadata and custom configuration:
+Generate a phylogenetic tree and use sample metadata and custom configuration:
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
@@ -194,10 +195,10 @@ nextflow run MI-Bioinformatics/CorGe \
 | ------------------ | :------: | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | `--input`          |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                                  |
 | `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
-| `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema. |
-| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.     |
-| `--mode`           |     ✓    | `default`      | `default` to run core genome analysis with new isolates; `schema` for **schema-download workflow**; or `remove` to remove samples from database     |
-| `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
+| `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema, check [_When to use what_](#-when-to-use-what). |
+| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Check [_group thresholds_](#-group-thresholds-allelic-or-snp-distance-cutoffs). Comma-separated integers.     |
+| `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; or [`remove`](#-troubleshooting) to remove samples from database     |
+| `--schema_ids`     |     –    | –              | Comma-separated [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
 | `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used  |
 | `--tree`     |     –    | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles.    |
 
