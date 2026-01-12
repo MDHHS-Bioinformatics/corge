@@ -149,7 +149,7 @@ nextflow run MI-Bioinformatics/CorGe \
   --outdir corge
 ```
 
-Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp).  More details about the default thresholds [below](#-group-thresholds-allelic-or-snp-distance-cutoffs). Customizable via `--thresholds 1,10,100,1000`. Reference thresholds from different sources are available at [`reference_thresholds.rmd`](assets/reference_thresholds.rmd). 
+Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp).  More details about the default thresholds [below](#-group-thresholds-allelic-or-snp-distance-cutoffs). Customizable via `--thresholds 1,10,100,1000`. Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md). 
 
 ### With custom thresholds
 
