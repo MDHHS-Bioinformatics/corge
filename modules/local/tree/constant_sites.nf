@@ -1,5 +1,5 @@
 process CONSTANTSITES {
-    tag "${meta.species}_${meta.cluster_id}"
+    tag "${meta.species}"
     label 'process_medium'
 
     conda "${moduleDir}/environment.yml"
