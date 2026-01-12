@@ -18,6 +18,49 @@ def encode_file(file_path):
         print(f"Error: File not found - {file_path}")
         sys.exit(1)
 
+# -----------------------------
+# Helper: resolve partitions with fallback
+# -----------------------------
+def resolve_partitions(partition_string, partitions_tsv):
+    """
+    For each requested partition, use it if present in TSV,
+    otherwise fallback to the largest available partition.
+    """
+    # Read header from TSV
+    with open(partitions_tsv, "r") as f:
+        header = f.readline().strip().split("\t")
+
+    # Extract available partition numbers
+    available = []
+    for col in header:
+        if col.startswith("single-") and col.endswith("x1.0"):
+            try:
+                num = int(col.replace("single-", "").replace("x1.0", ""))
+                available.append(num)
+            except ValueError:
+                pass
+
+    if not available:
+        print("❌ Error: No single-<N>x1.0 partitions found in TSV header")
+        sys.exit(1)
+
+    available = sorted(available)
+
+    requested = [int(p.strip()) for p in partition_string.split(",") if p.strip()]
+    resolved = []
+
+    for req in requested:
+        # exact match
+        if req in available:
+            resolved.append(req)
+        else:
+            # fallback to max available smaller than requested
+            fallback = max((a for a in available if a <= req), default=None)
+            if fallback is None:
+                fallback = min(available)  # absolute minimum safety net
+            resolved.append(fallback)
+
+    return resolved
 
 # -----------------------------
 # Core: create .microreact file
@@ -54,11 +97,11 @@ def create_microreact_file(species, partition_string, partitions_tsv, reportree_
     snp_tree_size = os.path.getsize(snp_tree)
     mash_tree_size = os.path.getsize(mash_tree)
 
-    # Split and clean the string of numbers
-    partitions = [num.strip() for num in partition_string.split(',') if num.strip()]
+    # Resolve partitions with fallback to last available
+    resolved_partitions = resolve_partitions(partition_string, partitions_tsv)
 
     # Build the formatted field names
-    field_names = [f"single-{num}x1.0" for num in partitions]
+    field_names = [f"single-{num}x1.0" for num in resolved_partitions]
 
     # Create the columns list
     columns = [{"field": "sequence", "fixed": False}]
