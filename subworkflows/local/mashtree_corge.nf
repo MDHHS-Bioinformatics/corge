@@ -19,8 +19,8 @@ def get_previous_assemblies(species ) {
     IMPORT LOCAL AND NF-COR MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MASHTREE              } from '../../modules/nf-core/mashtree/main.nf'
-include { ROOT_TREE             } from '../../modules/local/post_processing/root_tree.nf'
+include { MASHTREE                          } from '../../modules/nf-core/mashtree/main.nf'
+include { ROOT_TREE as ROOT_TREE_MASHTREE   } from '../../modules/local/tree/root_tree.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,15 +93,15 @@ workflow MASHTREE_CORGE {
     //
     // MODULE: Root the MashTree tree
     //
-    ROOT_TREE(
+    ROOT_TREE_MASHTREE(
         MASHTREE.out.tree
     )
-    ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
+    ch_versions = ch_versions.mix(ROOT_TREE_MASHTREE.out.versions)
 
     emit:
-    mashtree_tree       = ROOT_TREE.out.tre    //channel: [val(meta), tree]
-    mashtree_matrix     = MASHTREE.out.matrix  //channel: [val(meta), matrix]
-    versions            = ch_versions         // channel: [ versions.yml ]
+    mashtree_tree       = ROOT_TREE_MASHTREE.out.tre    //channel: [val(meta), tree]
+    mashtree_matrix     = MASHTREE.out.matrix           //channel: [val(meta), matrix]
+    versions            = ch_versions                   // channel: [ versions.yml ]
 }
 
 /*

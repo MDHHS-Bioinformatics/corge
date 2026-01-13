@@ -39,9 +39,7 @@
     "chartFilters": [],
     "searchOperator": "includes",
     "searchValue": "",
-    "selection": [
-      "20MP011858"
-    ],
+    "selection": [],
     "selectionBreakdownField": null
   },
   "matrices": {},
@@ -130,7 +128,7 @@
                       {
                         "type": "tab",
                         "id": "tree-2",
-                        "name": "mash",
+                        "name": "MashTree",
                         "component": "Tree"
                       }
                     ],
@@ -144,7 +142,7 @@
                       {
                         "type": "tab",
                         "id": "tree-1",
-                        "name": "single-HC",
+                        "name": "MSTreeV2",
                         "component": "Tree"
                       }
                     ]
@@ -236,11 +234,10 @@
       "blockHeaderFontSize": 13,
       "blockPadding": 0,
       "blocks": [
-        "single-10x1.0",
         "single-15x1.0",
+        "single-20x1.0",
         "single-40x1.0",
-        "single-150x1.0",
-        "single-700x1.0"
+        "single-150x1.0"
       ],
       "blockSize": 14,
       "branchLengthsDigits": 4,
@@ -323,7 +320,7 @@
       "styleNodeEdges": false,
       "subtreeIds": null,
       "type": "rc",
-      "title": "mash",
+      "title": "MashTree",
       "labelField": "sequence",
       "file": "07gg",
       "highlightedId": null,

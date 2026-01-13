@@ -41,10 +41,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 // MODULES
 include { DELETE_ASSEMBLIES                      } from '../modules/local/remove_samples/delete_assemblies.nf'
-include { MASHTREE                               } from '../modules/nf-core/mashtree/main.nf'
-include { ROOT_TREE                              } from '../modules/local/post_processing/root_tree.nf'
-include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/post_processing/microreact.nf'
-include { MICROREACT as MICROREACT_SNP           } from '../modules/local/post_processing/microreact.nf'
+include { ROOT_TREE as ROOT_TREE_MASHTREE        } from '../modules/local/tree/root_tree.nf'
+include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact/microreact.nf'
+include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact/microreact.nf'
+include { MICROREACT_ML as MICROREACT_ML_CGMLST  } from '../modules/local/microreact/microreact_ml.nf'
+include { MICROREACT_ML as MICROREACT_ML_SNP     } from '../modules/local/microreact/microreact_ml.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
 include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/post_processing/make_poodle_manifest_master.nf'
 
@@ -67,7 +68,7 @@ include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_anal
 //
 // MODULE: Installed directly from nf-core/modules
 //
-
+include { MASHTREE                               } from '../modules/nf-core/mashtree/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
@@ -128,10 +129,10 @@ workflow REMOVE_SAMPLES {
     //
     // MODULE: Root the MashTree tree
     //
-    ROOT_TREE(
+    ROOT_TREE_MASHTREE(
         MASHTREE.out.tree
     )
-    ch_versions = ch_versions.mix(ROOT_TREE.out.versions)
+    ch_versions = ch_versions.mix(ROOT_TREE_MASHTREE.out.versions)
 
     //
     // SUBWORKFLOW: Remove samples from cgMLST results and re-run ReporTree
@@ -153,36 +154,72 @@ workflow REMOVE_SAMPLES {
     ch_versions = ch_versions.mix(REMOVE_PARSNP.out.versions)
 
     //
-    // MODULE: Make a Microreact file with distance trees and selected groups
+    // MODULE: Make a Microreact file with trees and selected groups
     //
+    if(!params.tree) {
+        template_microreact = file(params.microreact_template)
+        // Using cgMLST results
+        ch_cgmlst_microreact = REMOVE_CGMLST.out.partitions
+            .join(REMOVE_CGMLST.out.dist_tree)
+            .map { meta, partitions_tsv, dist_tree ->
+                [[species: meta.species], partitions_tsv, dist_tree]
+            }
+            .join(ROOT_TREE_MASHTREE.out.tre)
+            .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_CGMLST(
+            ch_cgmlst_microreact
+        )
+        ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
+
+        // Using Parsnp results
+        ch_parsnp_microreact = REMOVE_PARSNP.out.partitions.join(REMOVE_PARSNP.out.dist_tree)
+            .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
+            .join(ROOT_TREE_MASHTREE.out.tre)         
+            .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_SNP(
+            ch_parsnp_microreact
+        )
+        ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
+    }
+
+    if(params.tree) {
+        template_microreact = file(params.microreact_template_ml)
+        // Using cgMLST results
+        ch_cgmlst_microreact_ml = REMOVE_CGMLST.out.partitions
+            .join(REMOVE_CGMLST.out.dist_tree)
+            .map { meta, partitions_tsv, dist_tree ->
+                [[species: meta.species], partitions_tsv, dist_tree]}
+            .join(REMOVE_CGMLST.out.snp_tree)
+            .join(ROOT_TREE_MASHTREE.out.tre)
+            .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_ML_CGMLST(
+            ch_cgmlst_microreact_ml
+        )
+        ch_versions = ch_versions.mix(MICROREACT_ML_CGMLST.out.versions)
+
+        // Using Parsnp results
+        ch_parsnp_microreact_ml = REMOVE_PARSNP.out.partitions
+            .join(REMOVE_PARSNP.out.dist_tree)
+            .join(REMOVE_PARSNP.out.snp_tree)
+            .map{meta, partitions_tsv, dist_tree, snp_tree -> 
+                [[species:meta.species], partitions_tsv, dist_tree, snp_tree]}
+            .join(ROOT_TREE_MASHTREE.out.tre)         
+            .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_ML_SNP(
+            ch_parsnp_microreact_ml
+        )
+        ch_versions = ch_versions.mix(MICROREACT_ML_SNP.out.versions)
+    }
+
     template_microreact = file(params.microreact_template)
-
-    // Using cgMLST results
-    ch_cgmlst_microreact = REMOVE_CGMLST.out.partitions
-        .join(REMOVE_CGMLST.out.dist_tree)
-        .map { meta, partitions_tsv, dist_tree ->
-            [[species: meta.species], partitions_tsv, dist_tree]
-        }
-        .join(ROOT_TREE.out.tre)
-        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
-
-    MICROREACT_CGMLST(
-        ch_cgmlst_microreact
-    )
-    ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
-
-    // Using Parsnp results
-    ch_parsnp_microreact = REMOVE_PARSNP.out.partitions.join(REMOVE_PARSNP.out.dist_tree)
-        .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(ROOT_TREE.out.tre)         
-        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
-
-    MICROREACT_SNP(
-        ch_parsnp_microreact
-    )
-    ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
 
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters

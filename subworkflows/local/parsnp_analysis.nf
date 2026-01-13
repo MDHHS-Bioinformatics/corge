@@ -26,10 +26,14 @@ def get_previous_partitions_tsv(species) {
     IMPORT LOCAL MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { PARSNP                } from '../../modules/local/parsnp/parsnp.nf'
-include { CLEAN_FASTA           } from '../../modules/local/parsnp/clean_fasta.nf'
-include { REPORTREE_PARSNP      } from '../../modules/local/reportree/reportree_parsnp.nf'
-include { CHECK_METADATA_MSA    } from '../../modules/local/reportree/check_metadata_msa.nf'
+include { PARSNP                                   } from '../../modules/local/parsnp/parsnp.nf'
+include { CLEAN_FASTA                              } from '../../modules/local/parsnp/clean_fasta.nf'
+include { CONVERT_XMFA_FASTA                       } from '../../modules/local/parsnp/convert_xmfa_fasta.nf'
+include { IQTREE as IQTREE_PARSNP                  } from '../../modules/local/tree/iqtree.nf'
+include { CONSTANTSITES as CONSTANT_SITES_PARSNP   } from '../../modules/local/tree/constant_sites.nf'
+include { ROOT_TREE as ROOT_TREE_PARSNP            } from '../../modules/local/tree/root_tree.nf'
+include { REPORTREE_PARSNP                         } from '../../modules/local/reportree/reportree_parsnp.nf'
+include { CHECK_METADATA_MSA                       } from '../../modules/local/reportree/check_metadata_msa.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -100,6 +104,31 @@ workflow PARSNP_ANALYSIS {
     )
     ch_versions = ch_versions.mix(CLEAN_FASTA.out.versions)
     //
+    // MODULE: If a phylogenetic tree is required generate an ML tree based on SNPs with adjusted branch length
+    //
+    ch_snp_tree = Channel.empty()
+    if(params.tree) {
+        CONVERT_XMFA_FASTA(PARSNP.out.xmfa)
+        ch_versions = ch_versions.mix(CONVERT_XMFA_FASTA.out.versions)
+        
+        CONSTANT_SITES_PARSNP(CONVERT_XMFA_FASTA.out.core_aln)
+        ch_versions = ch_versions.mix(CONSTANT_SITES_PARSNP.out.versions)
+
+        const_ch = CONSTANT_SITES_PARSNP.out.constant_sites.map { meta, p -> tuple(meta, p.text.trim())}
+
+        iqtree_input = CLEAN_FASTA.out.cleaned_snps_alignment
+            .join(const_ch)
+            .map { meta, msa, const_sites ->
+                tuple(meta, msa, const_sites)
+            }
+        IQTREE_PARSNP(iqtree_input)
+        ch_versions = ch_versions.mix(IQTREE_PARSNP.out.versions)
+
+        ROOT_TREE_PARSNP(IQTREE_PARSNP.out.phylogeny)
+        ch_versions = ch_versions.mix(ROOT_TREE_PARSNP.out.versions)
+        ch_snp_tree = ROOT_TREE_PARSNP.out.tre
+    }
+    //
     // MODULE: Check that metadata has info for all the samples in the final MSA
     //
     if(params.metadata) {
@@ -138,6 +167,7 @@ workflow PARSNP_ANALYSIS {
     partitions          = REPORTREE_PARSNP.out.partitions             //channel: [val (meta), partitions_summary]
     dist_tree           = REPORTREE_PARSNP.out.single_HC              //channel: [val(meta), single_hc]
     cluster_composition = REPORTREE_PARSNP.out.cluster_composition    //channel: [val(meta), cluster_composition]
+    snp_tree            = ch_snp_tree                                 //channel: [val(meta), tree]
     versions            = ch_versions                                 // channel: [ versions.yml ]
 }
 

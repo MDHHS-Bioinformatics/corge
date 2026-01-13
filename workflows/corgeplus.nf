@@ -42,8 +42,10 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 */
 
 // MODULES
-include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/post_processing/microreact.nf'
-include { MICROREACT as MICROREACT_SNP           } from '../modules/local/post_processing/microreact.nf'
+include { MICROREACT as MICROREACT_CGMLST        } from '../modules/local/microreact/microreact.nf'
+include { MICROREACT as MICROREACT_SNP           } from '../modules/local/microreact/microreact.nf'
+include { MICROREACT_ML as MICROREACT_ML_CGMLST  } from '../modules/local/microreact/microreact_ml.nf'
+include { MICROREACT_ML as MICROREACT_ML_SNP     } from '../modules/local/microreact/microreact_ml.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
 include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/post_processing/make_poodle_manifest_master.nf'
 
@@ -137,36 +139,70 @@ workflow CORGEPLUS {
     ch_versions = ch_versions.mix(MASHTREE_CORGE.out.versions)
 
     //
-    // MODULE: Make a Microreact file with distance trees and selected groups
+    // MODULE: Make a Microreact file with trees and selected groups
     //
-    template_microreact = file(params.microreact_template)
+    if(!params.tree) {
+        template_microreact = file(params.microreact_template)
+        // Using cgMLST results
+        ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
+            .join(CHEWBBACA_ANALYSIS.out.dist_tree)
+            .map { meta, partitions_tsv, dist_tree ->
+                [[species: meta.species], partitions_tsv, dist_tree]
+            }
+            .join(MASHTREE_CORGE.out.mashtree_tree)
+            .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
-    // Using cgMLST results
-    ch_cgmlst_microreact = CHEWBBACA_ANALYSIS.out.partitions
-        .join(CHEWBBACA_ANALYSIS.out.dist_tree)
-        .map { meta, partitions_tsv, dist_tree ->
-            [[species: meta.species], partitions_tsv, dist_tree]
-        }
-        .join(MASHTREE_CORGE.out.mashtree_tree)
-        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
+        MICROREACT_CGMLST(
+            ch_cgmlst_microreact
+        )
+        ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
 
-    MICROREACT_CGMLST(
-        ch_cgmlst_microreact
-    )
-    ch_versions = ch_versions.mix(MICROREACT_CGMLST.out.versions)
+        // Using Parsnp results
+        ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
+            .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
+            .join(MASHTREE_CORGE.out.mashtree_tree)         
+            .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
 
-    // Using Parsnp results
-    ch_parsnp_microreact = PARSNP_ANALYSIS.out.partitions.join(PARSNP_ANALYSIS.out.dist_tree)
-        .map{meta, partitions_tsv, dist_tree -> [[species:meta.species], partitions_tsv, dist_tree]}
-        .join(MASHTREE_CORGE.out.mashtree_tree)         
-        .map { meta, partitions_tsv, dist_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, mashtree_tree, template_microreact)}
+        MICROREACT_SNP(
+            ch_parsnp_microreact
+        )
+        ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
+    }
 
-    MICROREACT_SNP(
-        ch_parsnp_microreact
-    )
-    ch_versions = ch_versions.mix(MICROREACT_SNP.out.versions)
+    if(params.tree) {
+        template_microreact = file(params.microreact_template_ml)
+        // Using cgMLST results
+        ch_cgmlst_microreact_ml = CHEWBBACA_ANALYSIS.out.partitions
+            .join(CHEWBBACA_ANALYSIS.out.dist_tree)
+            .map { meta, partitions_tsv, dist_tree ->
+                [[species: meta.species], partitions_tsv, dist_tree]}
+            .join(CHEWBBACA_ANALYSIS.out.snp_tree)
+            .join(MASHTREE_CORGE.out.mashtree_tree)
+            .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_ML_CGMLST(
+            ch_cgmlst_microreact_ml
+        )
+        ch_versions = ch_versions.mix(MICROREACT_ML_CGMLST.out.versions)
+
+        // Using Parsnp results
+        ch_parsnp_microreact_ml = PARSNP_ANALYSIS.out.partitions
+            .join(PARSNP_ANALYSIS.out.dist_tree)
+            .join(PARSNP_ANALYSIS.out.snp_tree)
+            .map{meta, partitions_tsv, dist_tree, snp_tree -> 
+                [[species:meta.species], partitions_tsv, dist_tree, snp_tree]}
+            .join(MASHTREE_CORGE.out.mashtree_tree)         
+            .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+
+        MICROREACT_ML_SNP(
+            ch_parsnp_microreact_ml
+        )
+        ch_versions = ch_versions.mix(MICROREACT_ML_SNP.out.versions)
+    }
 
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters

@@ -65,11 +65,12 @@ def resolve_partitions(partition_string, partitions_tsv):
 # -----------------------------
 # Core: create .microreact file
 # -----------------------------
-def create_microreact_file(species, partition_string, partitions_tsv, reportree_tree, mash_tree, microreact_template, output_file):
+def create_microreact_file(species, partition_string, partitions_tsv, reportree_tree, snp_tree, mash_tree, microreact_template, output_file):
     # Convert relative paths to absolute paths
     microreact_template = os.path.abspath(microreact_template)
     partitions_tsv = os.path.abspath(partitions_tsv)
     reportree_tree = os.path.abspath(reportree_tree)
+    snp_tree = os.path.abspath(snp_tree)
     mash_tree = os.path.abspath(mash_tree)
     output_file = os.path.abspath(output_file)
 
@@ -87,11 +88,13 @@ def create_microreact_file(species, partition_string, partitions_tsv, reportree_
     # Encode new CSV and tree files into Base64
     partitions_tsv_blob = encode_file(partitions_tsv)
     reportree_tree_blob = encode_file(reportree_tree)
+    snp_tree_blob = encode_file(snp_tree)
     mash_tree_blob = encode_file(mash_tree)
 
     # Get file sizes
     partitions_tsv_size = os.path.getsize(partitions_tsv)
     report_tree_size = os.path.getsize(reportree_tree)
+    snp_tree_size = os.path.getsize(snp_tree)
     mash_tree_size = os.path.getsize(mash_tree)
 
     # Resolve partitions with fallback to last available
@@ -105,28 +108,37 @@ def create_microreact_file(species, partition_string, partitions_tsv, reportree_
     columns.extend({"field": f, "fixed": False} for f in field_names)
 
     # Update JSON with file data
-    microreact_data['files']['ozx7'] = {
+    microreact_data['files']['o0ru'] = {
         "blob": f"data:text/csv;base64,{partitions_tsv_blob}",
         "format": "text/csv",
-        "id": "ozx7",
+        "id": "o0ru",
         "name": os.path.basename(partitions_tsv),
         "size": partitions_tsv_size,
         "type": "data"
     }
 
-    microreact_data['files']['lwvj'] = {
+    microreact_data['files']['0tyl'] = {
         "blob": f"data:application/octet-stream;base64,{reportree_tree_blob}",
         "format": "text/x-nh",
-        "id": "lwvj",
+        "id": "0tyl",
         "name": os.path.basename(reportree_tree),
         "size": report_tree_size,
         "type": "tree"
     }
 
-    microreact_data['files']['07gg'] = {
+    microreact_data['files']['mwvf'] = {
+        "blob": f"data:application/octet-stream;base64,{snp_tree_blob}",
+        "format": "text/x-nh",
+        "id": "mwvf",
+        "name": os.path.basename(snp_tree),
+        "size": snp_tree_size,
+        "type": "tree"
+    }
+
+    microreact_data['files']['8afx'] = {
         "blob": f"data:application/octet-stream;base64,{mash_tree_blob}",
         "format": "text/x-nh",
-        "id": "07gg",
+        "id": "8afx",
         "name": os.path.basename(mash_tree),
         "size": mash_tree_size,
         "type": "tree"
@@ -139,12 +151,12 @@ def create_microreact_file(species, partition_string, partitions_tsv, reportree_
         "title": "HC-partitions",
         "paneId": "table-1",
         "columns": columns,
-        "file": "ozx7"
+        "file": "o0ru"
     }
 
     # Update trees with partition-based blocks
     microreact_data.setdefault('trees', {})
-    for tree_key in ["tree-1", "tree-2"]:
+    for tree_key in ["tree-1", "tree-2", "tree-3"]:
         microreact_data['trees'].setdefault(tree_key, {})
         microreact_data['trees'][tree_key]['blocks'] = field_names
 
@@ -180,6 +192,7 @@ def main():
     parser.add_argument("--partitions", required=True, help="Comma-separated partition values (e.g. '10,15,20,40')")
     parser.add_argument("--partitions-tsv", required=True, help="Path to the partitions TSV file")
     parser.add_argument("--reportree-tree", required=True, help="Path to the ReporTree Newick tree file")
+    parser.add_argument("--snp-tree", required=True, help="Path to the SNP tree file")
     parser.add_argument("--mash-tree", required=True, help="Path to the Mash tree file")
     parser.add_argument("--template", required=True, help="Path to the Microreact JSON template")
     parser.add_argument("--output", required=True, help="Output file path (.microreact)")
@@ -191,6 +204,7 @@ def main():
         partition_string=args.partitions,
         partitions_tsv=args.partitions_tsv,
         reportree_tree=args.reportree_tree,
+        snp_tree=args.snp_tree,
         mash_tree=args.mash_tree,
         microreact_template=args.template,
         output_file=args.output

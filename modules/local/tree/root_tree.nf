@@ -19,7 +19,6 @@ process ROOT_TREE {
 
     script:
     def args_extension = task.ext.args_extension ?: ''
-    prefix = task.ext.prefix ?: "${meta.species}"
     species = task.ext.prefix ?: "${meta.species}"
 
     """
@@ -27,7 +26,7 @@ process ROOT_TREE {
     tree <- read.tree('${tree}'); \
     midpoint_tree <- midpoint.root(tree); \
     midpoint_tree <- ladderize(midpoint_tree, right = F); \
-    write.tree(midpoint_tree, file='${prefix}${args_extension}.tre')"
+    write.tree(midpoint_tree, file='${species}_rooted_${args_extension}.tre')"
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":

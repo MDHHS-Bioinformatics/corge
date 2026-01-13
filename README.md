@@ -1,6 +1,6 @@
 <img src="docs/images/corge_logo.png" alt="CorGe Logo" width="100" align="right"/>
 
-# 🧬 CorGe+ — Core Genome plus **grouping** of bacteria
+# 🧬 CorGe+ — Core Genome plus grouping of bacteria
 
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
@@ -9,7 +9,31 @@
 
 CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance and linkage investigation**. It performs **core genome MLST (cgMLST)** or **core genome alignment** and then identifies potential linkages between samples and clusters isolates into **genomic context groups**.
 
-It’s portable, reproducible, and simple — whether you’re tracking an outbreak or monitoring genomic trends over time. More details [below](#-designed-for-bacterial-surveillance)
+
+## 🔍 Designed for bacterial surveillance
+
+CorGe+ was created to make **genomic epidemiology, routine surveillance, and outbreak screening both fast and accessible**. It helps you:
+
+* 🕒 **Track related isolates over time** and monitor emerging patterns.
+* 🧬 **Group genomes by allelic or SNP distance** using cgMLST or core-genome alignment.
+* 🔗 **Identify potential linkages** based on allelic distances (cgMLST) or SNP distances (Parsnp).
+* 📤 **Export clean, shareable outputs** (CSV tables + Microreact visualizations).
+* 🧩 **Feed selected genomic context groups** into the downstream pipeline [`PoODLE`](#-poodle-samplesheets) for high-quality SNP and pangenome analyses.
+
+When the first question is *“Are these isolates related?”*, CorGe+ gives you a fast answer.
+
+### Multi-species and incremental analysis
+
+CorGe+ can analyze **multiple species in a single run**.
+The output directory acts as a **growing surveillance database** — new samples are automatically compared with previous ones, and group nomenclature remains stable across batches.
+
+If you need to **analyze a batch independently** (e.g., without comparing to historical data), simply specify a **new `--outdir`** and include only the samples you want to compare in the manifest.
+
+---
+
+>[!WARNING]
+>**Disclaimer**: This pipeline is only for investigation and epidemiology use. *The data presented in this pipeline has not been validated or subjected to CLIA standards for diagnosing and treating disease. Relatedness by WGS should not replace epidemiological investigations for determining linkage.*
+
 
 ### ![CorGe flow](docs/images/corge_flow.png)
 
@@ -17,12 +41,11 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 - [Pipeline summary](#-pipeline-summary)
 - [Quick Start](#-quick-start)
 - [Parameters](#parameters)
-- [Designed for bacterial surveillance](#-designed-for-bacterial-surveillance)
-- [When to use what](#-when-to-use-what)
+- [Output overview](#-output-overview)
 - [Key files: Linkages & context groups](#-key-files-linkages--context-groups)
+- [When to use what](#-when-to-use-what)
 - [Best practices & caveats](#-best-practices--caveats)
 - [Troubleshooting](#-troubleshooting)
-- [Output overview](#-output-overview)
 - [Citations](#-citations)
 - [Credits & Community](#credits--community)
 - [License](#-license)
@@ -55,7 +78,7 @@ It’s portable, reproducible, and simple — whether you’re tracking an outbr
 > If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
 > ```
 > export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
-> ``````
+> ```
 
 ---
 
@@ -67,14 +90,14 @@ You only need to download each species’ cgMLST schema **once**. CorGe+ can aut
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
+  -profile singularity \
   --mode schema \
   --schema_ids s1,s20 \
-  --outdir corge \
-  -profile singularity
+  --outdir corge
 ```
 
 >[!NOTE]
->This command clones (download) the repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+>This command clones (download) this repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
 
 - **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
@@ -104,7 +127,8 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 Include:
 * `sample`: unique ID (no spaces recommended)
 * `assembly`: absolute path to FASTA assembly for the sample (uncompressed FASTA only; .gz or .zip not supported)
-* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Any spaces in the name will be automatically replaced with underscores.
+* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Parsnp is triggered when a species lacks a cgMLST schema; for more details check [_When to use what_](#-when-to-use-what). Any spaces in the name will be automatically replaced with underscores.
+
 ```
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
@@ -119,34 +143,36 @@ ISO4,/path/iso4.fasta,Acinetobacter baumannii
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
+  -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
-  --outdir corge \
-  -profile singularity
+  --outdir corge
 ```
 
-Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp).  More details about the default thresholds [below](#-group-thresholds-allelic-or-snp-distance-cutoffs). Customizable via `--thresholds 1,10,100,1000`. Reference thresholds from different sources are available at [`reference_thresholds.rmd`](assets/reference_thresholds.rmd). 
+Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Parsnp).  More details about the default thresholds [below](#-group-thresholds-allelic-or-snp-distance-cutoffs). Customizable via `--thresholds 1,10,100,1000`. Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md). 
 
 ### With custom thresholds
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
+  -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir results \
-  --thresholds 1,10,100,1000 \
-  -profile singularity
+  --thresholds 1,10,100,1000
 ```
 
 ### Expert level
-Using sample metadata and custom configuration:
+Generate a phylogenetic tree and use sample metadata and custom configuration:
 
 ```bash
 nextflow run MI-Bioinformatics/CorGe \
+  -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir /path/to/corge \
   --thresholds 5,10,20,30,150 \
+  --tree \
   --metadata full_lims_data.csv \
   --columns_summary_report st,specimen_source,specimen_type,patient_county,submitter_name,date,first_seq_date,last_seq_date,timespan_days \
   --metadata2report st \
@@ -154,9 +180,7 @@ nextflow run MI-Bioinformatics/CorGe \
   --phoenix_path /path/to/phx_output \
   --max_memory 160.GB \
   --max_cpus 24 \
-  --max_time 8.h \
-  -profile singularity
-
+  --max_time 8.h
 ```
 
 > [!TIP]
@@ -171,11 +195,12 @@ nextflow run MI-Bioinformatics/CorGe \
 | ------------------ | :------: | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | `--input`          |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                                  |
 | `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
-| `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema. |
-| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Comma-separated integers.     |
-| `--mode`           |     ✓    | `default`      | `default` to run core genome analysis with new isolates; `schema` for **schema-download workflow**; or `remove` to remove samples from database     |
-| `--schema_ids`     |     –    | –              | Comma-separated schema IDs (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
+| `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema, check [_When to use what_](#-when-to-use-what). |
+| `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Check [_group thresholds_](#-group-thresholds-allelic-or-snp-distance-cutoffs). Comma-separated integers.     |
+| `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; or [`remove`](#-troubleshooting) to remove samples from database     |
+| `--schema_ids`     |     –    | –              | Comma-separated [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
 | `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used  |
+| `--tree`     |     –    | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles.    |
 
 
 ### ⚙️ **Execution Configuration**
@@ -218,82 +243,22 @@ More details about these options in [`ReporTree`](https://github.com/insapathoge
 
 ---
 
-## 🔍 Designed for bacterial surveillance
+## 📊 Output overview
 
-CorGe+ was created to make **genomic epidemiology, routine surveillance, and outbreak screening both fast and accessible**. It helps you:
+Results are structured by **species** inside `<outdir>/<Species>/`.
+Each folder includes:
 
-* 🕒 **Track related isolates over time** and monitor emerging patterns.
-* 🧬 **Group genomes by allelic or SNP distance** using cgMLST or core-genome alignment.
-* 🔗 **Identify potential linkages** based on allelic distances (cgMLST) or SNP distances (Parsnp).
-* 📤 **Export clean, shareable outputs** (CSV tables + Microreact visualizations).
-* 🧩 **Feed selected genomic context groups** into the downstream pipeline [`PoODLE`](#-poodle-samplesheets) for high-quality SNP and pangenome analyses.
+* **cgMLST** or **Parsnp** results
+* **Linkage analysis** CSVs
+* **Genomic context group** tables per threshold
+* **MashTree** files
+* **Tree** files (when `--tree` is used)
+* **Microreact** project file (`*.microreact`)
+* **ReporTree** distance and cluster files
+* **PoODLE** manifests
 
-When the first question is *“Are these isolates related?”*, CorGe+ gives you a fast answer.
 
-### Multi-species and incremental analysis
-
-CorGe+ can analyze **multiple species in a single run**.
-The output directory acts as a **growing surveillance database** — new samples are automatically compared with previous ones, and group nomenclature remains stable across batches.
-
-If you need to **analyze a batch independently** (e.g., without comparing to historical data), simply specify a **new `--outdir`** and include only the samples you want to compare in the manifest.
-
----
-
->[!WARNING]
->**Disclaimer**: This pipeline is only for investigation and epidemiology use. *The data presented in this pipeline has not been validated or subjected to CLIA standards for diagnosing and treating disease. Relatedness by WGS should not replace epidemiological investigations for determining linkage.*
-
-## 🧭 When to use what
-
-### **🔹 cgMLST (ChewBBACA)** — *preferred method*
-
-Used automatically when a cgMLST schema is available for the species.
-
-* Works with as few as **2 samples**.
-* Provides **stable, reference-free** allele calling (40–80% of the genome).
-
----
-
-### **🔹 Parsnp fallback** — *used when no cgMLST schema exists*
-
-Parsnp is triggered when a species lacks a schema.
-
-* Recommended: **≥5 samples** for meaningful alignments.
-* Minimum: **2 samples**, but expect longer runtimes and reduced SNP accuracy.
-* Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~150 SNPs) when evaluating potential linkages.
-* For downstream confirmation, use an hqSNP workflow (e.g., [`Snippy`](https://github.com/tseemann/snippy) and [`Gubbins`](https://github.com/nickjcroucher/gubbins)).
-
----
-
-### **🔹 Group thresholds (allelic or SNP distance cutoffs)**
-
-Thresholds determine **which samples are grouped together** for downstream high-resolution analysis like [**PoODLE**](https://github.com/MI-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons).
-These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
-
-**Practical guidance from surveillance experience:**
-
-* **15–20 alleles**
-
-  * Useful for species or STs that are *highly prevalent* and genetically tight
-    (e.g., *Acinetobacter baumannii* ST2, *Klebsiella pneumoniae* ST219).
-  * Helps separate closely related sub-lineages.
-
-* **40 alleles**
-
-  * Good general-purpose threshold to keep **linked + contextual** samples together
-    within the same broader lineage.
-
-* **150 alleles**
-
-  * Useful when a cluster has **too few samples** and you want to include more that are
-    still related at a lineage level but not necessarily linked.
-
-A meaningful group for downstream SNP-based analysis ideally contains **>4 samples**.
-If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
-
----
-
-> [!TIP]
-> Use the [**Microreact visualization**](https://github.com/MI-Bioinformatics/CorGe/tree/development#-microreact-export) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+Details about outputs can be found in [`output.md`](docs/output.md) and the outputs tree in [`corge_outputs.md`](docs/corge_outputs.md).
 
 ---
 
@@ -356,22 +321,82 @@ For each cluster, CorGe+ selects a reference genome based on the "best" assembly
 
 ### 🧬 Microreact export
 
-CorGe+ generates a `.microreact` file that brings together **two complementary genetic perspectives**:
+CorGe+ generates a `.microreact` file that brings together **complementary genetic perspectives**:
 
 * **Mashtree** — produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes.
 * **Core-genome distance tree** — prepared by ReporTree with the MSTreeV2 method, it's useful for visualizing genetic relatedness among isolates.
+* **Maximum-Likelihood tree** — phylogenetic tree based on DNA sequence alignment, included when `--tree` is used.
 
-By integrating both views, Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which group threshold to use in downstream high-resolution analyses.
+Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which group threshold to use in downstream high-resolution analyses.
 
 To aid interpretation, Microreact also displays **heatmaps per threshold**, using the ReporTree **partition nomenclature**.
 Each partition corresponds to a hierarchical clustering level and includes the method, numeric threshold, and distance unit. For example, threshold **15** corresponds to the partition `single-15x1.0`.
 
 To visualize, upload the `.microreact` file to [`Microreact/upload`](https://microreact.org/upload)
 
+_Microreact example using default settings_
 ### ![Microreact example](docs/images/corge_microreact_example.png)
+
+_Microreact example using the `--tree` option_
+### ![Microreact example](docs/images/corge_microreact_example_ml.png)
 
 > [!TIP]  
 > You can also explore groups interactively by uploading the ReporTree files `.nwk` and `metadata_w_partitions.tsv` or `partitions.tsv` to [`GrapeTree`](https://github.com/achtman-lab/GrapeTree), [`SPREAD`](https://github.com/genpat-it/spread) or [`Auspice`](https://auspice.us/). These tools run entirely in your browser for quick and private visualization.
+
+---
+
+## 🧭 When to use what
+
+### **🔹 cgMLST (ChewBBACA)** — *preferred method*
+
+Used automatically when a cgMLST schema is available for the species.
+
+* Works with as few as **2 samples**.
+* Provides **stable, reference-free** allele calling (40–80% of the genome).
+
+---
+
+### **🔹 Parsnp fallback** — *used when no cgMLST schema exists*
+
+Parsnp is triggered when a species lacks a schema.
+
+* Recommended: **≥5 samples** for meaningful alignments.
+* Minimum: **2 samples**, but expect longer runtimes and reduced SNP accuracy.
+* Assembly-based SNPs are often **inflated**, so treat Parsnp results as **screening** only. Apply **higher SNP thresholds** (e.g., ~150 SNPs) when evaluating potential linkages.
+* For downstream confirmation, use an hqSNP workflow (e.g., [`Snippy`](https://github.com/tseemann/snippy) and [`Gubbins`](https://github.com/nickjcroucher/gubbins)).
+
+---
+
+### **🔹 Group thresholds (allelic or SNP distance cutoffs)**
+
+Thresholds determine **which samples are grouped together** for downstream high-resolution analysis like [**PoODLE**](https://github.com/MI-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons).
+These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
+
+**Practical guidance from surveillance experience:**
+
+* **15–20 alleles**
+
+  * Useful for species or STs that are *highly prevalent* and genetically tight
+    (e.g., *Acinetobacter baumannii* ST2, *Klebsiella pneumoniae* ST219).
+  * Helps separate closely related sub-lineages.
+
+* **40 alleles**
+
+  * Good general-purpose threshold to keep **linked + contextual** samples together
+    within the same broader lineage.
+
+* **150 alleles**
+
+  * Useful when a cluster has **too few samples** and you want to include more that are
+    still related at a lineage level but not necessarily linked.
+
+A meaningful group for downstream SNP-based analysis ideally contains **>4 samples**.
+If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
+
+---
+
+> [!TIP]
+> Use the [**Microreact visualization**](#-microreact-export) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
 
 ---
 
@@ -430,24 +455,6 @@ To visualize, upload the `.microreact` file to [`Microreact/upload`](https://mic
 
 ---
 
-## 📊 Output overview
-
-Results are structured by **species** inside `<outdir>/<Species>/`.
-Each folder includes:
-
-* **cgMLST** or **Parsnp** results
-* **Linkage analysis** CSVs
-* **Genomic context group** tables per threshold
-* **MashTree** files
-* **Microreact** project file (`*.microreact`)
-* **ReporTree** distance and cluster files
-* **PoODLE** manifests
-
-
-Details about outputs can be found in [`output.md`](docs/output.md) and the outputs tree in [`corge_outputs.md`](docs/corge_outputs.md).
-
----
-
 ## 💬 Citations
 
 If you use CorGe+, please cite:
@@ -458,6 +465,8 @@ If you use CorGe+, please cite:
 * Parsnp — core alignment
 * Microreact — visualization platform
 * cgmlst.org —  cgMLST server
+* IQTREE —  phylogeny (when `--tree` is used)
+* SNP-sites — constant sites calculation (when `--tree` is used)
 * nf-core — bioinformatics pipeline framework
 * NextFlow — computational workflow
 * Software packaging/containerization tools
