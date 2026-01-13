@@ -1,5 +1,14 @@
 # cgMLST Allelic Distance (AD) Thresholds – Reference
 
+AD thresholds are species-specific and depend on the scale desired. General overview:
+
+| Scale                   | Typical AD range           |
+| ----------------------- | -------------------------- |
+| Outbreak / transmission | 0–25 AD (species-specific) |
+| ST-level structure      | 100–700+ AD                |
+| CC / lineage structure  | 300–2000+ AD               |
+
+
 ## 1. Thresholds from Mixão et al., *Nature Communications* (2025)
 
 **Reference:**
@@ -8,24 +17,14 @@ Mixão V. *et al.*
 Nature Communications (2025)
 DOI: 10.1038/s41467-025-59246-8
 
-These thresholds represent **regions of highest congruence** between cgMLST allele distances and classical typing schemes (ST, CC, serotype), **not outbreak cut-offs** unless explicitly stated.
-
 ### 1.1 Per-species congruence thresholds (ADs)
 
 | Species                  | ST Congruence (AD)              | CC / Serotype Congruence (AD)                | Outbreak-Level Notes                                                                                                 | PopPUNK Congruence |
 | ------------------------ | ------------------------------- | -------------------------------------------- | -------------------------------------------------------------------------------------------------------------------- | ------------------ |
-| *Listeria monocytogenes* | ~143–190                        | ~388–508                                     | Outbreak clusters commonly assessed at **7 AD** (4 AD stringent); flexible up to ~9 AD improves pipeline concordance | Not reported       |
-| *Salmonella enterica*    | ~205–310                        | ~1261–1663 (serotype)                        | No explicit outbreak plateau defined in the study                                                                    | Not reported       |
-| *Escherichia coli*       | ~545–738                        | Not clearly separated from serotype          | Outbreak thresholds not explicitly defined                                                                           | ~723–1002 AD       |
-| *Campylobacter jejuni*   | Between ST and CC ranges        | ~315–522 (short schemas); ~644–839 (PubMLST) | No stable low-AD outbreak plateau                                                                                    | Between ST and CC  |
-| *Campylobacter coli*     | Similar behavior to *C. jejuni* | Similar ranges                               | No stable outbreak plateau                                                                                           | Similar            |
-
-**Key interpretation notes:**
-
-* These AD values represent **stable clustering regions**, not recommended surveillance cut-offs.
-* **ST and CC congruence thresholds are orders of magnitude larger** than outbreak thresholds.
-* *Campylobacter jejuni* does **not** show stable low-distance outbreak clustering using cgMLST.
-* PopPUNK congruence thresholds are only explicitly reported for *E. coli* and *Campylobacter*.
+| *Listeria monocytogenes* | ~143–190                        | ~388–508                                     | Outbreak clusters commonly assessed at **7 AD** (4 AD stringent); flexible up to ~9 AD improves pipeline concordance | -      |
+| *Salmonella enterica*    | ~205–310                        | ~1261–1663 (serotype)                        | 10-14 ADs                                                                    | -       |
+| *Escherichia coli*       | ~545–738                        | Not clearly separated from serotype          | 9 AD                                                                           | ~723–1002 AD       |
+| *Campylobacter jejuni*   | -        | ~315–522 (short schemas); ~644–839 (PubMLST) | 4 ADs                                                                                    | -  |
 
 ---
 
@@ -83,27 +82,4 @@ These thresholds define **maximum allelic distances** for assigning isolates to 
 | *Yersinia enterocolitica* cgMLST                              | 4                          |
 
 ---
-
-## 3. How to Use These Thresholds
-
-### Scale matters
-
-| Scale                   | Typical AD range           |
-| ----------------------- | -------------------------- |
-| Outbreak / transmission | 0–25 AD (species-specific) |
-| ST-level structure      | 100–700+ AD                |
-| CC / lineage structure  | 300–2000+ AD               |
-
----
-
-## 4. References
-
-1. Mixão V. *et al.* (2025).
-   *Clustering stability and congruence across bacterial cgMLST pipelines.*
-   **Nature Communications**, 16, Article 9246.
-   [https://doi.org/10.1038/s41467-025-59246-8](https://doi.org/10.1038/s41467-025-59246-8)
-
-2. Ridom GmbH.
-   *SeqSphere+ cgMLST schemes and cluster definitions.*
-   [https://www.cgmlst.org](https://www.cgmlst.org)
 
