@@ -266,17 +266,42 @@ Details about outputs can be found in [`output.md`](docs/output.md) and the outp
 
 CorGe+ generates two main tables to support surveillance, cluster interpretation, and downstream hqSNP-based analysis.
 
-### **📘 Potential linkages**
+Got it — thanks for the clarification. Here is a **clean, unified README section** where **all columns belong to the same *potential linkages* table**, with consistent terminology and no ambiguity.
 
-File: `<Species>_potential_linkages.csv`
-Identifies **strong** or **intermediate** linkages between samples based on **allelic distances** (cgMLST) or **SNP distances** (Parsnp).
+---
 
-**Columns:**
+## 📘 Potential linkages
 
-* `sample`
-* `strong_linkages` — highly similar isolates (0-10)
-* `intermediate_linkage` — moderately similar isolates (11-40)
-* `lineage_level` — less similar isolates (41-150)
+**File:** `<Species>_potential_linkages.csv`
+
+This table summarizes genome completeness and identifies **strong**, **intermediate**, or **lineage-level** linkages between samples based on **cgMLST allelic distances** or **SNP distances** (Parsnp), depending on the analysis performed.
+
+### Columns
+
+* `sample` — sample identifier
+
+* `species` — species assignment used for cgMLST or SNP-based analysis
+
+* `percentage_called` — proportion of the cgMLST schema (or aligned genome length) successfully called for the sample (range 0–1; e.g. `0.95` = 95%)
+
+* `completeness_check` — genome completeness quality flag derived from `percentage_called`:
+
+  * **PASS**: ≥ 95%
+  * **WARN**: 90–94.9%
+  * **FAIL**: < 90%
+
+  Samples flagged as **WARN** or **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend confirming relatedness using **read-based analyses** and evaluating samples at the **lineage level** to avoid missing potential links.
+
+* `min_dist` — minimum genetic distance to any other sample:
+
+  * **allelic distance (AD)** when cgMLST is used
+  * **SNP distance** when Parsnp is used
+
+* `strong_linkages` — highly similar isolates (distance 0–10).
+
+* `intermediate_linkages` — moderately similar isolates (distance 11–40).
+
+* `lineage_level` — related isolates (distance 41–150).
 
 ---
 
