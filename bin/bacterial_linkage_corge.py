@@ -7,18 +7,9 @@ import argparse
 import logging
 
 
-def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
+def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, output: str):
     """
     Generate a summary bacterial linkage table with potential strong and intermediate linkages.
-
-    Parameters
-    ----------
-    species : str
-        Species name
-    dist_hamming : str
-        Path to distance matrix TSV file from ReporTree
-    output : str
-        Output file path for linkage report
     """
 
     # -----------------------------
@@ -26,7 +17,6 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
     # -----------------------------
     def format_linkages(df, threshold, max_distance, include_threshold=False):
         def linkages(distances):
-            # Filter linked samples
             linked = [
                 (sample, distances[sample])
                 for sample in distances.index
@@ -40,10 +30,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
             if not linked:
                 return 'None'
 
-            # Sort by distance (ascending)
             linked_sorted = sorted(linked, key=lambda x: x[1])
-
-            # Convert to "sample (integer)" format
             return ', '.join(f"{s} ({int(d)})" for s, d in linked_sorted)
 
         return df.apply(linkages, axis=1)
@@ -56,14 +43,52 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
         sys.exit(1)
 
     try:
-        matrix_df = pd.read_csv(dist_hamming, sep='\t', index_col=0)
-        matrix_df = matrix_df.astype(float)
+        matrix_df = pd.read_csv(dist_hamming, sep='\t', index_col=0).astype(float)
     except Exception as e:
         logging.error(f"Error reading distance file {dist_hamming}: {e}")
         sys.exit(1)
 
-    # Replace diagonal with inf (self-comparisons)
+    # Replace diagonal with inf
     np.fill_diagonal(matrix_df.values, float('inf'))
+
+    # Minimum distance per sample
+    min_dist = matrix_df.min(axis=1)
+
+    # -----------------------------
+    # Load loci report
+    # -----------------------------
+    if not os.path.exists(loci_report):
+        logging.error(f"Error: Loci report not found - {loci_report}")
+        sys.exit(1)
+
+    try:
+        loci_df = pd.read_csv(loci_report, sep='\t')
+    except Exception as e:
+        logging.error(f"Error reading loci report {loci_report}: {e}")
+        sys.exit(1)
+
+    if 'samples' not in loci_df.columns or 'pct_called' not in loci_df.columns:
+        logging.error("Loci report must contain columns: 'samples' and 'pct_called'")
+        sys.exit(1)
+
+    loci_df = loci_df.rename(columns={'samples': 'sample'})
+    loci_df = loci_df[['sample', 'pct_called']]
+
+    # -----------------------------
+    # Completeness logic
+    # -----------------------------
+    def completeness_check(pct):
+        if pd.isna(pct):
+            return 'FAIL'
+        if pct >= 0.95:
+            return 'PASS'
+        elif pct >= 0.90:
+            return 'WARN'
+        else:
+            return 'FAIL'
+
+    loci_df['completeness_check'] = loci_df['pct_called'].apply(completeness_check)
+
     # -----------------------------
     # Compute linkages
     # -----------------------------
@@ -75,17 +100,22 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
     # Build results table
     # -----------------------------
     result_df = pd.DataFrame({
-        'sample_id': matrix_df.index,
+        'sample': matrix_df.index,
         'species': species,
+        'percentage_called': matrix_df.index.map(loci_df.set_index('sample')['pct_called']),
+        'completeness_check': matrix_df.index.map(loci_df.set_index('sample')['completeness_check']),
+        'min_dist': min_dist,
         'strong_linkages': strong_linkages,
         'intermediate_linkages': intermediate_linkages,
         'lineage_level': lineage_level
     })
 
     # Fill missing safely
-    result_df['strong_linkages'] = result_df['strong_linkages'].fillna('None')
-    result_df['intermediate_linkages'] = result_df['intermediate_linkages'].fillna('None')
-    result_df['lineage_level'] = result_df['lineage_level'].fillna('None')
+    for col in ['strong_linkages', 'intermediate_linkages', 'lineage_level']:
+        result_df[col] = result_df[col].fillna('None')
+
+    result_df['percentage_called'] = result_df['percentage_called'].astype(float).round(3)
+    result_df['min_dist'] = result_df['min_dist'].astype(int)
 
     # -----------------------------
     # Save to CSV
@@ -98,16 +128,14 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, output: str):
         sys.exit(1)
 
 
-# -----------------------------
-# Command-line interface
-# -----------------------------
 def main():
     parser = argparse.ArgumentParser(
         description="Generate linkage tables based on core genome distances."
     )
-    parser.add_argument("--species", required=True, help="Species name for the linkage report.")
-    parser.add_argument("--dist-hamming", required=True, help="Path to distance matrix TSV from ReporTree.")
-    parser.add_argument("--output", required=True, help="Output CSV file path.")
+    parser.add_argument("--species", required=True)
+    parser.add_argument("--dist-hamming", required=True)
+    parser.add_argument("--loci-report", required=True)
+    parser.add_argument("--output", required=True)
 
     args = parser.parse_args()
 
@@ -116,7 +144,12 @@ def main():
         level=logging.INFO
     )
 
-    bacterial_linkage_corge(args.species, args.dist_hamming, args.output)
+    bacterial_linkage_corge(
+        args.species,
+        args.dist_hamming,
+        args.loci_report,
+        args.output
+    )
 
 
 if __name__ == "__main__":

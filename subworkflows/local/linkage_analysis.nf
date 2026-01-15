@@ -22,6 +22,8 @@ workflow LINKAGE_ANALYSIS {
     ch_parsnp_dist_hamming            // channel: [ val(meta), [ results ] ]
     ch_chewbbaca_cluster_composition  // channel: [ val(meta), [ cluster_composition ] ]
     ch_parsnp_cluster_composition     // channel: [ val(meta), [ cluster_composition ] ]
+    ch_chewbbaca_loci_report          // channel: [ val(meta), [ loci_report ] ]
+    ch_parsnp_loci_report             // channel: [ val(meta), [ loci_report ] ]
 
     main:
 
@@ -32,13 +34,19 @@ workflow LINKAGE_ANALYSIS {
     ch_all_dist_hamming = Channel.empty()
     ch_all_dist_hamming = ch_all_dist_hamming.mix(ch_chewbbaca_dist_hamming)
     ch_all_dist_hamming = ch_all_dist_hamming.mix(ch_parsnp_dist_hamming)
-    //ch_all_dist_hamming.view()
-
+    //
+    // Combine all the loci reports
+    //
+    ch_all_loci_report = Channel.empty()
+    ch_all_loci_report = ch_all_loci_report.mix(ch_chewbbaca_loci_report)
+    ch_all_loci_report = ch_all_loci_report.mix(ch_parsnp_loci_report)
     //
     // MODULE: Create bacterial linkage table per species
     //
+    ch_dist_loci = ch_all_dist_hamming.join(ch_all_loci_report)
+    //
     BACTERIAL_LINKAGE(
-        ch_all_dist_hamming
+        ch_dist_loci
     )
     ch_versions = ch_versions.mix(BACTERIAL_LINKAGE.out.versions)
     //
