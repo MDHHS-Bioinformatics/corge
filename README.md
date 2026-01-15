@@ -266,8 +266,6 @@ Details about outputs can be found in [`output.md`](docs/output.md) and the outp
 
 CorGe+ generates two main tables to support surveillance, cluster interpretation, and downstream hqSNP-based analysis.
 
-Got it — thanks for the clarification. Here is a **clean, unified README section** where **all columns belong to the same *potential linkages* table**, with consistent terminology and no ambiguity.
-
 ---
 
 ## 📘 Potential linkages
