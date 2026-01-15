@@ -15,6 +15,7 @@ process REPORTREE_CGMLST {
     tuple val(meta), path("ReporTree/${meta.species}_dist_hamming.tsv")               , emit: dist_hamming
     tuple val(meta), path("ReporTree/${meta.species}_partitions.tsv")                 , emit: partitions
     tuple val(meta), path("ReporTree/${meta.species}_single_HC.nwk")                  , emit: single_HC
+    tuple val(meta), path("ReporTree/${meta.species}_loci_report.tsv")                , emit: loci_report
     path "versions.yml", emit: versions
 
     when:

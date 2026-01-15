@@ -10,7 +10,7 @@ process BACTERIAL_LINKAGE {
         'quay.io/biocontainers/pandas:2.2.1' }"
 
     input:
-    tuple val(meta), path(dist_hamming)
+    tuple val(meta), path(dist_hamming), path(loci_report)
 
     output:
     tuple val(meta), path("*_potential_linkages.csv"), emit: potential_linkages
@@ -28,6 +28,7 @@ process BACTERIAL_LINKAGE {
     bacterial_linkage_corge.py \
         --species $species \
         --dist-hamming $dist_hamming \
+        --loci-report $loci_report \
         --output ${species}_potential_linkages.csv
 
     cat <<-END_VERSIONS > versions.yml
