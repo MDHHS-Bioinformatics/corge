@@ -33,7 +33,7 @@ process CHEWBBACA_ALLELECALL {
         --cpu $task.cpus
 
     # Rename the prefix of the results files
-    rm -rf dummy_dir/
+    rm -rf new/dummy_dir/
     
     for file in new/*; do
         if [ -f "\$file" ]; then
