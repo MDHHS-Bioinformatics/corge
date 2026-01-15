@@ -211,7 +211,9 @@ workflow CORGEPLUS {
         CHEWBBACA_ANALYSIS.out.dist_hamming,
         PARSNP_ANALYSIS.out.dist_hamming,
         CHEWBBACA_ANALYSIS.out.cluster_composition,
-        PARSNP_ANALYSIS.out.cluster_composition
+        PARSNP_ANALYSIS.out.cluster_composition,
+        CHEWBBACA_ANALYSIS.out.loci_report,
+        PARSNP_ANALYSIS.out.loci_report
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     //
