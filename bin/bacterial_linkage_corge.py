@@ -114,7 +114,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, o
     for col in ['strong_linkages', 'intermediate_linkages', 'lineage_level']:
         result_df[col] = result_df[col].fillna('None')
 
-    result_df['percentage_called'] = result_df['percentage_called'].astype(float).round(3)
+    result_df['percentage_called'] = result_df['percentage_called'].astype(float)
     result_df['min_dist'] = result_df['min_dist'].astype(int)
 
     # -----------------------------
