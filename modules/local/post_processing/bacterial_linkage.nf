@@ -1,5 +1,3 @@
-
-
 process BACTERIAL_LINKAGE {
     tag  "$meta.species"
     label 'process_single'
@@ -24,7 +22,6 @@ process BACTERIAL_LINKAGE {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    echo $species
     bacterial_linkage_corge.py \
         --species $species \
         --dist-hamming $dist_hamming \
