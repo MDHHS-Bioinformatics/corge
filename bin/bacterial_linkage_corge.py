@@ -87,7 +87,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, o
         else:
             return 'FAIL'
 
-    loci_df['completeness_check'] = loci_df['pct_called'].apply(completeness_check)
+    loci_df['completeness_qc'] = loci_df['pct_called'].apply(completeness_check)
 
     # -----------------------------
     # Compute linkages
@@ -103,7 +103,7 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, o
         'sample': matrix_df.index,
         'species': species,
         'percentage_called': matrix_df.index.map(loci_df.set_index('sample')['pct_called']),
-        'completeness_check': matrix_df.index.map(loci_df.set_index('sample')['completeness_check']),
+        'completeness_qc': matrix_df.index.map(loci_df.set_index('sample')['completeness_qc']),
         'min_dist': min_dist,
         'strong_linkages': strong_linkages,
         'intermediate_linkages': intermediate_linkages,

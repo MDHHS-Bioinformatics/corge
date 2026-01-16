@@ -282,13 +282,13 @@ This table summarizes genome completeness and identifies **strong**, **intermedi
 
 * `percentage_called` — proportion of the cgMLST schema (or aligned genome length) successfully called for the sample (range 0–1; e.g. `0.95` = 95%)
 
-* `completeness_check` — genome completeness quality flag derived from `percentage_called`:
+* `completeness_qc` — genome completeness quality flag derived from `percentage_called`:
 
   * **PASS**: ≥ 95%
   * **WARN**: 90–94.9%
   * **FAIL**: < 90%
 
-  Samples flagged as **WARN** or **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend confirming relatedness using **read-based analyses** and evaluating samples at the **lineage level** to avoid missing potential links.
+  Samples flagged as **WARN** or **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links.
 
 * `min_dist` — minimum genetic distance to any other sample:
 
