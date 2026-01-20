@@ -23,12 +23,14 @@ def build_species_index(ps: pd.DataFrame) -> pd.DataFrame:
         idx['partition']
         .str.split('-', expand=True)[1]
         .str.split('x', expand=True)[0]
+        .str.extract(r'^(\d+)')
         .astype(int)
     )
     idx['cluster_numeric'] = (
         idx['cluster']
-        .str.split('_', expand=True)[1]
-        .astype(float).astype(int)
+            .str.split('_', expand=True)[1]
+            .str.extract(r'^(\d+)')
+            .astype(int)
     )
 
     # Build combined names
