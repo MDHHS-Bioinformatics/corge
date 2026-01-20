@@ -31,7 +31,7 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 
 ---
 
->[!WARNING]
+>[!IMPORTANT]
 >**Disclaimer**: This pipeline is only for investigation and epidemiology use. *The data presented in this pipeline has not been validated or subjected to CLIA standards for diagnosing and treating disease. Relatedness by WGS should not replace epidemiological investigations for determining linkage.*
 
 
@@ -76,7 +76,7 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 
 > [!NOTE]  
 > If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
-> ```
+> ```bash
 > export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
 > ```
 
@@ -101,7 +101,7 @@ nextflow run MI-Bioinformatics/CorGe \
 
 - **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
-```
+```csv
 species,cgmlst_path
 Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
 Escherichia_albertii,/path/to/Escherichia_coli_cgMLST
@@ -129,7 +129,7 @@ Include:
 * `assembly`: absolute path to FASTA assembly for the sample (uncompressed FASTA only; .gz or .zip not supported)
 * `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Parsnp is triggered when a species lacks a cgMLST schema; for more details check [_When to use what_](#-when-to-use-what). Any spaces in the name will be automatically replaced with underscores.
 
-```
+```csv
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
 ISO2,/path/iso2.fasta,Escherichia coli
@@ -331,7 +331,7 @@ These tables define groups of samples for downstream analysis, using the standar
 
 CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold. The required columns are:
 
-```
+```csv
 sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
 ```
 
