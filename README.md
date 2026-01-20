@@ -194,7 +194,7 @@ nextflow run MI-Bioinformatics/CorGe \
 | Parameter          | Required | Default        | Description                                                                                                |
 | ------------------ | :------: | -------------- | ---------------------------------------------------------------------------------------------------------- |
 | `--input`          |     ✓    | –              | Manifest CSV (`sample,assembly,species`).                                                                  |
-| `--outdir`         |     ✓    | `$PWD/corge`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
+| `--outdir`         |     ✓    | `./corge_results`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
 | `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema, check [_When to use what_](#-when-to-use-what). |
 | `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Check [_group thresholds_](#-group-thresholds-allelic-or-snp-distance-cutoffs). Comma-separated integers.     |
 | `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; or [`remove`](#-troubleshooting) to remove samples from database     |
