@@ -140,6 +140,7 @@ workflow REMOVE_PARSNP {
     partitions          = REPORTREE_PARSNP.out.partitions             //channel: [val (meta), partitions_summary]
     dist_tree           = REPORTREE_PARSNP.out.single_HC              //channel: [val(meta), single_hc]
     cluster_composition = REPORTREE_PARSNP.out.cluster_composition    //channel: [val(meta), cluster_composition]
+    loci_report         = REPORTREE_PARSNP.out.loci_report            //channel: [val(meta), loci_report]
     snp_tree            = ch_snp_tree                                 //channel: [val(meta), tree]
     versions            = ch_versions                                 // channel: [ versions.yml ]
 }

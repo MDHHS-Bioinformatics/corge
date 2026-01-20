@@ -228,7 +228,9 @@ workflow REMOVE_SAMPLES {
         REMOVE_CGMLST.out.dist_hamming,
         REMOVE_PARSNP.out.dist_hamming,
         REMOVE_CGMLST.out.cluster_composition,
-        REMOVE_PARSNP.out.cluster_composition
+        REMOVE_PARSNP.out.cluster_composition,
+        REMOVE_CGMLST.out.loci_report,
+        REMOVE_PARSNP.out.loci_report
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     

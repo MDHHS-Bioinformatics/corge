@@ -138,6 +138,7 @@ workflow REMOVE_CGMLST {
     partitions          = REPORTREE_CGMLST.out.partitions             //channel: [val (meta), partitions_summary]
     dist_tree           = REPORTREE_CGMLST.out.single_HC              //channel: [val(meta), single_hc]
     cluster_composition = REPORTREE_CGMLST.out.cluster_composition    //channel: [val(meta), cluster_composition]
+    loci_report         = REPORTREE_CGMLST.out.loci_report           //channel: [val(meta), loci_report]
     snp_tree            = ch_snp_tree                                 //channel: [val(meta), tree]
     versions            = ch_versions                                 // channel: [ versions.yml ]
 }
