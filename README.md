@@ -5,6 +5,7 @@
 [![Nextflow](https://img.shields.io/badge/nextflow%20DSL2-%E2%89%A522.10.1-23aa62.svg)](https://www.nextflow.io/)
 [![run with docker](https://img.shields.io/badge/run%20with-docker-0db7ed?labelColor=000000&logo=docker)](https://www.docker.com/)
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
+[![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/docs/user/latest/)
 
 
 CorGe+ is a **Nextflow** pipeline designed for **bacterial genomic surveillance and linkage investigation**. It performs **core genome MLST (cgMLST)** or **core genome alignment** and then identifies potential linkages between samples and clusters isolates into **genomic context groups**.
@@ -59,7 +60,7 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 3. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree) (method = `single`).
 4. Create potential linkage tables per species.
 5. Select groups per sample using user-defined thresholds.
-6. Generate [`PoODLE`](https://github.com/MI-Bioinformatics/poodle) manifests.
+6. Generate [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) manifests.
 7. Run [`MashTree`](https://github.com/lskatz/mashtree).
 8. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees based on core genome and Mash distances.
 
@@ -72,13 +73,13 @@ If you need to **analyze a batch independently** (e.g., without comparing to his
 ### 1. Install prerequisites
 
 1. Install [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
-2. Install [`Docker`](https://docs.docker.com/engine/installation/) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/) for full pipeline reproducibility.
+2. Install [`Docker`](https://docs.docker.com/engine/installation/) (recommended for local runs) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)/[`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC clusters) for full pipeline reproducibility.
 
 > [!NOTE]  
-> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
+> If using **Singularity/Apptainer** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
 > ```bash
 > export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
-> ```
+> ``````
 
 ---
 
@@ -89,7 +90,7 @@ You only need to download each species’ cgMLST schema **once**. CorGe+ can aut
 - **Step 1. Download the schemas**: Find the schema ID in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`.
 
 ```bash
-nextflow run MI-Bioinformatics/CorGe \
+nextflow run MDHHS-Bioinformatics/corge \
   -profile singularity \
   --mode schema \
   --schema_ids s1,s20 \
@@ -97,7 +98,7 @@ nextflow run MI-Bioinformatics/CorGe \
 ```
 
 >[!NOTE]
->This command clones (download) this repo to ~/.nextflow/assets/MI-Bioinformatics/CorGe. You can download the pipeline in a different location using `git clone https://github.com/MI-Bioinformatics/CorGe.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
+>This command clones (download) this repo to ~/.nextflow/assets/MDHHS-Bioinformatics/corge. You can download the pipeline in a different location using `git clone https://github.com/MDHHS-Bioinformatics/corge.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`). More details in [Usage](docs/usage.md)
 
 - **Step 2. Check the generated schema file**: CorGe+ writes a summary to: `<outdir>/cgmlst_schemas/cgmlst_schemas.csv`. Some schemas can be used for multiple species and this file will automatically reflect those mappings (e.g. _E. coli_ cgMLST schema can be used for _Escherichia_ and _Shigella_ spp.). You can browse the full list of supported species here [`cgMLST species`](assets/species_schemas.csv). Use `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs. Example cgMLST schema file:
 
@@ -116,7 +117,7 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
 
 > [!TIP]
-> After the cgMLST schemas have been successfully downloaded, you can safely remove the `work` directory located at `<outdir>/work`.
+> After the cgMLST schemas have been successfully downloaded, the `work/` folder inside the working directory can be safely deleted.
 
 
 > [!NOTE]
@@ -127,7 +128,7 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 Include:
 * `sample`: unique ID (no spaces recommended)
 * `assembly`: absolute path to FASTA assembly for the sample (uncompressed FASTA only; .gz or .zip not supported)
-* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Parsnp is triggered when a species lacks a cgMLST schema; for more details check [_When to use what_](#-when-to-use-what). Any spaces in the name will be automatically replaced with underscores.
+* `species`: Species name used for taxonomic grouping. It must match the species name used in the cgMLST schema file. Parsnp is triggered when a species lacks a cgMLST schema; for more details check [_When to use what_](#-when-to-use-what). Any spaces in the species will be automatically replaced with underscores.
 
 ```csv
 sample,assembly,species
@@ -142,7 +143,7 @@ ISO4,/path/iso4.fasta,Acinetobacter baumannii
 ### Basic run
 
 ```bash
-nextflow run MI-Bioinformatics/CorGe \
+nextflow run MDHHS-Bioinformatics/corge \
   -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
@@ -154,7 +155,7 @@ Default clustering thresholds: `15,20,40,150` (alleles for cgMLST or SNPs for Pa
 ### With custom thresholds
 
 ```bash
-nextflow run MI-Bioinformatics/CorGe \
+nextflow run MDHHS-Bioinformatics/corge \
   -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
@@ -166,7 +167,7 @@ nextflow run MI-Bioinformatics/CorGe \
 Generate a phylogenetic tree and use sample metadata and custom configuration:
 
 ```bash
-nextflow run MI-Bioinformatics/CorGe \
+nextflow run MDHHS-Bioinformatics/corge \
   -profile singularity \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
@@ -207,17 +208,17 @@ nextflow run MI-Bioinformatics/CorGe \
 
 | Parameter      | Required | Default  | Description                                                                                                                      |
 | -------------- | :------: | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `-profile`     |     ✓    | –        | Execution profile (`docker` or `singularity`).                                                             |
+| `-profile`     |     ✓    | –        | Execution profile: `docker` or `singularity` (singularity works also for apptainer).                                                             |
 | `--max_memory` |     ✓    | `128.GB` | Maximum memory allocation.                                                                                                       |
 | `--max_cpus`   |     ✓    | `16`     | Maximum CPUs allowed.                                                                                                            |
 | `--max_time`   |     ✓    | `24.h`   | Maximum execution time.                                                                                                          |
 | `-resume`      |     –    | –        | Reuse cached results from previous runs when inputs and code haven't changed. Ideal for interrupted runs. |
 
-More NextFlow configuration options [`here`](https://www.nextflow.io/docs/latest/reference/config.html).
+More NextFlow configuration options in [`docs/usage.md`](docs/usage.md)
 
 
 ### **📦 Data Source Options for PoODLE Manifests**
-[`PoODLE`](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
+[`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
 These options allow CorGe+ to automatically fill PoODLE manifests with read and annotation paths. They are optional, but only **one** may be used per run. If none are provided, the [`PoODLE samplesheets`](#-poodle-samplesheets) will contain empty placeholders for FASTQ and GFF paths, which you must fill in manually before running PoODLE.
 
 | Parameter         | Required | Default | Description                                                                                       |
@@ -245,20 +246,24 @@ More details about these options in [`ReporTree`](https://github.com/insapathoge
 
 ## 📊 Output overview
 
-Results are structured by **species** inside `<outdir>/<Species>/`.
-Each folder includes:
+Results are structured by **species**:
 
-* **cgMLST** or **Parsnp** results
-* **Linkage analysis** CSVs
-* **Genomic context group** tables per threshold
-* **MashTree** files
-* **Tree** files (when `--tree` is used)
-* **Microreact** project file (`*.microreact`)
-* **ReporTree** distance and cluster files
-* **PoODLE** manifests
+```text
+   📁 <outdir>/
+    └── 📁 <Species>/
+        ├── 📁 assemblies/
+        ├── 📁 cgMLST/ or 📁 parsnp/
+        ├── 📁 genomic_context_groups/
+        ├── 📁 linkages/
+        ├── 📁 mashtree/
+        ├── 📁 metadata/ (when `--metadata` is used)
+        ├── 📁 microreact/
+        ├── 📁 tree/ (when `--tree` is used)
+        ├── 📁 poodle_samplesheets/
+        └── 📁 ReporTree/
+```
 
-
-Details about outputs can be found in [`output.md`](docs/output.md) and the outputs tree in [`corge_outputs.md`](docs/corge_outputs.md).
+Details about outputs can be found in [`output.md`](docs/output.md) and the full output tree in [`corge_outputs.md`](docs/corge_outputs.md).
 
 ---
 
@@ -266,7 +271,6 @@ Details about outputs can be found in [`output.md`](docs/output.md) and the outp
 
 CorGe+ generates two main tables to support surveillance, cluster interpretation, and downstream hqSNP-based analysis.
 
----
 
 ## 📘 Potential linkages
 
@@ -288,7 +292,8 @@ This table summarizes genome completeness and identifies **strong**, **intermedi
   * **WARN**: 90–94.9%
   * **FAIL**: < 90%
 
-  Samples flagged as **WARN** or **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links.
+>[!IMPORTANT]
+>Samples flagged as **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend re-sequencing or confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links. Completeness of cgMLST schemes has been highlighted as crucial to ensure correct clustering [Merda et. al, 2024](https://link.springer.com/article/10.1186/s12864-024-10982-z). 
 
 * `min_dist` — minimum genetic distance to any other sample:
 
@@ -327,7 +332,7 @@ These tables define groups of samples for downstream analysis, using the standar
 ### 📝 **PoODLE samplesheets**
 <img src="docs/images/corge_poodle.png" alt="CorGe PoODLE" width="200" align="right"/>
 
-[**PoODLE**](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
+[**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
 
 CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold. The required columns are:
 
@@ -392,7 +397,7 @@ Parsnp is triggered when a species lacks a schema.
 
 ### **🔹 Group thresholds (allelic or SNP distance cutoffs)**
 
-Thresholds determine **which samples are grouped together** for downstream high-resolution analysis like [**PoODLE**](https://github.com/MI-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons).
+Thresholds determine **which samples are grouped together** for downstream high-resolution analysis like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons).
 These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
 
 **Practical guidance from surveillance experience:**
@@ -451,7 +456,7 @@ If your group becomes too large, **lower the threshold** to retain only the most
 
 * **🗑️ Removing samples from the database**
 
-  If a sample has already been added to a CorGe+ database and needs to be removed (for example, due to contamination, mislabeling, or reanalysis), you can use the dedicated **`remove` mode**.
+  If a sample has already been added to a CorGe+ database and needs to be removed (for example, due to contamination, mislabeling, or reanalysis), you can use the dedicated **`remove` mode**. _Recommended when cgMLST was used, if Parsnp was used it may affect cluster nomenclature_.
 
   Create a CSV file listing the samples to remove, including their corresponding species:
 
@@ -464,7 +469,7 @@ If your group becomes too large, **lower the threshold** to retain only the most
   Then run CorGe+ in `remove` mode, pointing to the existing database and the cgMLST schema file used to build it. For consistency, include all the options priorly used, such as `--metadata`, `--columns_summary_report`, `--phoenix_path`, etc:
 
   ```bash
-  nextflow run MI-Bioinformatics/CorGe \
+  nextflow run MDHHS-Bioinformatics/corge \
     --mode remove \
     --samples_to_remove manifest_remove.csv \
     --cgmlst_schemas cgmlst_schemas.csv \
@@ -482,19 +487,31 @@ If your group becomes too large, **lower the threshold** to retain only the most
 
 If you use CorGe+, please cite:
 
-* ChewBBACA — cgMLST calling
-* ReporTree — hierarchical clustering
-* Mashtree — composition-based tree
-* Parsnp — core alignment
-* Microreact — visualization platform
-* cgmlst.org —  cgMLST server
-* IQTREE —  phylogeny (when `--tree` is used)
-* SNP-sites — constant sites calculation (when `--tree` is used)
-* nf-core — bioinformatics pipeline framework
-* NextFlow — computational workflow
+* [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA) — cgMLST calling
+* [`ReporTree`](https://github.com/insapathogenomics/ReporTree) — hierarchical clustering
+* [`MashTree`](https://github.com/lskatz/mashtree) — composition-based tree
+* [`Parsnp`](https://github.com/marbl/parsnp) — core alignment
+* [Microreact](https://microreact.org/) — visualization platform
+* [`cgmlst.org`](https://cgmlst.org/ncs) —  cgMLST server
+* [`IQ-TREE`](https://www.iqtree.org/) —  phylogeny (when `--tree` is used)
+* [`snp-sites`](https://sanger-pathogens.github.io/snp-sites/) — constant sites calculation (when `--tree` is used)
+* [`nf-core`](https://nf-co.re/) — bioinformatics pipeline framework
+* [`NextFlow`](https://www.nextflow.io/docs/latest/index.html) — computational workflow
 * Software packaging/containerization tools
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
+
+---
+
+# Disclaimer
+This repository is not a source of government records but is intended to increase collaboration and collaborative potential on public health related projects. Materials and information in this repository are intended to share information and collaboratively develop analysis workflows. 
+
+The workflows and pipelines reflect the current understanding of the software and biological questions being answered and may be updated as needed and pursuant to further analysis and review. No warranty, expressed or implied, is made by MDHHS Bureau of Laboratories as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that the MDHHS Bureau of Laboratories shall not be held liable for any damages resulting from its authorized or unauthorized use. 
+
+---
+
+## Privacy Notice
+Use of this service is limited only to non-sensitive and publicly available data. Users must not use, share, or store any kind of sensitive data like health status, provision or payment of healthcare, Personally Identifiable Information (PII) and/or Protected Health Information (PHI), etc. under any circumstance.
 
 ---
 
