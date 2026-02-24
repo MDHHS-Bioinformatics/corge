@@ -32,7 +32,7 @@ If you need to analyze a batch independently (e.g., without comparing to histori
 
 ### ![CorGe flow](docs/images/corge_flow.png)
 
-## Documentation for CorGe+ can be found in the [`Wiki`](https://github.com/MDHHS-Bioinformatics/CorGe/wiki) page.
+## Documentation for CorGe+ can be found in the [`Wiki`](wiki.md) page.
 
 
 ---
@@ -45,7 +45,7 @@ If you use CorGe+, please cite:
 * [`ReporTree`](https://github.com/insapathogenomics/ReporTree) - hierarchical clustering
 * [`MashTree`](https://github.com/lskatz/mashtree) - composition-based tree
 * [`Parsnp`](https://github.com/marbl/parsnp) - core alignment
-* [Microreact](https://microreact.org/) - visualization platform
+* [`Microreact`](https://microreact.org/) - visualization platform
 * [`cgmlst.org`](https://cgmlst.org/ncs) -  cgMLST server
 * [`IQ-TREE`](https://www.iqtree.org/) -  phylogeny (when `--tree` is used)
 * [`snp-sites`](https://sanger-pathogens.github.io/snp-sites/) - constant sites calculation (when `--tree` is used)
@@ -55,26 +55,23 @@ If you use CorGe+, please cite:
 
 An extensive list of references for the tools used by the pipeline can be found in the [`CITATIONS.md`](CITATIONS.md) file.
 
----
 
 ## Disclaimer
 This repository is not a source of government records but is intended to increase collaboration and collaborative potential on public health related projects. Materials and information in this repository are intended to share information and collaboratively develop analysis workflows. 
 
-The workflows and pipelines reflect the current understanding of the software and biological questions being answered and may be updated as needed and pursuant to further analysis and review. No warranty, expressed or implied, is made by MDHHS Bureau of Laboratories as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories shall not be held liable for any damages resulting from its authorized or unauthorized use. 
+The workflows and pipelines reflect the current understanding of the software and biological questions being answered and may be updated as needed and pursuant to further analysis and review. No warranty, expressed or implied, is made by Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories as to the functionality of the software and related material nor shall the fact of release constitute any such warranty. Furthermore, the software is released on condition that the MDHHS Bureau of Laboratories shall not be held liable for any damages resulting from its authorized or unauthorized use. 
 
----
 
 ## Privacy Notice
 Use of this service is limited only to non-sensitive and publicly available data. Users must not use, share, or store any kind of sensitive data like health status, provision or payment of healthcare, Personally Identifiable Information (PII) and/or Protected Health Information (PHI), etc. under any circumstance.
 
----
+
 
 ## Credits
 
 CorGe+ was built and is maintained by the Genomics Analysis Unit at the MDHHS. This pipeline was developed by [Karla Vasco](https://github.com/vascokarla) and [Douglas Maldonado-Torres](https://github.com/MTDouglas).
 Contributions, issues, and pull requests are welcome!
 
----
 
 ## 📜 License
 
