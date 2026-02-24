@@ -7,7 +7,7 @@ on:
 jobs:
   run-tower:
     name: Run AWS tests
-    if: github.repository == 'MI-Bioinformatics/CorGe'
+    if: github.repository == 'MDHHS-Bioinformatics/corge'
     runs-on: ubuntu-latest
     steps:
       # Launch workflow using Tower CLI tool action

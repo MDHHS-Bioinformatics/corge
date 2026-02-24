@@ -7,7 +7,7 @@ body:
       value: |
         Before you post this issue, please check the documentation:
 
-        - [MI-Bioinformatics/CorGe pipeline documentation](https://github.com/MI-Bioinformatics/CorGe)
+        - [MDHHS-Bioinformatics/corge pipeline documentation](https://github.com/MDHHS-Bioinformatics/corge)
 
   - type: textarea
     id: description
@@ -46,4 +46,4 @@ body:
         * Executor _(eg. slurm, local, awsbatch)_
         * Container engine: _(e.g. Docker, Singularity, Conda, Podman, Shifter or Charliecloud)_
         * OS _(eg. CentOS Linux, macOS, Linux Mint)_
-        * Version of MI-Bioinformatics/CorGe _(eg. 1..0.0)_
+        * Version of MDHHS-Bioinformatics/corge _(eg. 1.0.0)_

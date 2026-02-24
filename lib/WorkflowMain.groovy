@@ -1,5 +1,5 @@
 //
-// This file holds several functions specific to the main.nf workflow in the MI-Bioinformatics/CorGe pipeline
+// This file holds several functions specific to the main.nf workflow in the MDHHS-Bioinformatics/corge pipeline
 //
 
 class WorkflowMain {

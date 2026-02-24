@@ -1,4 +1,4 @@
-# MI-Bioinformatics/CorGe: Usage
+# MDHHS-Bioinformatics/corge: Usage
 
 > _Documentation of pipeline parameters is generated automatically from the pipeline schema and can no longer be found in markdown files._
 
@@ -26,7 +26,7 @@ An [example samplesheet](../assets/samplesheet.csv) has been provided with the p
 The typical command for running the pipeline is as follows:
 
 ```bash
-nextflow run MI-Bioinformatics/CorGe --input samplesheet.csv --outdir <OUTDIR> --cgmlst_schemas cgmlst_schemas.csv -profile docker
+nextflow run MDHHS-Bioinformatics/corge --input samplesheet.csv --outdir <OUTDIR> --cgmlst_schemas cgmlst_schemas.csv -profile docker
 ```
 
 This will launch the pipeline with the `docker` configuration profile. See below for more information about profiles.
@@ -45,14 +45,14 @@ work                # Directory containing the nextflow working files
 When you run the above command, Nextflow automatically pulls the pipeline code from GitHub and stores it as a cached version. When running the pipeline after this, it will always use the cached version if available - even if the pipeline has been updated since. To make sure that you're running the latest version of the pipeline, make sure that you regularly update the cached version of the pipeline:
 
 ```bash
-nextflow pull MI-Bioinformatics/CorGe
+nextflow pull MDHHS-Bioinformatics/corge
 ```
 
 ### Reproducibility
 
 It is a good idea to specify a pipeline version when running the pipeline on your data. This ensures that a specific version of the pipeline code and software are used when you run your pipeline. If you keep using the same tag, you'll be running the same version of the pipeline, even if there have been changes to the code since.
 
-First, go to the [MI-Bioinformatics/CorGe releases page](https://github.com/MI-Bioinformatics/CorGe/releases) and find the latest pipeline version - numeric only (eg. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
+First, go to the [MDHHS-Bioinformatics/corge releases page](https://github.com/MDHHS-Bioinformatics/corge/releases) and find the latest pipeline version - numeric only (eg. `1.0.0`). Then specify this when running the pipeline with `-r` (one hyphen) - eg. `-r 1.0.0`. Of course, you can switch to another version by changing the number after the `-r` flag.
 
 This version number will be logged in reports when you run the pipeline, so that you'll know what you used when you look back in the future. For example, at the bottom of the MultiQC reports.
 
@@ -140,7 +140,7 @@ Tip: you can replicate the issue by changing to the process work dir and enterin
 
 #### For beginners
 
-A first step to bypass this error, you could try to increase the amount of CPUs, memory, and time for the whole pipeline. Therefor you can try to increase the resource for the parameters `--max_cpus`, `--max_memory`, and `--max_time`. Based on the error above, you have to increase the amount of memory. Therefore you can go to the [parameter documentation ](https://github.com/MI-Bioinformatics/CorGe/tree/development#parameters) to get the default value for `--max_memory`. In this case 128GB, you than can try to run your pipeline again with `--max_memory 200GB -resume` to skip all process, that were already calculated. If you can not increase the resource of the complete pipeline, you can try to adapt the resource for a single process as mentioned below.
+A first step to bypass this error, you could try to increase the amount of CPUs, memory, and time for the whole pipeline. Therefor you can try to increase the resource for the parameters `--max_cpus`, `--max_memory`, and `--max_time`. Based on the error above, you have to increase the amount of memory. Therefore you can go to the [parameter documentation ](https://github.com/MDHHS-Bioinformatics/corge/tree/development#parameters) to get the default value for `--max_memory`. In this case 128GB, you than can try to run your pipeline again with `--max_memory 200GB -resume` to skip all process, that were already calculated. If you can not increase the resource of the complete pipeline, you can try to adapt the resource for a single process as mentioned below.
 
 #### Advanced option on process level
 

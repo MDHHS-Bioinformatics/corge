@@ -1,4 +1,4 @@
-# MI-Bioinformatics/CorGe: Output
+# MDHHS-Bioinformatics/corge: Output
 
 ## Introduction
 
@@ -17,7 +17,7 @@ The pipeline is built using [Nextflow](https://www.nextflow.io/) and processes d
 - [Metadata](#metadata) - Metadata information for the species
 - [Microreact](#microreact) - Microreact file
 - [Genomic context groups](#genomic-context-groups) - Genomic context groups selected at the given thresholds
-- [Linkage analysis](#linkage-analysis) - File with per-sample information about strong, intermediate and lineage level thresholds
+- [Linkages](#linkage-analysis) - File with per-sample information about strong, intermediate and lineage level thresholds
 - [PoODLE samplesheets](#poodle-samplesheets) - PoODLE manifests for downstream analysis
 - [Pipeline information](#pipeline-information) - Report metrics generated during the workflow execution
 - [Tree](#tree) - Phylogenetic tree information
@@ -87,7 +87,7 @@ This subdirectory contains files related to phylogenetic tree inference when `--
 
 ### PoODLE samplesheets
 
-[**PoODLE**](https://github.com/MI-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
+[**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
 
 CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold if genomic context groups were identified. The required columns are:
 
@@ -121,14 +121,35 @@ These tables define groups of samples for downstream analysis, using the standar
 ### Linkage analysis
 
 File: `<Species>_potential_linkages.csv`
-Identifies **strong** or **intermediate** linkages between samples based on **allelic distances** (cgMLST) or **SNP distances** (Parsnp).
 
-**Columns:**
+This table summarizes genome completeness and identifies **strong**, **intermediate**, or **lineage-level** linkages between samples based on **cgMLST allelic distances** or **SNP distances** (Parsnp), depending on the analysis performed.
 
-* `sample`
-* `strong_linkages` — highly similar isolates (0-10)
-* `intermediate_linkage` — moderately similar isolates (11-40)
-* `lineage_level` — less similar isolates (41-150)
+### Columns
+
+* `sample` — sample identifier
+
+* `species` — species assignment used for cgMLST or SNP-based analysis
+
+* `percentage_called` — proportion of the cgMLST schema (or aligned genome length) successfully called for the sample (range 0–1; e.g. `0.95` = 95%)
+
+* `completeness_qc` — genome completeness quality flag derived from `percentage_called`:
+
+  * **PASS**: ≥ 95%
+  * **WARN**: 90–94.9%
+  * **FAIL**: < 90%
+
+  Samples flagged as **WARN** or **FAIL** may yield unreliable distance estimates due to incomplete assemblies, misassemblies, contamination, or incorrect species assignment. Linkages involving these samples should be interpreted with caution. We recommend confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links.
+
+* `min_dist` — minimum genetic distance to any other sample:
+
+  * **allelic distance (AD)** when cgMLST is used
+  * **SNP distance** when Parsnp is used
+
+* `strong_linkages` — highly similar isolates (distance 0–10).
+
+* `intermediate_linkages` — moderately similar isolates (distance 11–40).
+
+* `lineage_level` — related isolates (distance 41–150).
 
 ### Pipeline information
 

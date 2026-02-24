@@ -1,6 +1,6 @@
 {
-    "name": "MI-Bioinformatics/CorGe",
-    "homePage": "https://github.com/MI-Bioinformatics/CorGe",
+    "name": "MDHHS-Bioinformatics/corge",
+    "homePage": "https://github.com/MDHHS-Bioinformatics/corge",
     "repos": {
         "https://github.com/nf-core/modules.git": {
             "modules": {

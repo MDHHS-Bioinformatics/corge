@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest an idea for the MI-Bioinformatics/CorGe pipeline
+description: Suggest an idea for the MDHHS-Bioinformatics/corge pipeline
 labels: enhancement
 body:
   - type: textarea

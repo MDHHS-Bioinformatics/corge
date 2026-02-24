@@ -1,9 +1,9 @@
 #!/usr/bin/env nextflow
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    MI-Bioinformatics/CorGe
+    MDHHS-Bioinformatics/corge
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    Github : https://github.com/MI-Bioinformatics/CorGe
+    Github : https://github.com/MDHHS-Bioinformatics/corge
 
 ----------------------------------------------------------------------------------------
 */
@@ -29,7 +29,7 @@ WorkflowMain.initialise(workflow, params, log)
 */
 
 //
-// WORKFLOW: Run main MI-Bioinformatics/CorGe analysis pipeline
+// WORKFLOW: Run main MDHHS-Bioinformatics/corge analysis pipeline
 //
 workflow {
     if (params.mode == 'default') {
