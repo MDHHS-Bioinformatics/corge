@@ -15,20 +15,19 @@
 
 - [ReporTree](https://doi.org/10.1186/s13073-023-01196-1)
 
-  > Mixão, V., Pinto, M., Sobral, D. et al. ReporTree: a surveillance-oriented tool to strengthen the linkage between pathogen genetic clusters and epidemiological data. Genome Med 15, 43 (2023). https://doi.org/10.1186/s13073-023-01196-1
+  > Mixão, V, Pinto, M, Sobral, D, Di Pasquale A, Gomes, JP, Borges V. *ReporTree: a surveillance-oriented tool to strengthen the linkage between pathogen genetic clusters and epidemiological data.* Genome Med 15, 43 (2023). https://doi.org/10.1186/s13073-023-01196-1
 
 - [Mashtree](https://doi.org/10.21105/joss.01762)
 
-  > Katz LS, Griswold T, Morrison SS, et al. *Mashtree: a rapid comparison of whole genome sequence files.* J Open Source Softw. 2019;4(44):1762. doi:10.21105/joss.01762.
+  > Katz LS, Griswold T, Morrison SS, Caravas JA, Zhang S, den Bakker HC, Deng X, Carleton HA. *Mashtree: a rapid comparison of whole genome sequence files.* J Open Source Softw. 2019;4(44):1762. doi:10.21105/joss.01762.
 
 - [Parsnp](https://doi.org/10.1186/s13059-014-0524-x)
 
-  > Treangen TJ, Ondov BD, Koren S, Phillippy AM. *The Harvest suite for rapid core-genome alignment and visualization of thousands of intraspecific microbial genomes.* Genome Biol. 2014 Nov 26;15(11):524. doi:10.1186/s13059-014-0524-x. PMID: 25442590; PMCID: PMC4262892.
-  > *(Parsnp is part of the Harvest suite.)*
+  > Kille, Bryce, Michael G Nute, Victor Huang, Eddie Kim, Adam M Phillippy, and Todd J Treangen. 2024. *Parsnp 2.0: Scalable Core-Genome Alignment for Massive Microbial Datasets.* Bioinformatics 40 (5): btae311. doi.org/10.1093/bioinformatics/btae311.
 
 - [Microreact](https://doi.org/10.1099/mgen.0.000093)
 
-  > Argimón S, Abudahab K, Goater RJE, et al. *Microreact: visualizing and sharing data for genomic epidemiology and phylogeography.* Microb Genom. 2016;2(11):e000093. doi:10.1099/mgen.0.000093.
+  > Argimón S, Abudahab K, Goater RJE, Fedosejev A, Bhai J, Glasner C, Feil EJ, Holden MT, Yeats CA, Grundmann H, Spratt BG. *Microreact: visualizing and sharing data for genomic epidemiology and phylogeography.* Microb Genom. 2016;2(11):e000093. doi:10.1099/mgen.0.000093.
 
 - [cgmlst.org](https://cgmlst.org/)
 
