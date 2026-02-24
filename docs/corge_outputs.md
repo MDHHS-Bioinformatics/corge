@@ -32,11 +32,11 @@
             │       ├── 📄 <Species>_new_results_alleles.tsv
             │       ├── 📄 <Species>_new_results_contigsInfo.tsv
             │       └── 📄 <Species>_new_results_statistics.tsv
-            ├── 📁 linkage_analysis
+            ├── 📁 linkages
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
             │   └── 📄 <Species>-groups_HC<threshold>.csv (one per threshold)
-            ├── 📁 mash
+            ├── 📁 mashtree
             │   ├── 📄 <Species>_mash.dist
             │   ├── 📄 <Species>_mash.dnd
             │   └── 📄 <Species>_mash_rooted.tre
@@ -82,13 +82,13 @@
             │   ├── 📄 <Species>_parsnpAligner.ini
             │   ├── 📄 <Species>_parsnpAligner.log
             │   └── 📄 <Species>_snps_alignment.fasta
-            ├── 📁 linkage_analysis
+            ├── 📁 linkages
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
             │   └── 📄 <Species>-groups_HC<threshold>.csv (one per threshold)
             ├── 📁 metadata
             │   └── 📄 <Species>_metadata.tsv (curated metadata if provided)
-            ├── 📁 mash
+            ├── 📁 mashtree
             │   ├── 📄 <Species>_mash.dist
             │   ├── 📄 <Species>_mash.dnd
             │   └── 📄 <Species>_mash_rooted.tre
