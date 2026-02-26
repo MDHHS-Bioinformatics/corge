@@ -44,7 +44,7 @@
                     "description": "Pipeline mode: 'default' (cluster analysis), 'schema' (download cgMLST schemas) or 'remove' (remove sample from database).",
                     "fa_icon": "fas fa-cog",
                     "default": "default",
-                    "enum": ["default", "schema", "remove"]
+                    "enum": ["default", "schema", "regroup", "remove"]
                 },
                 "thresholds": {
                     "type": "string",
@@ -193,6 +193,21 @@
                     "description": "CSV file with columns: 'sample,species' to remove from database. Use only when '--mode remove'",
                     "default": "null",
                     "fa_icon": "fas fa-file-csv"
+                }
+            }
+        },
+         "regroup": {
+            "title": "Options to regroup samples with new thresholds",
+            "type": "object",
+            "fa_icon": "fas fa-terminal",
+            "description": "Define species priorly analyzed that you want to regroup with new thresholds",
+            "required": [],
+            "properties": {
+                 "species_to_regroup": {
+                    "type": "string",
+                    "description": "Species from database (separated by commas) to regroup (e.g., 'Klebsiella_pneumoniae,Salmonella_enterica'). Use only when '--mode regroup'",
+                    "default": "null",
+                    "fa_icon": "fas fa-list"
                 }
             }
         },

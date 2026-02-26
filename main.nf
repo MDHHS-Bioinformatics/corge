@@ -12,6 +12,7 @@ nextflow.enable.dsl = 2
 
 include { CORGEPLUS             } from './workflows/corgeplus'
 include { PREPARE_CGMLST_SCHEMA } from './workflows/prepare_cgmlst_schema'
+include { REGROUP               } from './workflows/regroup'
 include { REMOVE_SAMPLES        } from './workflows/remove_samples'
 
 /*
@@ -36,10 +37,12 @@ workflow {
         CORGEPLUS()
     } else if (params.mode == 'schema') {
         PREPARE_CGMLST_SCHEMA()
+    } else if (params.mode == 'regroup') {
+        REGROUP()
     } else if (params.mode == 'remove') {
         REMOVE_SAMPLES()
     } else {
-        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'schema', or 'remove'."
+        exit 1, "ERROR: Unknown --mode '${params.mode}'. Must be one of: 'default', 'schema', 'regroup' or 'remove'."
     }
 }
 
