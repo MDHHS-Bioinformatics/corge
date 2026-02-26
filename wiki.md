@@ -166,17 +166,18 @@ nextflow run MDHHS-Bioinformatics/corge \
 | `--outdir`         |     ✓    | `./corge_results`   | Output directory root. This acts as a **growing surveillance database** where new samples are compared to previous ones.|
 | `--cgmlst_schemas` |     ✓    | –              | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). Parsnp is used for species with no schema, check [_When to use what_](#-when-to-use-what). |
 | `--thresholds`     |     ✓    | `15,20,40,150` | Allelic/SNP distance thresholds for grouping samples. Check [_group thresholds_](#-group-thresholds-allelic-or-snp-distance-cutoffs). Comma-separated integers.     |
-| `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; or [`remove`](#-troubleshooting) to remove samples from database     |
+| `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; [`regroup`](#regroup-samples-with-new-thresholds) to regroup samples with different thresholds; or [`remove`](#-troubleshooting) to remove samples from database     |
 | `--schema_ids`     |     –    | –              | Comma-separated [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
 | `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used  |
-| `--tree`     |     –    | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles.    |
+| `--species_to_regroup`     |     –    | –             | Species from database to regroup with new thresholds (`Escherichia_coli,Klebsiella_pneumoniae`). Required when `--mode regroup` is used  |
+| `--tree`     |     –    | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove`   |
 
 
 ### ⚙️ **Execution Configuration**
 
 | Parameter      | Required | Default  | Description                                                                                                                      |
 | -------------- | :------: | -------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `-profile`     |     ✓    | –        | Execution profile: `docker` or `singularity` (singularity works also for apptainer).                                                             |
+| `-profile`     |     ✓    | –        | Execution profile: `docker` or `singularity` (singularity works also for `apptainer`).                                                             |
 | `--max_memory` |     ✓    | `128.GB` | Maximum memory allocation.                                                                                                       |
 | `--max_cpus`   |     ✓    | `16`     | Maximum CPUs allowed.                                                                                                            |
 | `--max_time`   |     ✓    | `24.h`   | Maximum execution time.                                                                                                          |
@@ -393,6 +394,27 @@ If your group becomes too large, **lower the threshold** to retain only the most
 
 > [!TIP]
 > Use the [**Microreact visualization**](#-microreact-export) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+
+### Regroup samples with new thresholds
+
+If you want to generate new clustering groups using **existing database results**, you can run the pipeline in `--mode regroup`. This reuses previously generated outputs and applies new distance thresholds. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
+
+Specify the species to regroup using `--species_to_regroup`. The names must **exactly match** those used in the original run. Multiple species can be provided as a comma-separated list **without spaces**.
+
+You must also provide:
+
+* `--outdir` - the directory containing the previous corge results
+* `--thresholds` - the new thresholds to apply (comma-separated, no spaces)
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  -profile singularity \
+  --mode regroup \
+  --species_to_regroup Escherichia_coli,Acinetobacter_baumannii,Klebsiella_pneumoniae \
+  --outdir corge_results \
+  --thresholds 50,500,1000,1500
+```
+
 
 ---
 
