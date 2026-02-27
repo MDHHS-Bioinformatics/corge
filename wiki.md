@@ -153,7 +153,8 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 > [!TIP]
-> After the run has been successfully finished, you can safely remove the `work` directory located at `<outdir>/work`.
+> After the run has been successfully finished, you can safely remove the `work` folder inside the working directory.
+
 ---
 
 ## Parameters
@@ -169,7 +170,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 | `--mode`           |     ✓    | `default`      | [`default`](#4-run-your-analyses) to run core genome analysis with new isolates ; [`schema`](#2-download-cgmlst-schemas) for schema-download workflow; [`regroup`](#regroup-samples-with-new-thresholds) to regroup samples with different thresholds; or [`remove`](#-troubleshooting) to remove samples from database     |
 | `--schema_ids`     |     –    | –              | Comma-separated [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) (no spaces), required when `--mode schema` is used (e.g., s1,s20).                |
 | `--samples_to_remove`     |     –    | –              | CSV mapping samples to remove from database(`sample,species`). Required when `--mode remove` is used  |
-| `--species_to_regroup`     |     –    | –             | Species from database to regroup with new thresholds (`Escherichia_coli,Klebsiella_pneumoniae`). Required when `--mode regroup` is used  |
+| `--species_to_regroup`     |     –    | –             | String with species from database to regroup separated by commas (e.g., `Escherichia_coli,Klebsiella_pneumoniae`). Required when `--mode regroup` is used  |
 | `--tree`     |     –    | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove`   |
 
 
@@ -311,8 +312,7 @@ sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
 
 The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
-For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
-
+For each cluster, CorGe+ selects a reference genome based on assembly quality (prioritizing fewer contigs, longer assembly length, and alphabetical tie-breaking). You can override this choice by selecting a different sample, either one with a higher N50 (often a better indicator of assembly quality) or a specific sample of interest within the cluster.
 
 ---
 
