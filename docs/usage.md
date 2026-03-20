@@ -205,7 +205,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 * Comma-separated (no spaces)
 * Defines clustering levels
 
-Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
+More info below [`Choosing thresholds`](#-choosing-thresholds) 
 
 ---
 
@@ -328,6 +328,8 @@ These groups are **not strict “clusters”**, since they can include contextua
 | 40        | General clustering               |
 | 150       | Broad lineage grouping           |
 
+Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
+
 > 💡 Ideal group size: **≥4 samples**
 > If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
 
@@ -347,7 +349,7 @@ results/        # final outputs
 
 * You can safely delete `work/` after completion
 
-👉 See full details: [`output.md`](docs/output.md)
+👉 See full details: [`output.md`](output.md)
 
 ---
 
