@@ -16,10 +16,10 @@ def get_previous_assemblies(species ) {
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL AND NF-COR MODULES
+    IMPORT LOCAL MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
-include { MASHTREE                          } from '../../modules/nf-core/mashtree/main.nf'
+include { MASHTREE                          } from '../../modules/local/mashtree/main.nf'
 include { ROOT_TREE as ROOT_TREE_MASHTREE   } from '../../modules/local/tree/root_tree.nf'
 
 /*
