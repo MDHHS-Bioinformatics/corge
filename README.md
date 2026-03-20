@@ -1,5 +1,5 @@
 <p align="center">
-<img src="docs/images/corge_logo.png" width="250">
+<img src="docs/images/corge_logo.png" width="200">
 </p>
 
 # 🧬 CorGe+: Core Genome plus
@@ -15,19 +15,16 @@
 [![DOI](https://zenodo.org/badge/DOI/XXXX.svg)](https://zenodo.org/badge/latestdoi/XXXXXX)
 
 
-**CorGe+** is a bioinformatics pipeline for analyzing bacterial DNA sequencing data. It takes a sample sheet with FASTA files and optionally sample metadata as input, performs either core genome MLST (cgMLST) or core genome alignment and produces linkage tables, Microreact visualizations, metadata summaries, and sample groupings based on allelic or SNP distances for downstream analysis.
+**CorGe+** is a bioinformatics pipeline for analyzing bacterial DNA sequencing data. It takes a sample sheet with FASTA files and optionally a metadata file as input, performs either core genome MLST (cgMLST) or core genome alignment and produces linkage tables, Microreact visualizations, metadata summaries, and sample groupings based on allelic or SNP distances for downstream analysis.
 
 ## 🌟 Highlights
 
-- 🧬 **Fast and scalable**: Designed for high-throughput screening and large datasets.
-- 🔗 **Detects potential linkages**: Identifies related samples using allelic distances (cgMLST) or SNP distances (Parsnp).
-- 🧩 **Flexible grouping**: Groups genomes at user-defined thresholds and generates sample sheets for downstream analysis with [PoODLE](https://github.com/MDHHS-Bioinformatics/poodle).
-- 📤 **Clear, shareable outputs**: Exports results as CSV tables and Microreact visualizations.
-- 🕒 **Tracks trends over time**: Helps monitor related isolates and detect emerging patterns.
-- 🧪 **Multi-species support**: Can analyze multiple species in a single run.
-- 🗂️ **Built-in surveillance database**: The output directory grows over time:
-  * New samples are automatically compared to previous ones
-  * Group names remain consistent across batches
+* 🧬 **Fast & scalable**: Built for high-throughput screening of large genomic datasets
+* 🔗 **Linkage detection & grouping**: Identifies related samples (cgMLST/SNP) and groups them using flexible thresholds
+* 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and PoODLE-ready sample sheets
+* 🕒 **Temporal insights**: Tracks related isolates over time to detect emerging patterns
+* 🧪 **Multi-species support**: Analyze multiple species in a single run
+* 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data while preserving group consistency
 
 
 
@@ -53,32 +50,31 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 ### 1️⃣ Requirements
 
 * [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (`>=22.10.1`)
-* [`Docker`](https://docs.docker.com/engine/installation/) (recommended for local runs) or [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)/[`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC clusters) for full pipeline reproducibility
+* One container runtime:
+  * [`Docker`](https://docs.docker.com/engine/installation/) (recommended for local runs)
+  * [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
+  * [`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC)
 
-> [!NOTE]  
-> If using **Singularity/Apptainer** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
-> ```bash
-> export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
-> ``````
 
-### 2️⃣ Download cgMLST schemas
+### 2️⃣ Download cgMLST schemas (optional, recommended)
+> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which is slower and may produce less consistent results across runs.
 
-Download cgMLST schemas once per species. CorGe+ can fetch them automatically from [cgmlst.org](https://cgmlst.org/).
+CorGe+ can automatically download cgMLST schemas from [cgmlst.org](https://cgmlst.org/). Schemas only need to be downloaded once per species.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile singularity \
+  -profile apptainer \
   --mode schema \
   --schema_ids s1,s20 \
-  --outdir corge
+  --outdir corge_results
 ```
 
 > [!TIP]
-> Find schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv)
+> Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv)
 
 > [!NOTE]
-> - The generated schema file (`cgmlst_schemas.csv`) will be used in the next step.
-> - Parsnp is triggered when a species lacks a cgMLST schema. 
+> - The generated file (`cgmlst_schemas.csv) is used as input in the next step.
+> - If a species does not have a corresponding cgMLST schema, it will automatically be processed with Parsnp.
 ---
 
 ### 3️⃣ Prepare manifest file
@@ -107,10 +103,10 @@ Run the pipeline using:
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile singularity \
+  -profile apptainer \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
-  --outdir results
+  --outdir corge_results
 ```
 
 > [!TIP]
@@ -122,10 +118,10 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile singularity \
+  -profile apptainer \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
-  --outdir results \
+  --outdir corge_results \
   --thresholds 1,10,100,1000
 ```
 

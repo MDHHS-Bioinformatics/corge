@@ -7,7 +7,7 @@ body:
       value: |
         Before you post this issue, please check the documentation:
 
-        - [MDHHS-Bioinformatics/corge pipeline documentation](https://github.com/MDHHS-Bioinformatics/corge)
+        - [MDHHS-Bioinformatics/corge pipeline documentation](https://github.com/MDHHS-Bioinformatics/corge/tree/main/docs)
 
   - type: textarea
     id: description
