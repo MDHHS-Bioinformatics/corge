@@ -4,9 +4,7 @@ process MICROREACT {
     label 'process_single'
 
     conda "conda-forge::pandas=2.2.3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:2.2.1' :
-        'quay.io/biocontainers/pandas:2.2.1' }"
+    container 'quay.io/biocontainers/pandas:2.2.1'
 
     input:
     tuple val(meta), path(partitions), path(single_HC), path(mashtree), path(template_microreact)

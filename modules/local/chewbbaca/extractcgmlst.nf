@@ -4,9 +4,7 @@ process CHEWBBACA_EXTRACTCGMLST {
     label 'process_single'
 
     conda "bioconda::chewbbaca=3.5.3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/chewbbaca:3.5.3--pyh106432d_1':
-        'quay.io/biocontainers/chewbbaca:3.5.3--pyh106432d_1' }"
+    container 'quay.io/biocontainers/chewbbaca:3.5.3--pyh106432d_1'
         
     input:
     tuple val(meta), path(alleles)

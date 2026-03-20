@@ -4,9 +4,7 @@ process SAMPLESHEET_CHECK_RM {
     label 'process_single'
 
     conda "conda-forge::pandas=2.2.3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:2.2.1' :
-        'quay.io/biocontainers/pandas:2.2.1' }"
+    container 'quay.io/biocontainers/pandas:2.2.1'
 
     input:
     path samplesheet_remove
@@ -18,7 +16,7 @@ process SAMPLESHEET_CHECK_RM {
     when:
     task.ext.when == null || task.ext.when
 
-    script: // This script is bundled with the pipeline, in nf-core/corgeplus/bin/
+    script:
     """
     check_samplesheet_remove.py \\
         $samplesheet_remove \\

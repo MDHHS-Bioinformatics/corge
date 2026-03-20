@@ -2,9 +2,7 @@ process UPDATE_CGMLST_FILE {
     label 'process_medium'
 
     conda "conda-forge::pandas=2.2.3"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/pandas:2.2.1' :
-        'quay.io/biocontainers/pandas:2.2.1' }"
+    container 'quay.io/biocontainers/pandas:2.2.1'
 
     input:
     tuple val(outdir), path(species_schemas), val(ready)
