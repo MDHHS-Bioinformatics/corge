@@ -21,11 +21,10 @@
 
 * 🧬 **Fast & scalable**: Built for high-throughput screening of large genomic datasets
 * 🔗 **Linkage detection & grouping**: Identifies related samples (cgMLST/SNP) and groups them using flexible thresholds
-* 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and PoODLE-ready sample sheets
+* 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle)-ready sample sheets
 * 🕒 **Temporal insights**: Tracks related isolates over time to detect emerging patterns
 * 🧪 **Multi-species support**: Analyze multiple species in a single run
 * 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data while preserving group consistency
-
 
 
 ## 📊 Workflow Overview
@@ -73,7 +72,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 > Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv)
 
 > [!NOTE]
-> - The generated file (`cgmlst_schemas.csv) is used as input in the next step.
+> - The generated file (`cgmlst_schemas.csv`) is used as input in the next step.
 > - If a species does not have a corresponding cgMLST schema, it will automatically be processed with Parsnp.
 ---
 
