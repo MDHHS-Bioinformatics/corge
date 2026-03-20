@@ -1,0 +1,4 @@
+sample,assembly,species
+sample 1,test/sample_1.fasta,Escherichia coli
+sample_2,test/sample_2.fasta,Escherichia_coli
+sample_3,test/sample_3.fasta,Escherichia_coli
