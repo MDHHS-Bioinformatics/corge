@@ -30,15 +30,15 @@ CorGe+ is designed for **incremental genomic surveillance**:
 nextflow run MDHHS-Bioinformatics/corge \
   --mode schema \
   --schema_ids s20 \
-  --outdir corge \
-  -profile singularity
+  --outdir corge_results \
+  -profile apptainer
 
 # 2. Run analysis
 nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas corge/cgmlst_schemas/cgmlst_schemas.csv \
-  --outdir corge \
-  -profile singularity
+  --outdir corge_results \
+  -profile apptainer
 ```
 
 >[!NOTE]
@@ -61,20 +61,21 @@ Install:
 
 * [`Nextflow`](https://www.nextflow.io/docs/latest/getstarted.html#installation) (≥ 22.10.1)
 * One container runtime:
-
-
   * [`Docker`](https://docs.docker.com/engine/installation/) (recommended for local runs)
   * [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
   * [`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC)
 
 
-> [!NOTE]
-> When using Singularity/Apptainer, set a cache directory to reuse container images:
->
+> [!NOTE]  
+> If using **Singularity** set `NXF_SINGULARITY_CACHEDIR` (or `singularity.cacheDir`) to reuse images later. For example: 
 > ```bash
 > export NXF_SINGULARITY_CACHEDIR="/path/to/singularity_cache"
-> ```
-
+> ``````
+>
+> If using **Apptainer** set `NXF_APPTAINER_CACHEDIR` (or `apptainer.cacheDir`) to reuse images later. For example: 
+> ```bash
+> export NXF_APPTAINER_CACHEDIR="/path/to/singularity_cache"
+> ``````
 ---
 
 ## 2️⃣ Download cgMLST schemas
@@ -85,50 +86,54 @@ Schemas are required for cgMLST analysis and only need to be downloaded once.
 nextflow run MDHHS-Bioinformatics/corge \
   --mode schema \
   --schema_ids s1,s20 \
-  --outdir corge \
-  -profile singularity
+  --outdir corge_results \
+  -profile apptainer
 ```
 <details>
 <summary><b>Click here to check schema IDs</b></summary>
 
-| id  | species                                                                 |
-|-----|-------------------------------------------------------------------------|
-| s1  | Acinetobacter_baumannii                                                |
-| s2  | Bacillus_anthracis                                                     |
-| s3  | Bordetella_pertussis                                                   |
-| s4  | Brucella_melitensis                                                    |
-| s5  | Brucella_melitensis_abortus_suis_canis_ovis_neotomae_ceti_pinnipedialis_microti_inopinata |
-| s6  | Burkholderia_mallei_RKI                                                |
-| s7  | Burkholderia_mallei_FLI                                                |
-| s8  | Burkholderia_pseudomallei                                              |
-| s9  | Campylobacter_jejuni_coli                                              |
-| s10 | Clostridioides_difficile                                               |
-| s11 | Clostridium_perfringens                                                |
-| s12 | Corynebacterium_diphtheriae                                            |
-| s13 | Corynebacterium_pseudotuberculosis                                     |
-| s14 | Cronobacter_sakazakii_malonaticus                                      |
-| s15 | Enterobacter_hormaechei                                                |
-| s16 | Enterococcus_faecalis                                                  |
-| s17 | Enterococcus_faecium                                                   |
-| s18 | Escherichia_coli_Escherichia_spp_Shigella_spp                          |
-| s19 | Francisella_tularensis                                                 |
-| s20 | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii                   |
-| s21 | Klebsiella_pneumoniae_variicola_quasipneumoniae                        |
-| s22 | Legionella_pneumophila                                                 |
-| s23 | Listeria_monocytogenes                                                 |
-| s24 | Morganella_morganii                                                    |
-| s25 | Mycobacterium_tuberculosis_bovis_africanum_canettii                    |
-| s26 | Mycobacteroides_abscessus                                              |
-| s27 | Mycoplasma_gallisepticum                                               |
-| s28 | Paenibacillus_larvae                                                   |
-| s29 | Proteus_mirabilis                                                      |
-| s30 | Pseudomonas_aeruginosa                                                 |
-| s31 | Salmonella_enterica_bongori                                            |
-| s32 | Serratia_marcescens                                                    |
-| s33 | Staphylococcus_aureus                                                  |
-| s34 | Staphylococcus_capitis                                                 |
-| s35 | Streptococcus_pyogenes                                                 |
-| s36 | Yersinia_enterocolitica                                                |
+| id  | schema_name                                                     |
+|-----|------------------------------------------------------------------|
+| s1  | Acinetobacter_baumannii                                          |
+| s2  | Bacillus_anthracis                                               |
+| s3  | Bordetella_pertussis                                             |
+| s4  | Brucella_melitensis                                              |
+| s5  | Brucella_spp                                                     |
+| s6  | Burkholderia_mallei_FLI                                          |
+| s7  | Burkholderia_mallei_RKI                                          |
+| s8  | Burkholderia_pseudomallei                                        |
+| s9  | Campylobacter_jejuni_coli                                        |
+| s10 | Citrobacter_freundii                                             |
+| s11 | Citrobacter_freundii_portucalensis_braakii_europaeus             |
+| s12 | Clostridioides_difficile                                         |
+| s13 | Clostridium_perfringens                                          |
+| s14 | Corynebacterium_diphtheriae                                      |
+| s15 | Corynebacterium_pseudotuberculosis                               |
+| s16 | Cronobacter_sakazakii_malonaticus                                |
+| s17 | Enterobacter_hormaechei                                          |
+| s18 | Enterococcus_faecalis                                            |
+| s19 | Enterococcus_faecium                                             |
+| s20 | Escherichia_coli                                                 |
+| s21 | Francisella_tularensis                                           |
+| s22 | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii             |
+| s23 | Klebsiella_pneumoniae_variicola_quasipneumoniae                  |
+| s24 | Legionella_pneumophila                                           |
+| s25 | Listeria_monocytogenes                                           |
+| s26 | Morganella_morganii                                              |
+| s27 | Mycobacterium_tuberculosis_bovis_africanum_canettii              |
+| s28 | Mycobacteroides_abscessus                                        |
+| s29 | Mycoplasma_gallisepticum                                         |
+| s30 | Paenibacillus_larvae                                             |
+| s31 | Proteus_mirabilis                                                |
+| s32 | Providencia_stuartii                                             |
+| s33 | Pseudomonas_aeruginosa                                           |
+| s34 | Salmonella_enterica                                              |
+| s35 | Serratia_marcescens                                              |
+| s36 | Staphylococcus_argenteus                                         |
+| s37 | Staphylococcus_aureus                                            |
+| s38 | Staphylococcus_capitis                                           |
+| s39 | Streptococcus_pyogenes                                           |
+| s40 | Yersinia_enterocolitica                                          |
 
 </details>
 
@@ -180,7 +185,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
-  -profile singularity
+  -profile apptainer
 ```
 
 **What this does:**
@@ -209,7 +214,7 @@ Example enabling optional analyses (phylogenetic tree and use sample metadata) a
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile singularity \
+  -profile apptainer \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
@@ -253,7 +258,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --species_to_regroup Escherichia_Escherichia_coli,Acinetobacter_baumanniicoli \
   --outdir corge_results \
   --thresholds 50,100 \
-  -profile singularity
+  -profile apptainer
 ```
 
 ---
@@ -274,13 +279,13 @@ For consistency, include all the options priorly used, such as `--metadata`, `--
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
---mode remove \
---samples_to_remove manifest_remove.csv \
---cgmlst_schemas cgmlst_schemas.csv \
---outdir corge \
---metadata metadata.csv \
---columns_summary_report st,specimen_source,date,first_seq_date,last_seq_date,timespan_days \
--profile singularity
+  --mode remove \
+  --samples_to_remove manifest_remove.csv \
+  --cgmlst_schemas cgmlst_schemas.csv \
+  --outdir corge \
+  --metadata metadata.csv \
+  --columns_summary_report st,specimen_source,date,first_seq_date,last_seq_date,timespan_days \
+  -profile apptainer
 ```
 
 ---
@@ -361,7 +366,7 @@ For reproducible analyses, run a specific pipeline release:
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   -r v1.0.0 \
-  -profile singularity \
+  -profile apptainer \
   --input samplesheet.csv \
   --outdir corge_results \
   --cgmlst_schemas cgmlst_schemas.csv
