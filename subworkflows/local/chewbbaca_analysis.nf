@@ -13,7 +13,7 @@ include { CHEWBBACA_JOINPROFILES                   } from '../../modules/local/c
 include { CHEWBBACA_EXTRACTCGMLST                  } from '../../modules/local/chewbbaca/extractcgmlst.nf'
 include { CHEWBBACA_COMPUTEMSA                     } from '../../modules/local/chewbbaca/computemsa.nf'
 include { IQTREE as IQTREE_CGMLST                  } from '../../modules/local/tree/iqtree.nf'
-include { CONSTANTSITES as CONSTANT_SITES_CGMLST  } from '../../modules/local/tree/constant_sites.nf'
+include { CONSTANTSITES as CONSTANT_SITES_CGMLST   } from '../../modules/local/tree/constant_sites.nf'
 include { ROOT_TREE as ROOT_TREE_CGMLST            } from '../../modules/local/tree/root_tree.nf'
 include { DEDUPLICATE_ALLELES                      } from '../../modules/local/chewbbaca/deduplicate_alleles.nf'
 include { CHECK_METADATA                           } from '../../modules/local/reportree/check_metadata.nf'
