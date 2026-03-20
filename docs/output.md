@@ -239,7 +239,7 @@ CorGe+ automatically generates a PoODLE-compatible manifest for every selected t
 ```csv
 sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
 ```
-The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a **PHoeNIx** directory (`--phoenix_path`), a **Bactopia** results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
+The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a [PHoeNIx](https://github.com/CDCgov/phoenix) results directory (`--phoenix_path`), a [Bactopia](https://bactopia.github.io/latest/) results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
 For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
 
@@ -252,25 +252,22 @@ For each cluster, CorGe+ selects a reference genome based on the "best" assembly
 microreact/<Species>_corge.microreact
 ```
 
-
 CorGe+ generates a `.microreact` file that brings together **complementary genetic perspectives**:
 
 * **Mashtree** - produces a k-mer–based distance tree that reflects overall genome composition, including accessory genes.
 * **Core-genome distance tree** - prepared by ReporTree with the MSTreeV2 method, its useful for visualizing genetic relatedness among isolates.
 * **Maximum-Likelihood tree** - phylogenetic tree based on DNA sequence alignment, included when `--tree` is used.
 
-Microreact provides an intuitive way to explore how samples group at the thresholds defined with `--thresholds`, and helps you decide which group threshold to use in downstream high-resolution analyses.
-
 To aid interpretation, Microreact also displays **metadata blocks per threshold**, using the ReporTree **partition nomenclature**.
 Each partition corresponds to a hierarchical clustering level and includes the method, numeric threshold, and distance unit. For example, threshold **15** corresponds to the partition `single-15x1.0`.
 
-Includes:
-
-* MashTree (k-mer distances)
-* Core-genome distance tree (ReporTree)
-* Optional ML tree (`--tree`)
-
 Upload to: [https://microreact.org/upload](https://microreact.org/upload)
+
+_Microreact example using default settings_
+### ![Microreact example](images/corge_microreact_example.png)
+
+_Microreact example using the `--tree` option_
+### ![Microreact example](images/corge_microreact_example_ml.png)
 
 > [!TIP]  
 > You can also explore groups interactively by uploading the ReporTree files `.nwk` and `metadata_w_partitions.tsv` or `partitions.tsv` to [`GrapeTree`](https://github.com/achtman-lab/GrapeTree), [`SPREAD`](https://github.com/genpat-it/spread) or [`Auspice`](https://auspice.us/). These tools run entirely in your browser for quick and private visualization.
@@ -282,10 +279,6 @@ Upload to: [https://microreact.org/upload](https://microreact.org/upload)
 
 Detailed tool outputs are stored in subdirectories.
 
----
-Here are your tool sections reformatted to match the **clean, template style** (consistent tables, minimal text, easy to scan):
-
----
 
 ## ChewBBACA
 
