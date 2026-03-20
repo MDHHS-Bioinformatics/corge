@@ -7,10 +7,7 @@ testing*
 *.pyc
 *results*
 logs/*
-*.fasta
 *.sh
 python_notebooks/*
 mrsa_*
 results*
-*.csv
-*.tsv
