@@ -8,7 +8,7 @@ Example:
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile singularity \
+  -profile apptainer \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results
@@ -24,7 +24,7 @@ These parameters are required for most pipeline runs.
 | ------------------ | ------ | -------- | ----------------- | ----------------------------------------------------------- |
 | `--input`          | string | ✓        | –                 | Manifest CSV (`sample,assembly,species`).                   |
 | `--outdir`         | string | ✓        | `./corge_results` | Output directory (acts as a growing database across runs).  |
-| `--cgmlst_schemas` | string | ✓        | –                 | CSV mapping species to cgMLST schemas (`species,cgmlst_path`).                      |
+| `--cgmlst_schemas` | string | –        | –                 | CSV mapping species to cgMLST schemas (`species,cgmlst_path`).                      |
 | `--thresholds`     | string | ✓        | `15,20,40,150`    | Distance thresholds for grouping samples (comma-separated). |
 | `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `schema`, `regroup`, or `remove`. |
 | `--email`          | string | –        | –                 | Email address to receive pipeline completion notifications.  |
@@ -122,6 +122,7 @@ Available profiles:
 | Profile       | Description                         |
 | ------------- | ----------------------------------- |
 | `docker`      | Run using Docker containers         |
+| `apptainer`   | Run using Apptainer containers      |
 | `singularity` | Run using Singularity containers    |
 | `test`        | Run pipeline with bundled test data |
 
