@@ -313,9 +313,8 @@ class NfcoreTemplate {
         Map colors = logColours(monochrome_logs)
         return "-${colors.dim}----------------------------------------------------${colors.reset}-"
     }
-
     //
-    // nf-core logo
+    // CorGe+ logo
     //
     public static String logo(workflow, monochrome_logs) {
         Map colors = logColours(monochrome_logs)
@@ -323,12 +322,16 @@ class NfcoreTemplate {
         String.format(
             """\n
             ${dashedLine(monochrome_logs)}
-                                                    ${colors.green},--.${colors.black}/${colors.green},-.${colors.reset}
-            ${colors.blue}        ___     __   __   __   ___     ${colors.green}/,-._.--~\'${colors.reset}
-            ${colors.blue}  |\\ | |__  __ /  ` /  \\ |__) |__         ${colors.yellow}}  {${colors.reset}
-            ${colors.blue}  | \\| |       \\__, \\__/ |  \\ |___     ${colors.green}\\`-._,-`-,${colors.reset}
-                                                    ${colors.green}`._,._,\'${colors.reset}
-            ${colors.purple}  ${workflow.manifest.name} ${workflow_version}${colors.reset}
+            ${colors.green}   _____            _____        +${colors.reset}
+            ${colors.green}  / ____|          / ____|       ${colors.reset}
+            ${colors.green} | |     ___  _ __| |  __  ___   +${colors.reset}
+            ${colors.green} | |    / _ \\| '__| | |_ |/ _ \\ ${colors.reset}
+            ${colors.green} | |___| (_) | |  | |__| |  __/  +${colors.reset}
+            ${colors.green}  \\_____\\___/|_|   \\_____|\\___|${colors.reset}
+            ${colors.biwhite}                                 ${colors.reset}
+            ${colors.biwhite}       Built by the MDHHS BOL    ${colors.reset}
+            ${colors.biwhite}                                 ${colors.reset}
+            ${colors.bicyan}  ${workflow.manifest.name} v${workflow.manifest.version}${colors.reset}
             ${dashedLine(monochrome_logs)}
             """.stripIndent()
         )

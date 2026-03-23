@@ -3,9 +3,7 @@ process ROOT_TREE {
     label 'process_single'
 
     conda "conda-forge::r-phytools=0.7_47"
-    container "${ workflow.containerEngine == 'singularity' && !task.ext.singularity_pull_docker_container ?
-        'https://depot.galaxyproject.org/singularity/r-phytools:0.6_99--r40h6115d3f_1' :
-        'quay.io/biocontainers/r-phytools:0.6_44' }"
+    container 'quay.io/biocontainers/r-phytools:0.6_44--r3.4.1_0'
 
     input:
     tuple val(meta), path(tree)

@@ -1,10 +1,27 @@
-# MDHHS-Bioinformatics/corge: Documentation
+# 📚 MDHHS-Bioinformatics/corge Documentation
 
-The MDHHS-Bioinformatics/corge documentation is split into the following pages:
+This directory contains detailed documentation for **CorGe+**.
 
-- [Usage](usage.md)
-  - An overview of how the pipeline works, how to run it and a description of all of the different command-line flags.
-- [Output](output.md)
-  - An overview of the different results produced by the pipeline and how to interpret them.
+The documentation is organized to help users understand:
 
-You can find a lot more documentation about installing, configuring and running nf-core pipelines on the website: [https://nf-co.re](https://nf-co.re)
+* how to run the pipeline
+* how the workflow operates
+* what parameters can be configured
+* what outputs are generated
+
+---
+
+## 📖 Documentation Overview
+
+| Document                             | Description                                                                                                                             |
+| ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------- |
+| **[`usage.md`](usage.md)**           | Instructions for running the pipeline, including requirements, input preparation, and example commands.                                 |
+| **[`parameters.md`](parameters.md)** | Complete list of pipeline parameters and configuration options. |
+| **[`workflow.md`](workflow.md)**     | Overview of the pipeline workflow, including the analysis steps and tools used.                                                         |
+| **[`output.md`](output.md)**       | Description of the pipeline outputs, including directory structure and key result files.                                                |
+
+---
+
+## 📁 Additional Resources
+
+Images used in the documentation (workflow diagrams, pipeline logos, etc.) are stored in [`images/`](images/)

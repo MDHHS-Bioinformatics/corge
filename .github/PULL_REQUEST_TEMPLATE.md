@@ -8,7 +8,7 @@ These are the most common things requested on pull requests (PRs).
 
 Remember that PRs should be made against the dev branch, unless you're preparing a pipeline release.
 
-Learn more about contributing: [CONTRIBUTING.md](https://github.com/MDHHS-Bioinformatics/corge/tree/master/.github/CONTRIBUTING.md)
+Learn more about contributing: [CONTRIBUTING.md](https://github.com/MDHHS-Bioinformatics/corge/tree/main/.github/CONTRIBUTING.md)
 -->
 
 ## PR checklist
@@ -19,5 +19,7 @@ Learn more about contributing: [CONTRIBUTING.md](https://github.com/MDHHS-Bioinf
 - [ ] Ensure the test suite passes (`nextflow run . -profile test,docker --outdir <OUTDIR>`).
 - [ ] Usage Documentation in `docs/usage.md` is updated.
 - [ ] Output Documentation in `docs/output.md` is updated.
+- [ ] Parameter Documentation in `docs/parameters.md` is updated.
+- [ ] Workflow Documentation in `docs/workflow.md` is updated.
 - [ ] `CHANGELOG.md` is updated.
 - [ ] `README.md` is updated (including new tool citations and authors/contributors).

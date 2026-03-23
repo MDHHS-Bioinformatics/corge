@@ -48,6 +48,7 @@ include { MICROREACT_ML as MICROREACT_ML_CGMLST  } from '../modules/local/micror
 include { MICROREACT_ML as MICROREACT_ML_SNP     } from '../modules/local/microreact/microreact_ml.nf'
 include { MAKE_POODLE_MANIFEST                   } from '../modules/local/post_processing/make_poodle_manifest.nf'
 include { MAKE_POODLE_MANIFEST_MASTER            } from '../modules/local/post_processing/make_poodle_manifest_master.nf'
+include { MASHTREE                               } from '../modules/local/mashtree/main.nf'
 
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
@@ -68,7 +69,6 @@ include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_anal
 //
 // MODULE: Installed directly from nf-core/modules
 //
-include { MASHTREE                               } from '../modules/nf-core/mashtree/main.nf'
 include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoftwareversions/main'
 
 /*
