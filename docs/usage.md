@@ -14,7 +14,7 @@ CorGe+ is designed for **incremental genomic surveillance**:
 2. Prepare a sample manifest
 3. Run the pipeline
 4. Results are added to a **growing database** (`--outdir`)
-5. (Optional) regroup or refine analyses later
+5. (Optional) regroup or remove specific samples later
 
 **Method selection is automatic:**
 
@@ -42,16 +42,16 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 >[!NOTE]
->This command clones (download) this repo to ~/.nextflow/assets/MDHHS-Bioinformatics/corge. You can download the pipeline in a different location using `git clone https://github.com/MDHHS-Bioinformatics/corge.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/CorGe ...`).
+>This command clones (download) this repo to ~/.nextflow/assets/MDHHS-Bioinformatics/corge. You can download the pipeline in a different location using `git clone https://github.com/MDHHS-Bioinformatics/corge.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/corge ...`).
 
 ---
 
 ## ⚠️ Important notes (read before running)
 
 * Use **unique sample names** across runs
-* Do **not run multiple jobs on the same cgMLST schema** simultaneously
+* Do **not run multiple jobs on the same cgMLST schema** simultaneously. By default, ChewBBACA adds new alleles to a cgMLST schema while it runs. If multiple jobs use the **same schema directory**, they may interfere with each other and cause problems with how new alleles are named.
 * Parsnp results may vary across runs (less reproducible than cgMLST)
-* The `--outdir` acts as a **persistent database**
+* The `--outdir` acts as a **growing database**
 
 ---
 
@@ -74,7 +74,7 @@ Install:
 >
 > If using **Apptainer** set `NXF_APPTAINER_CACHEDIR` (or `apptainer.cacheDir`) to reuse images later. For example: 
 > ```bash
-> export NXF_APPTAINER_CACHEDIR="/path/to/singularity_cache"
+> export NXF_APPTAINER_CACHEDIR="/path/to/apptainer_cache"
 > ``````
 ---
 
@@ -90,7 +90,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   -profile apptainer
 ```
 <details>
-<summary><b>Click here to check schema IDs</b></summary>
+<summary><b>Click here to check cgMLST schema IDs</b></summary>
 
 | id  | schema_name                                                     |
 |-----|------------------------------------------------------------------|
@@ -138,6 +138,85 @@ nextflow run MDHHS-Bioinformatics/corge \
 </details>
 
 
+<details>
+<summary><b>Check species supported by the cgMLST schema IDs</b></summary>
+
+| species                      | schema                                                              |
+|-----------------------------|---------------------------------------------------------------------|
+| Acinetobacter_baumannii     | Acinetobacter_baumannii_cgMLST                                      |
+| Bacillus_anthracis          | Bacillus_anthracis_cgMLST                                           |
+| Bordetella_pertussis        | Bordetella_pertussis_cgMLST                                         |
+| Brucella_melitensis         | Brucella_melitensis_cgMLST                                          |
+| Brucella_abortus            | Brucella_spp_cgMLST                                                 |
+| Brucella_canis              | Brucella_spp_cgMLST                                                 |
+| Brucella_ceti               | Brucella_spp_cgMLST                                                 |
+| Brucella_inopinata          | Brucella_spp_cgMLST                                                 |
+| Brucella_melitensis         | Brucella_spp_cgMLST                                                 |
+| Brucella_microti            | Brucella_spp_cgMLST                                                 |
+| Brucella_neotomae           | Brucella_spp_cgMLST                                                 |
+| Brucella_ovis               | Brucella_spp_cgMLST                                                 |
+| Brucella_pinnipedialis      | Brucella_spp_cgMLST                                                 |
+| Brucella_suis               | Brucella_spp_cgMLST                                                 |
+| Burkholderia_mallei         | Burkholderia_mallei_FLI_cgMLST                                      |
+| Burkholderia_mallei         | Burkholderia_mallei_RKI_cgMLST                                      |
+| Burkholderia_pseudomallei   | Burkholderia_pseudomallei_cgMLST                                    |
+| Campylobacter_coli          | Campylobacter_jejuni_coli_cgMLST                                    |
+| Campylobacter_jejuni        | Campylobacter_jejuni_coli_cgMLST                                    |
+| Citrobacter_freundii        | Citrobacter_freundii_cgMLST                                         |
+| Citrobacter_braakii         | Citrobacter_freundii_portucalensis_braakii_europaeus_cgMLST         |
+| Citrobacter_europaeus       | Citrobacter_freundii_portucalensis_braakii_europaeus_cgMLST         |
+| Citrobacter_freundii        | Citrobacter_freundii_portucalensis_braakii_europaeus_cgMLST         |
+| Citrobacter_portucalensis   | Citrobacter_freundii_portucalensis_braakii_europaeus_cgMLST         |
+| Clostridioides_difficile    | Clostridioides_difficile_cgMLST                                     |
+| Clostridium_perfringens     | Clostridium_perfringens_cgMLST                                      |
+| Corynebacterium_diphtheriae | Corynebacterium_diphtheriae_cgMLST                                  |
+| Corynebacterium_pseudotuberculosis | Corynebacterium_pseudotuberculosis_cgMLST                   |
+| Cronobacter_malonaticus     | Cronobacter_sakazakii_malonaticus_cgMLST                            |
+| Cronobacter_sakazakii       | Cronobacter_sakazakii_malonaticus_cgMLST                            |
+| Enterobacter_hormaechei     | Enterobacter_hormaechei_cgMLST                                      |
+| Enterococcus_faecalis       | Enterococcus_faecalis_cgMLST                                        |
+| Enterococcus_faecium        | Enterococcus_faecium_cgMLST                                         |
+| Escherichia_albertii        | Escherichia_coli_cgMLST                                             |
+| Escherichia_coli            | Escherichia_coli_cgMLST                                             |
+| Escherichia_fergusonii      | Escherichia_coli_cgMLST                                             |
+| Escherichia_marmotae        | Escherichia_coli_cgMLST                                             |
+| Escherichia_ruysiae         | Escherichia_coli_cgMLST                                             |
+| Shigella_boydii             | Escherichia_coli_cgMLST                                             |
+| Shigella_dysenteriae        | Escherichia_coli_cgMLST                                             |
+| Shigella_flexneri           | Escherichia_coli_cgMLST                                             |
+| Shigella_sonnei             | Escherichia_coli_cgMLST                                             |
+| Francisella_tularensis      | Francisella_tularensis_cgMLST                                       |
+| Klebsiella_grimontii        | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii_cgMLST         |
+| Klebsiella_michiganensis    | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii_cgMLST         |
+| Klebsiella_oxytoca          | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii_cgMLST         |
+| Klebsiella_pasteurii        | Klebsiella_oxytoca_grimontii_michiganensis_pasteurii_cgMLST         |
+| Klebsiella_pneumoniae       | Klebsiella_pneumoniae_variicola_quasipneumoniae_cgMLST              |
+| Klebsiella_quasipneumoniae  | Klebsiella_pneumoniae_variicola_quasipneumoniae_cgMLST              |
+| Klebsiella_variicola        | Klebsiella_pneumoniae_variicola_quasipneumoniae_cgMLST              |
+| Legionella_pneumophila      | Legionella_pneumophila_cgMLST                                       |
+| Listeria_monocytogenes      | Listeria_monocytogenes_cgMLST                                       |
+| Morganella_morganii         | Morganella_morganii_cgMLST                                          |
+| Mycobacterium_africanum     | Mycobacterium_tuberculosis_bovis_africanum_canettii_cgMLST          |
+| Mycobacterium_bovis         | Mycobacterium_tuberculosis_bovis_africanum_canettii_cgMLST          |
+| Mycobacterium_canettii      | Mycobacterium_tuberculosis_bovis_africanum_canettii_cgMLST          |
+| Mycobacterium_tuberculosis  | Mycobacterium_tuberculosis_bovis_africanum_canettii_cgMLST          |
+| Mycobacteroides_abscessus   | Mycobacteroides_abscessus_cgMLST                                    |
+| Mycoplasma_gallisepticum    | Mycoplasma_gallisepticum_cgMLST                                     |
+| Paenibacillus_larvae        | Paenibacillus_larvae_cgMLST                                         |
+| Proteus_mirabilis           | Proteus_mirabilis_cgMLST                                            |
+| Providencia_stuartii        | Providencia_stuartii_cgMLST                                         |
+| Pseudomonas_aeruginosa      | Pseudomonas_aeruginosa_cgMLST                                       |
+| Salmonella_bongori          | Salmonella_enterica_cgMLST                                          |
+| Salmonella_enterica         | Salmonella_enterica_cgMLST                                          |
+| Serratia_marcescens         | Serratia_marcescens_cgMLST                                          |
+| Staphylococcus_argenteus    | Staphylococcus_argenteus_cgMLST                                     |
+| Staphylococcus_aureus       | Staphylococcus_aureus_cgMLST                                        |
+| Staphylococcus_capitis      | Staphylococcus_capitis_cgMLST                                       |
+| Streptococcus_pyogenes      | Streptococcus_pyogenes_cgMLST                                       |
+| Yersinia_enterocolitica     | Yersinia_enterocolitica_cgMLST                                      |
+
+</details>
+
 * Output file:
 
   ```
@@ -172,7 +251,7 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 | ---------- | ------------------------------------------------------- |
 | `sample`   | Unique sample ID                                        |
 | `assembly` | Path to FASTA file (uncompressed)                       |
-| `species`  | Species name (must match schema file if cgMLST is used) |
+| `species`  | Species name (must match `species` from schema file if cgMLST is used) |
 
 ---
 
@@ -248,14 +327,14 @@ nextflow run MDHHS-Bioinformatics/corge \
 ---
 
 ### Change clustering thresholds
-If you want to generate new clustering groups using **existing database results**, you can run the pipeline in `--mode regroup`. This reuses previously generated outputs and applies new distance thresholds. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
+The `--mode regroup` allows to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
 
-Specify the species to regroup using `--species_to_regroup`. The names must **exactly match** those used in the original run. Multiple species can be provided as a comma-separated list **without spaces**.
+Specify the species to regroup using `--species_to_regroup`. Multiple species can be provided as a comma-separated list **without spaces**.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   --mode regroup \
-  --species_to_regroup Escherichia_Escherichia_coli,Acinetobacter_baumanniicoli \
+  --species_to_regroup Escherichia_coli,Acinetobacter_baumannii \
   --outdir corge_results \
   --thresholds 50,100 \
   -profile apptainer
@@ -265,7 +344,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 ### Remove samples from database
 
-If a sample has already been added to a CorGe+ database and needs to be removed (for example, due to contamination, mislabeling, or reanalysis), you can use the dedicated **`remove` mode**. _Recommended when cgMLST was used, if Parsnp was used it may affect cluster nomenclature_.
+The `--mode remove` helps remove samples already added to the CorGe+ database (e.g., due to contamination, mislabeling, or reanalysis)
+
+> Recommended when cgMLST was used, if Parsnp was used it may affect cluster nomenclature.
 
 Create a CSV file listing the samples to remove, including their corresponding species:
 
@@ -275,27 +356,19 @@ ISO1,Escherichia_coli
 ISO4,Acinetobacter_baumannii
 ```
 
-For consistency, include all the options priorly used, such as `--metadata`, `--columns_summary_report`, `--phoenix_path`, etc:
+Include all the options priorly used, such as `--metadata`, `--columns_summary_report`, `--phoenix_path`, etc:
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   --mode remove \
   --samples_to_remove manifest_remove.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
-  --outdir corge \
+  --outdir corge_results \
   --metadata metadata.csv \
   --columns_summary_report st,specimen_source,date,first_seq_date,last_seq_date,timespan_days \
   -profile apptainer
 ```
 
----
-
-## 🧭 Which method is used?
-
-| Scenario                | Method               |
-| ----------------------- | -------------------- |
-| cgMLST schema available | cgMLST (recommended) |
-| No schema available     | Parsnp               |
 
 ---
 

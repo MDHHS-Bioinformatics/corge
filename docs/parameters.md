@@ -125,6 +125,7 @@ Available profiles:
 | `apptainer`   | Run using Apptainer containers      |
 | `singularity` | Run using Singularity containers    |
 | `test`        | Run pipeline with bundled test data |
+| `test_full`   | Run pipeline with bundled full test data |
 
 Multiple profiles can be combined:
 
