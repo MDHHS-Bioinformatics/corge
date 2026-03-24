@@ -36,7 +36,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 # 2. Run analysis
 nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
-  --cgmlst_schemas corge/cgmlst_schemas/cgmlst_schemas.csv \
+  --cgmlst_schemas corge_results/cgmlst_schemas/cgmlst_schemas.csv \
   --outdir corge_results \
   -profile apptainer
 ```
@@ -139,7 +139,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 
 <details>
-<summary><b>Check species supported by the cgMLST schema IDs</b></summary>
+<summary><b>Check species supported by the cgMLST schemas</b></summary>
 
 | species                      | schema                                                              |
 |-----------------------------|---------------------------------------------------------------------|
@@ -408,7 +408,7 @@ Reference thresholds from different sources are available at [`cgmlst_thresholds
 
 
 > [!TIP]
-> Use the [**Microreact visualization**](#-microreact-export) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+> Use the [**Microreact visualization**](output.md#-microreact-visualization) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
 
 ---
 
@@ -467,7 +467,7 @@ nextflow pull MDHHS-Bioinformatics/corge
 
 * **No clusters** → increase `--thresholds`
 * **Different group IDs across runs** → expected with Parsnp
-* **Switching to cgMLST** → remove prior results for that species and re-run all samples for consistency
+* **Switching from Parsnp to cgMLST** → remove prior results for that species and re-run all samples for consistency
 * **Low-quality results** → check assembly quality. The output `linkages/<Species>_potential_linkages.csv` reports the completeness quality check.
  
 

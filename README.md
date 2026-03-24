@@ -69,7 +69,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 > [!TIP]
-> Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species [cgMLST species](assets/species_schemas.csv).
+> Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species in [`cgMLST species`](assets/species_schemas.csv).
 
 > [!NOTE]
 > - The generated file (`cgmlst_schemas.csv`) is used as input in the next step.
