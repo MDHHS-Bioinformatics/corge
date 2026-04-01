@@ -16,10 +16,10 @@ if (params.mode == 'regroup') { //following params only need to be validated for
     def checkPathParamList = [params.outdir]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
-    if (params.species_to_regroup == null) {
-        exit 1, 'Missing --species_to_regroup.  Provide a species or list of species separated by commas, no spaces allowed'}
+    if (params.species == null) {
+        exit 1, 'Missing --species .  Provide a species or list of species separated by commas, no spaces allowed'}
     
-    def raw = params.species_to_regroup?.toString() ?: ''
+    def raw = params.species?.toString() ?: ''
     speciesList = raw.split(/,/).collect { it.trim() }.unique()
 
     println "Species requested to regroup: ${speciesList.join(', ')}" 
