@@ -327,16 +327,32 @@ nextflow run MDHHS-Bioinformatics/corge \
 ---
 
 ### Change clustering thresholds
-The `--mode regroup` allows to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
+The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
 
-Specify the species to regroup using `--species_to_regroup`. Multiple species can be provided as a comma-separated list **without spaces**.
+Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   --mode regroup \
-  --species_to_regroup Escherichia_coli,Acinetobacter_baumannii \
+  --species Escherichia_coli,Acinetobacter_baumannii \
   --outdir corge_results \
   --thresholds 50,100 \
+  -profile apptainer
+```
+
+---
+
+### Build a phylogenetic tree from prior results
+The `--mode tree` allows you to generate a phylogenetic tree using **existing database results**. New Microreact outputs will be generated to include the new phylogenetic tree with existing MSTreeV2 and MashTree from the database (`outdir`). A maximum-likelihood phylogenetic tree (GTR+G4) will be build from a DNA multiple-sequence alignment (MSA). When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. ML trees need at least 3 samples.
+
+Specify the species to analyze using `--species`. Multiple species can be provided as a comma-separated list **without spaces**. The cgMLST schemas file is required if the previous analysis used cgMLST.
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  --mode tree \
+  --cgmlst_schemas cgmlst_schemas.csv \
+  --species Escherichia_coli,Acinetobacter_baumannii \
+  --outdir corge_results \
   -profile apptainer
 ```
 
