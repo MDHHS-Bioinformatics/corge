@@ -14,7 +14,7 @@ def create_assembly_channel(LinkedHashMap row) {
     meta.id         = row.sample
     meta.species    = row.species
 
-    // add paths to the assemblies and gffs
+    // add paths to the assemblies
     def assembly_meta = []
     if (!file(row.assembly).exists()){
         exit 1, "ERROR: Please check input samplesheet -> Assembly file does not exist! \n${row.assembly}"

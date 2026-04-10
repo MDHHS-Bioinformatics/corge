@@ -35,13 +35,13 @@ def parse_args():
         "--master_paths",
         help=(
             "Optional master paths file (JSON or CSV). "
-            "JSON: {\"sample\": {\"fastq_1\":..., \"fastq_2\":..., \"gff\":..., \"assembly\":...}, ...} "
-            "CSV: columns sample,fastq_1,fastq_2,gff,assembly"
+            "JSON: {\"sample\": {\"fastq_1\":..., \"fastq_2\":..., \"annotation\":..., \"assembly\":...}, ...} "
+            "CSV: columns sample,fastq_1,fastq_2,annotation,assembly"
         ),
     )
     parser.add_argument(
         "--phoenix_path",
-        help="Optional phoenix base path. Uses phoenix_path/<sample>/fastp_trimd and /annotation for fastqs and gff.",
+        help="Optional phoenix base path. Uses phoenix_path/<sample>/fastp_trimd and /annotation for fastqs and annotation.",
     )
     parser.add_argument(
         "--bactopia_path",
@@ -52,11 +52,11 @@ def parse_args():
 
 def load_master_paths(path):
     """
-    Load master paths mapping sample -> dict(fastq_1, fastq_2, gff, assembly).
+    Load master paths mapping sample -> dict(fastq_1, fastq_2, annotation, assembly).
 
     Supports:
-      - JSON: {sample: {fastq_1, fastq_2, gff, assembly}}
-      - CSV:  columns: sample,fastq_1,fastq_2,gff,assembly
+      - JSON: {sample: {fastq_1, fastq_2, annotation, assembly}}
+      - CSV:  columns: sample,fastq_1,fastq_2,annotation,assembly
     """
     if path is None:
         return {}
@@ -73,7 +73,7 @@ def load_master_paths(path):
                 mp[sample] = {
                     "fastq_1": vals.get("fastq_1") or vals.get("fastq1", ""),
                     "fastq_2": vals.get("fastq_2") or vals.get("fastq2", ""),
-                    "gff": vals.get("gff", ""),
+                    "annotation": vals.get("annotation", ""),
                     "assembly": vals.get("assembly", ""),
                 }
         else:
@@ -83,7 +83,7 @@ def load_master_paths(path):
                 mp[sample] = {
                     "fastq_1": row.get("fastq_1", "") or row.get("fastq1", ""),
                     "fastq_2": row.get("fastq_2", "") or row.get("fastq2", ""),
-                    "gff": row.get("gff", ""),
+                    "annotation": row.get("annotation", ""),
                     "assembly": row.get("assembly", ""),
                 }
     except Exception as e:
@@ -96,16 +96,16 @@ def build_paths_from_phoenix(sample, phoenix_path):
     base = os.path.join(phoenix_path, sample)
     fastq_1 = os.path.join(base, "fastp_trimd", f"{sample}_1.trim.fastq.gz")
     fastq_2 = os.path.join(base, "fastp_trimd", f"{sample}_2.trim.fastq.gz")
-    gff = os.path.join(base, "annotation", f"{sample}.gff")
-    return fastq_1, fastq_2, gff
+    annotation = os.path.join(base, "annotation", f"{sample}.gff")
+    return fastq_1, fastq_2, annotation
 
 
 def build_paths_from_bactopia(sample, bactopia_path):
     base = os.path.join(bactopia_path, sample)
     fastq_1 = os.path.join(base, "quality-control", f"{sample}_R1.fastq.gz")
     fastq_2 = os.path.join(base, "quality-control", f"{sample}_R2.fastq.gz")
-    gff = os.path.join(base, "annotation", f"{sample}.gff")
-    return fastq_1, fastq_2, gff
+    annotation = os.path.join(base, "annotation", f"{sample}.gff")
+    return fastq_1, fastq_2, annotation
 
 
 def get_default_assembly_path(outdir, species, sample):
@@ -179,23 +179,23 @@ def choose_reference_sample(samples_info, metrics_cache):
 def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_path, bactopia_path):
     """
     Build paths for a sample:
-      - start with defaults (empty fastqs/gff, default assembly path)
+      - start with defaults (empty fastqs/annotation, default assembly path)
       - fill phoenix or bactopia if provided
       - override with master_paths if present for the sample
     """
     # Default assembly path
     assembly = get_default_assembly_path(outdir, species_value, sample)
 
-    # Default fastq/gff: empty
+    # Default fastq/annotation: empty
     fastq_1 = ""
     fastq_2 = ""
-    gff = ""
+    annotation = ""
 
     # Phoenix / Bactopia (only one should be used, as Nextflow chooses)
     if phoenix_path:
-        fastq_1, fastq_2, gff = build_paths_from_phoenix(sample, phoenix_path)
+        fastq_1, fastq_2, annotation = build_paths_from_phoenix(sample, phoenix_path)
     elif bactopia_path:
-        fastq_1, fastq_2, gff = build_paths_from_bactopia(sample, bactopia_path)
+        fastq_1, fastq_2, annotation = build_paths_from_bactopia(sample, bactopia_path)
 
     # master_paths overrides everything per sample
     if sample in master_paths:
@@ -204,8 +204,8 @@ def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_pa
             fastq_1 = mp["fastq_1"]
         if mp.get("fastq_2"):
             fastq_2 = mp["fastq_2"]
-        if mp.get("gff"):
-            gff = mp["gff"]
+        if mp.get("annotation"):
+            annotation = mp["annotation"]
         if mp.get("assembly"):
             assembly = mp["assembly"]
 
@@ -213,7 +213,7 @@ def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_pa
         "sample": sample,
         "fastq_1": fastq_1,
         "fastq_2": fastq_2,
-        "gff": gff,
+        "annotation": annotation,
         "assembly": assembly,
         "species": species_value,
     }
@@ -289,7 +289,7 @@ def process_threshold(
                     "sample": info["sample"],
                     "fastq_1": info["fastq_1"],
                     "fastq_2": info["fastq_2"],
-                    "gff": info["gff"],
+                    "annotation": info["annotation"],
                     "assembly": info["assembly"],
                     "cluster_id": group_name,
                     "species": info["species"],

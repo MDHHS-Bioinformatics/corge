@@ -50,7 +50,7 @@ Optional parameters to populate PoODLE manifests automatically.
 
 | Parameter         | Type   | Default | Description                                       |
 | ----------------- | ------ | ------- | ------------------------------------------------- |
-| `--master_paths`  | string | –       | CSV with explicit absolute paths to reads and annotations (`sample,fastq_1,fastq_2,gff`). Use this when you already have all paths from the database organized in a single file. |
+| `--master_paths`  | string | –       | CSV with explicit absolute paths to reads and annotations (`sample,fastq_1,fastq_2,annotation`). Use this when you already have all paths from the database organized in a single file. |
 | `--phoenix_path`  | string | –       | Path to PHoeNIx results directory.                |
 | `--bactopia_path` | string | –       | Path to Bactopia results directory.               |
 

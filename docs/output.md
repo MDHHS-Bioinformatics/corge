@@ -237,9 +237,9 @@ poodle_samplesheets/<Species>_HC<threshold>_poodle_manifest.csv
 CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold. The required columns are:
 
 ```csv
-sample,fastq_1,fastq_2,gff,assembly,cluster_id,species,reference
+sample,fastq_1,fastq_2,annotation,assembly,cluster_id,species,reference
 ```
-The FASTQ and GFF fields are left empty by default, but CorGe+ can fill them automatically if you provide a [PHoeNIx](https://github.com/CDCgov/phoenix) results directory (`--phoenix_path`), a [Bactopia](https://bactopia.github.io/latest/) results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
+The FASTQ and annotation (GFF) fields are left empty by default, but CorGe+ can fill them automatically if you provide a [PHoeNIx](https://github.com/CDCgov/phoenix) results directory (`--phoenix_path`), a [Bactopia](https://bactopia.github.io/latest/) results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
 For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
 

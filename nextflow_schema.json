@@ -118,7 +118,7 @@
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "CSV file with sample paths for PoODLE manifests (`sample,fastq_1,fastq_2,gff`).",
+                    "description": "CSV file with sample paths for PoODLE manifests (`sample,fastq_1,fastq_2,annotation`).",
                     "default": "null",
                     "fa_icon": "fas fa-file-csv"
                 },
