@@ -20,11 +20,12 @@
 ## 🌟 Highlights
 
 * 🧬 **Fast & scalable**: Built for high-throughput screening of large genomic datasets
+* 🧪 **Multi-species support**: Analyzes multiple species in a single run
 * 🔗 **Linkage detection & grouping**: Identifies related samples (cgMLST/SNP) and groups them using flexible thresholds
 * 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle)-ready sample sheets
-* 🧪 **Multi-species support**: Analyzes multiple species in a single run
 * 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data while preserving group nomenclature
-* 🕒 **Temporal insights**: When metadata is provided it tracks related isolates over time to detect emerging patterns
+* 🕒 **Metadata-driven insights**: Uses [`ReporTree`](https://github.com/insapathogenomics/ReporTree) to summarize genetic clusters across metadata fields (e.g., time, location, clinical data) for enhanced epidemiological interpretation
+* ⚙️ **Flexible workflows**: Supports regrouping, phylogenetic tree generation from prior results, and selective sample removal from the database
 
 
 ## 📊 Workflow Overview
@@ -35,12 +36,13 @@ High-level steps:
 
 1. Verify cgMLST schema availability for each species.
 2. Perform core genome analysis using [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA) (cgMLST) or [`Parsnp`](https://github.com/marbl/parsnp) (core alignment if schema unavailable).
-3. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree).
-4. Create potential linkage tables per species.
-5. Select groups per sample using user-defined thresholds.
-6. Generate [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) manifests.
-7. Run [`MashTree`](https://github.com/lskatz/mashtree).
-8. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees.
+3. Generate a phylogenetic tree with [`IQ-TREE`](https://www.iqtree.org/) (optional with `--tree`).
+4. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree).
+5. Create potential linkage tables per species.
+6. Select groups per sample using user-defined thresholds.
+7. Generate [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) manifests.
+8. Run [`MashTree`](https://github.com/lskatz/mashtree).
+9. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees.
 
 Full workflow details: [`Worflow documentation`](docs/workflow.md)
 
@@ -74,6 +76,8 @@ nextflow run MDHHS-Bioinformatics/corge \
 > [!NOTE]
 > - The generated file (`cgmlst_schemas.csv`) is used as input in the next step.
 > - If a species does not have a corresponding cgMLST schema, it will automatically be processed with Parsnp.
+> - cgMLST schemas can also be downloaded from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), created or prepared with [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Add any custom schema to the schema file once ready.
+
 ---
 
 ### 3️⃣ Prepare manifest file
@@ -98,7 +102,7 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 
 ### 4️⃣ Run
 
-Run the pipeline using:
+_Basic run:_
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -110,10 +114,15 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 > [!TIP]
 > Default clustering thresholds: `15,20,40,150`
-> You can customize them with `--thresholds`
+> Customize them with `--thresholds`
 
+_Advanced run:_
 
-### 🔧 Optional: Custom thresholds
+This example shows some optional features for metadata-aware reporting, maximum-likelihood phylogenetic reconstruction, and automated PoODLE manifest generation.
+
+* 🕒 **Metadata-aware reporting (ReporTree)**: Links genetic clusters with epidemiological metadata for richer summaries, filtering, and downstream analyses.
+* 🌳 **Phylogenetic reconstruction (ML)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples).
+* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx, Bactopia, or a user-provided table to generate ready-to-use sample sheets.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -121,9 +130,22 @@ nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
-  --thresholds 1,10,100,1000
+  --thresholds 5,10,20,30,150 \
+  --tree \
+  --metadata full_lims_data.csv \
+  --columns_summary_report st,source,location,date,first_seq_date,last_seq_date,timespan_days \
+  --metadata2report st \
+  --count_matrix st,source \
+  --phoenix_path /path/to/phx_output
 ```
 
+### 🔄 Additional modes
+
+CorGe+ also supports alternative modes for working with existing results:
+
+- `regroup`: Recompute clusters using different thresholds  
+- `tree`: Generate phylogenetic trees from prior results  
+- `remove`: Remove specific samples from the database  
 
 For more details and advanced usage, see the
 [`Usage documentation`](docs/usage.md) and [`Parameter documentation`](docs/parameters.md)
