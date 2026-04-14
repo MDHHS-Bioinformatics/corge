@@ -153,16 +153,16 @@ This example shows some optional features for metadata-aware reporting, maximum-
   ISO2,ST2,urine,FacilityA,2026-02-12
   ```
 
-* 🌳 **Phylogenetic reconstruction (ML)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples) (`--tree`).
+* 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples) .
 
-* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx `--phoenix_path`, Bactopia `--bactopia_path`, or a user-provided table `--master_paths` to generate ready-to-use sample sheets.
+* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx `--phoenix_path`, Bactopia `--bactopia_path`, or a user-provided table `--master_paths` to generate ready-to-use sample sheets. If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE.
 
   Example `--master_paths master_paths.csv`
 
   ```csv
   sample,fastq_1,fastq_2,annotation
   ISO1,/path/ISO1_R1.fq.gz,/path/ISO1_R2.fq.gz,/path/ISO1.gff
-  ISO2,/path/ISO2_R2.fq.gz,/path/ISO2_R2.fq.gz,/path/ISO2.gff
+  ISO2,/path/ISO2_R1.fq.gz,/path/ISO2_R2.fq.gz,/path/ISO2.gff
   ```
 
 Example:
