@@ -250,7 +250,7 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 | Column     | Description                                             |
 | ---------- | ------------------------------------------------------- |
 | `sample`   | Unique sample ID                                        |
-| `assembly` | Path to FASTA file (uncompressed)                       |
+| `assembly` | Path to FASTA file (`.fasta`, `.fna`, `.fa`, `fas`, `.fasta.gz`, `.fna.gz`, `.fa.gz`, `.fas.gz`) |
 | `species`  | Species name (must match `species` from schema file if cgMLST is used) |
 
 ---

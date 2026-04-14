@@ -116,7 +116,7 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 | Column   | Description                           |
 | -------- | ------------------------------------- |
 | sample   | Unique sample ID                      |
-| assembly | Path to FASTA assembly                |
+| assembly | Path to FASTA assembly (can be gzipped)  |
 | species  | Species name (must match schema file) |
 
 ---
