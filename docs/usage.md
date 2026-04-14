@@ -373,7 +373,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 ### 🔁 Regroup
 Recompute clusters with new thresholds.
 
-The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
+The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds (old results are overwritten).
 
 Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**.
 

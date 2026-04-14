@@ -14,8 +14,18 @@
 
 [![DOI](https://zenodo.org/badge/DOI/XXXX.svg)](https://zenodo.org/badge/latestdoi/XXXXXX)
 
+**CorGe+** is a bioinformatics pipeline for analyzing bacterial genome assemblies. It takes a sample sheet with FASTA files and performs either core genome MLST (cgMLST) or core genome alignment. Outputs include linkage tables, Microreact visualizations, metadata summaries, and sample groupings based on allelic or SNP distances.
 
-**CorGe+** is a bioinformatics pipeline for analyzing bacterial DNA sequencing data. It takes a sample sheet with FASTA files and optionally a metadata file as input, performs either core genome MLST (cgMLST) or core genome alignment and produces linkage tables, Microreact visualizations, metadata summaries, and sample groupings based on allelic or SNP distances for downstream analysis.
+### Suggested workflow
+
+Genome assemblies from sequencing pipelines (e.g., PHoeNIx, Bactopia) or public databases (e.g., AllTheBacteria, NCBI) are analyzed with CorGe+ to group genetically similar samples. These groups can help identify potential linkages to support routine surveillance and outbreak investigation.
+
+Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) provides higher-resolution comparisons for each group, including SNP-based and pangenome analyses.
+
+<p align="center">
+<img src="docs/images/corge_overview.png" width="500">
+</p>
+
 
 ## 🌟 Highlights
 
@@ -70,6 +80,17 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results
 ```
 
+Example cgMLST schema file:
+
+```csv
+species,cgmlst_path
+Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
+Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
+Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
+```
+
+
 > [!TIP]
 > Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species in [`cgMLST species`](assets/species_schemas.csv).
 
@@ -113,17 +134,38 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 > [!TIP]
-> Default clustering thresholds: `15,20,40,150`
-> Customize them with `--thresholds`
+> - Default clustering thresholds (alleles for cgMLST or SNPs for Parsnp): `15,20,40,150`
+> - Customize them with `--thresholds`
 
 _Advanced run:_
 
 This example shows some optional features for metadata-aware reporting, maximum-likelihood phylogenetic reconstruction, and automated PoODLE manifest generation.
 
 * 🕒 **Metadata-aware reporting (ReporTree)**: Links genetic clusters with epidemiological metadata for richer summaries, filtering, and downstream analyses.
-* 🌳 **Phylogenetic reconstruction (ML)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples).
-* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx, Bactopia, or a user-provided table to generate ready-to-use sample sheets.
 
+  Must include **all samples** (new + previous). Sample IDs in the first column must match CorGe+ names. Recommended to include a `date` column (YYYY-MM-DD) for temporal summaries (infers: `first_seq_date`, `last_seq_date`, `timespan_days`). 
+  
+  Example for `--metadata metadata.csv`:
+
+  ```csv
+  sample,st,source,location,date
+  ISO1,ST2,wound,FacilityA,2026-01-03
+  ISO2,ST2,urine,FacilityA,2026-02-12
+  ```
+
+* 🌳 **Phylogenetic reconstruction (ML)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples) (`--tree`).
+
+* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx `--phoenix_path`, Bactopia `--bactopia_path`, or a user-provided table `--master_paths` to generate ready-to-use sample sheets.
+
+  Example `--master_paths master_paths.csv`
+
+  ```csv
+  sample,fastq_1,fastq_2,annotation
+  ISO1,/path/ISO1_R1.fq.gz,/path/ISO1_R2.fq.gz,/path/ISO1.gff
+  ISO2,/path/ISO2_R2.fq.gz,/path/ISO2_R2.fq.gz,/path/ISO2.gff
+  ```
+
+Example:
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   -profile apptainer \
@@ -132,7 +174,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results \
   --thresholds 5,10,20,30,150 \
   --tree \
-  --metadata full_lims_data.csv \
+  --metadata metadata.csv \
   --columns_summary_report st,source,location,date,first_seq_date,last_seq_date,timespan_days \
   --metadata2report st \
   --count_matrix st,source \
