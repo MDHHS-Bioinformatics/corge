@@ -14,8 +14,8 @@
             },
             "assembly": {
                 "type": "string",
-                "pattern": "^\\S+\\.(fa|fna|fas|fasta)$",
-                "errorMessage": "Assembly file must be provided, cannot contain spaces and must have extension '.fa', 'fna', 'fas' or '.fasta'"
+                "pattern": "^\\S+\\.(fa|fna|fas|fasta|fa.gz|fna.gz|fas.gz|fasta.gz)$",
+                "errorMessage": "Assembly file must be provided, cannot contain spaces and must have extension '.fa', 'fna', 'fas' or '.fasta' and can be gzipped"
             },    
             "species": {
                 "type": "string",
