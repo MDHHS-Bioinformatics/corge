@@ -6,7 +6,7 @@ process MAKE_POODLE_MANIFEST {
     container 'quay.io/biocontainers/pandas:2.2.1'
 
     input:
-    tuple val(meta), path(genomic_context_groups)
+    tuple val(meta), path(genomic_context_groups), path(potential_linkages)
     val(outdir_abs)
 
     output:
@@ -36,6 +36,7 @@ process MAKE_POODLE_MANIFEST {
         --outdir ${outdir_abs} \
         --thresholds ${thresholds} \
         --groups ${genomic_context_groups} \
+        --linkages ${potential_linkages} \
         ${sample_paths}
 
     cat <<-END_VERSIONS > versions.yml
