@@ -14,7 +14,7 @@ CorGe+ is designed for **incremental genomic surveillance**:
 2. Prepare a sample manifest
 3. Run the pipeline
 4. Results are added to a **growing database** (`--outdir`)
-5. (Optional) regroup or remove specific samples later
+5. (Optional) regroup, generate a phylogenetic tree or remove specific samples later
 
 **Method selection is automatic:**
 
@@ -42,15 +42,15 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 >[!NOTE]
->This command clones (download) this repo to ~/.nextflow/assets/MDHHS-Bioinformatics/corge. You can download the pipeline in a different location using `git clone https://github.com/MDHHS-Bioinformatics/corge.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/corge ...`).
+>This command clones (download) this repo to `~/.nextflow/assets/MDHHS-Bioinformatics/corge`. You can download the pipeline in a different location using `git clone https://github.com/MDHHS-Bioinformatics/corge.git`. To run the pipeline, specify the path to the cloned repository (e.g. `nextflow run /path/to/corge ...`).
 
 ---
 
-## ⚠️ Important notes (read before running)
+## ⚠️ Important notes
 
 * Use **unique sample names** across runs
 * Do **not run multiple jobs on the same cgMLST schema** simultaneously. By default, ChewBBACA adds new alleles to a cgMLST schema while it runs. If multiple jobs use the **same schema directory**, they may interfere with each other and cause problems with how new alleles are named.
-* Parsnp results may vary across runs (less reproducible than cgMLST)
+* Parsnp results may vary across runs
 * The `--outdir` acts as a **growing database**
 
 ---
@@ -250,14 +250,17 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 | Column     | Description                                             |
 | ---------- | ------------------------------------------------------- |
 | `sample`   | Unique sample ID                                        |
-| `assembly` | Path to FASTA file (uncompressed)                       |
+| `assembly` | Path to FASTA file (`.fasta`, `.fna`, `.fa`, `fas`, `.fasta.gz`, `.fna.gz`, `.fa.gz`, `.fas.gz`) |
 | `species`  | Species name (must match `species` from schema file if cgMLST is used) |
+
+
+An example samplesheet is available in [`assets/samplesheet.csv`](../assets/samplesheet.csv)
 
 ---
 
-## ▶ Run analyses
+## 🚀 Run analyses
 
-### 🔹 Run with new samples
+### 🔹 Basic run
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -272,10 +275,13 @@ nextflow run MDHHS-Bioinformatics/corge \
 * Runs cgMLST or Parsnp automatically
 * Computes distances
 * Generates groups, linkages, and reports
+* Updates the existing database
 
----
+### ⚙️ Optional features
 
-### 🔹 Custom thresholds
+These options enhance analysis and reporting and can be combined.
+
+#### 🔹 Custom thresholds
 
 ```bash
 --thresholds 5,10,20,50
@@ -286,9 +292,94 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 More info below [`Choosing thresholds`](#-choosing-thresholds) 
 
+#### 🕒 **Metadata-aware reporting**
+
+  ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
+
+  At minimum, you can provide a metadata file like this:
+
+    ```bash
+    --metadata metadata.csv
+    ```
+
+  Example:
+
+    ```csv
+    sample,st,source,location,date
+    ISO1,ST2,wound,FacilityA,2026-01-03
+    ISO2,ST2,urine,FacilityA,2026-02-12
+    ```
+
+  Once metadata is included, ReporTree will enrich cluster outputs with useful summaries such as:
+
+  - number of samples per cluster
+  - distribution across locations or sources
+  - temporal signals (e.g. first and last detection dates, duration of circulation)
+
+  💡 **Going further**
+
+  You can refine and expand these reports depending on your needs.
+
+  For example, you might want to:
+
+  - focus only on a subset of samples (e.g. a country or time period)
+  - track specific metadata fields separately (e.g. sequence type or resistance profile)
+  - explore how lineages change over time
+
+  This can be done with options like:
+
+  Optional:
+
+  ```bash
+  --columns_summary_report lineage,country,date
+  --metadata2report st
+  --filter 'country == USA;date > 2024-01-01'
+  --frequency_matrix lineage,iso_week
+  ```
+  These allow you to:
+
+  - customize what gets summarized per cluster
+  - generate dedicated reports for key variables
+  - filter your dataset before analysis
+  - produce matrices for downstream visualization (e.g. lineage trends over time)
+
+
+
+  More details about these options in [`parameters.md`](parameters.md) and [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
+
+#### 🌳 Phylogenetic trees (ML)
+
+```bash
+--tree
+```
+
+* Builds a **maximum-likelihood tree (GTR+G4)**
+* Requires ≥3 samples
+* Uses cgMLST-derived alignments when available
+* More computationally intensive
+
+#### 📦 PoODLE sample sheets
+> [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
+
+CorGe+ can infer read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
+
+  Example for `--master_paths master_paths.csv`
+
+  ```csv
+  sample,fastq_1,fastq_2,annotation
+  ISO1,/path/ISO1_R1.trim.fq.gz,/path/ISO1_R2.trim.fq.gz,/path/ISO1.gff
+  ISO2,/path/ISO2_R1.trim.fq.gz,/path/ISO2_R2.trim.fq.gz,/path/ISO2.gff
+  ```
+
+  > If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE. 
+
+> [!NOTE]
+> * Avoids manual file tracking
+> * Use only **one option per run**
+
 ---
 
-### 🔹 Advanced run
+### 🔹 Advanced example
 Example enabling optional analyses (phylogenetic tree and use sample metadata) and adjusting resources:
 
 ```bash
@@ -300,9 +391,9 @@ nextflow run MDHHS-Bioinformatics/corge \
   --thresholds 5,10,20,30,150 \
   --tree \
   --metadata full_lims_data.csv \
-  --columns_summary_report st,specimen_source,specimen_type,patient_county,submitter_name,date,first_seq_date,last_seq_date,timespan_days \
+  --columns_summary_report st,source,county,date,first_seq_date,last_seq_date,timespan_days \
   --metadata2report st \
-  --count_matrix st,specimen_source \
+  --count_matrix st,source \
   --phoenix_path /path/to/phx_output \
   --max_memory 50.GB \
   --max_cpus 16 \
@@ -311,30 +402,19 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 ---
 
-## 🧪 Common workflows
+## 🔄 Working with existing results
 
-### Add new samples to an existing database
+### 🔁 Regroup
+Recompute clusters with new thresholds.
 
-* Use the **same `--outdir`**
-* Provide only new samples
+The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds (old results are overwritten).
 
----
-
-### Analyze samples independently
-
-* Use a **new `--outdir`**
-
----
-
-### Change clustering thresholds
-The `--mode regroup` allows to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds.
-
-Specify the species to regroup using `--species_to_regroup`. Multiple species can be provided as a comma-separated list **without spaces**.
+Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
   --mode regroup \
-  --species_to_regroup Escherichia_coli,Acinetobacter_baumannii \
+  --species Escherichia_coli,Acinetobacter_baumannii \
   --outdir corge_results \
   --thresholds 50,100 \
   -profile apptainer
@@ -342,7 +422,23 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 ---
 
-### Remove samples from database
+### 🌳 Build phylogenetic trees from existing data
+The `--mode tree` allows you to generate a phylogenetic tree using **existing database results**. New Microreact outputs will be generated to include the new phylogenetic tree with existing MSTreeV2 and MashTree from the database (`outdir`). A maximum-likelihood phylogenetic tree (GTR+G4) will be build from a DNA multiple-sequence alignment (MSA). When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. ML trees need at least 3 samples.
+
+Specify the species to analyze using `--species`. Multiple species can be provided as a comma-separated list **without spaces**. The cgMLST schemas file is required if the previous analysis used cgMLST.
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  --mode tree \
+  --cgmlst_schemas cgmlst_schemas.csv \
+  --species Escherichia_coli,Acinetobacter_baumannii \
+  --outdir corge_results \
+  -profile apptainer
+```
+
+---
+
+### 🗑️ Remove samples
 
 The `--mode remove` helps remove samples already added to the CorGe+ database (e.g., due to contamination, mislabeling, or reanalysis)
 
@@ -356,7 +452,7 @@ ISO1,Escherichia_coli
 ISO4,Acinetobacter_baumannii
 ```
 
-Include all the options priorly used, such as `--metadata`, `--columns_summary_report`, `--phoenix_path`, etc:
+💡 Include previous options (metadata, reporting settings) to regenerate outputs consistently.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -369,6 +465,11 @@ nextflow run MDHHS-Bioinformatics/corge \
   -profile apptainer
 ```
 
+## 🧪 Common workflows
+
+* **Add new samples** → reuse same `--outdir`
+* **Independent analysis** → use new `--outdir`
+* **Adjust thresholds** → use `--mode regroup`
 
 ---
 

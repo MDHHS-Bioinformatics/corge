@@ -57,9 +57,9 @@ workflow INPUT_CHECK_CGMLST {
     // Join the cgmlst paths with the species_count channel
     //
     joined_species_count = species_count
-    .join(cgmlst_paths.map{ meta, path -> [meta.species, [meta, path]]}, remainder:true)
-    .map{ species, count, temp -> //change any species that may have zero counts resulting in null to zero
-        [species, count ?: 0, temp]
+    .join(cgmlst_paths.map { meta, path -> [meta.species, [meta, path]] }, remainder:true)
+    .filter { species, count, temp ->
+        count != null   // keep only species that were actually requested
     }
     //
     // Now branch based on if a cgmlst is a available or not
@@ -68,7 +68,7 @@ workflow INPUT_CHECK_CGMLST {
         schema_unavailable: it[2] == null
         chewbbaca: it[2] != null
     }
-    .set{cgmlst_species_counts}
+    .set { cgmlst_species_counts }
     //
     // Reformat channel for species with cgmlst
     //

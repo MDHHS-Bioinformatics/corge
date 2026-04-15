@@ -35,28 +35,94 @@ def parse_args():
         "--master_paths",
         help=(
             "Optional master paths file (JSON or CSV). "
-            "JSON: {\"sample\": {\"fastq_1\":..., \"fastq_2\":..., \"gff\":..., \"assembly\":...}, ...} "
-            "CSV: columns sample,fastq_1,fastq_2,gff,assembly"
+            "JSON: {\"sample\": {\"fastq_1\":..., \"fastq_2\":..., \"annotation\":..., \"assembly\":...}, ...} "
+            "CSV: columns sample,fastq_1,fastq_2,annotation,assembly"
         ),
     )
     parser.add_argument(
         "--phoenix_path",
-        help="Optional phoenix base path. Uses phoenix_path/<sample>/fastp_trimd and /annotation for fastqs and gff.",
+        help="Optional phoenix base path. Uses phoenix_path/<sample>/fastp_trimd and /annotation for fastqs and annotation.",
     )
     parser.add_argument(
         "--bactopia_path",
         help="Optional bactopia base path. Uses bactopia_path/<sample>/quality-control and /annotation.",
     )
+    parser.add_argument(
+        "--linkages",
+        help=(
+            "Optional linkage CSV with columns including: "
+            "sample,species,percentage_called,completeness_qc,min_dist,"
+            "strong_linkages,intermediate_linkages,lineage_level"
+        ),
+    )
     return parser.parse_args()
 
+def load_linkages(path):
+    """
+    Load linkage CSV into a mapping:
+      sample -> {
+          "species": ...,
+          "percentage_called": float or None,
+          ...
+      }
+
+    Expected columns include at least:
+      sample, percentage_called
+    """
+    if path is None:
+        return {}
+
+    try:
+        df = pd.read_csv(path)
+
+        required = {"sample", "percentage_called"}
+        missing = required - set(df.columns)
+        if missing:
+            print(
+                f"[WARN] Linkage file {path} is missing required columns: {sorted(missing)}",
+                file=sys.stderr,
+            )
+            return {}
+
+        linkages = {}
+        for _, row in df.iterrows():
+            sample = str(row["sample"]).strip()
+            if not sample:
+                continue
+
+            percentage_called = row.get("percentage_called", None)
+            if pd.isna(percentage_called):
+                percentage_called = None
+            else:
+                try:
+                    percentage_called = float(percentage_called)
+                except (TypeError, ValueError):
+                    percentage_called = None
+
+            linkages[sample] = {
+                "species": row.get("species", ""),
+                "percentage_called": percentage_called,
+                "completeness_qc": row.get("completeness_qc", ""),
+                "min_dist": row.get("min_dist", ""),
+                "strong_linkages": row.get("strong_linkages", ""),
+                "intermediate_linkages": row.get("intermediate_linkages", ""),
+                "lineage_level": row.get("lineage_level", ""),
+            }
+
+        return linkages
+
+    except Exception as e:
+        print(f"[WARN] Failed to load linkages from {path}: {e}", file=sys.stderr)
+        return {}
+    
 
 def load_master_paths(path):
     """
-    Load master paths mapping sample -> dict(fastq_1, fastq_2, gff, assembly).
+    Load master paths mapping sample -> dict(fastq_1, fastq_2, annotation, assembly).
 
     Supports:
-      - JSON: {sample: {fastq_1, fastq_2, gff, assembly}}
-      - CSV:  columns: sample,fastq_1,fastq_2,gff,assembly
+      - JSON: {sample: {fastq_1, fastq_2, annotation, assembly}}
+      - CSV:  columns: sample,fastq_1,fastq_2,annotation,assembly
     """
     if path is None:
         return {}
@@ -73,7 +139,7 @@ def load_master_paths(path):
                 mp[sample] = {
                     "fastq_1": vals.get("fastq_1") or vals.get("fastq1", ""),
                     "fastq_2": vals.get("fastq_2") or vals.get("fastq2", ""),
-                    "gff": vals.get("gff", ""),
+                    "annotation": vals.get("annotation", ""),
                     "assembly": vals.get("assembly", ""),
                 }
         else:
@@ -83,7 +149,7 @@ def load_master_paths(path):
                 mp[sample] = {
                     "fastq_1": row.get("fastq_1", "") or row.get("fastq1", ""),
                     "fastq_2": row.get("fastq_2", "") or row.get("fastq2", ""),
-                    "gff": row.get("gff", ""),
+                    "annotation": row.get("annotation", ""),
                     "assembly": row.get("assembly", ""),
                 }
     except Exception as e:
@@ -96,16 +162,16 @@ def build_paths_from_phoenix(sample, phoenix_path):
     base = os.path.join(phoenix_path, sample)
     fastq_1 = os.path.join(base, "fastp_trimd", f"{sample}_1.trim.fastq.gz")
     fastq_2 = os.path.join(base, "fastp_trimd", f"{sample}_2.trim.fastq.gz")
-    gff = os.path.join(base, "annotation", f"{sample}.gff")
-    return fastq_1, fastq_2, gff
+    annotation = os.path.join(base, "annotation", f"{sample}.gff")
+    return fastq_1, fastq_2, annotation
 
 
 def build_paths_from_bactopia(sample, bactopia_path):
     base = os.path.join(bactopia_path, sample)
     fastq_1 = os.path.join(base, "quality-control", f"{sample}_R1.fastq.gz")
     fastq_2 = os.path.join(base, "quality-control", f"{sample}_R2.fastq.gz")
-    gff = os.path.join(base, "annotation", f"{sample}.gff")
-    return fastq_1, fastq_2, gff
+    annotation = os.path.join(base, "annotation", f"{sample}.gff")
+    return fastq_1, fastq_2, annotation
 
 
 def get_default_assembly_path(outdir, species, sample):
@@ -151,23 +217,43 @@ def get_assembly_metrics(assembly_path, cache):
     return num_contigs, total_length
 
 
-def choose_reference_sample(samples_info, metrics_cache):
+def choose_reference_sample(samples_info, metrics_cache, linkages_by_sample=None):
     """
     samples_info: list of dicts with keys:
       - sample
       - assembly
 
     Reference selection priority:
-      1) fewest contigs
-      2) largest total assembly length
-      3) alphabetical sample name
+      1) highest percentage_called (from --linkages)
+      2) fewest contigs
+      3) largest total assembly length
+      4) alphabetical sample name
+
+    If a sample is absent from the linkage file or percentage_called is missing,
+    it is treated as worse than any sample with a valid percentage_called.
     """
+    linkages_by_sample = linkages_by_sample or {}
+
     def sort_key(info):
         sample = info["sample"]
         assembly = info["assembly"]
         num_contigs, total_len = get_assembly_metrics(assembly, metrics_cache)
-        # fewer contigs (ascending), larger length (descending), sample name (ascending)
-        return (num_contigs, -total_len, sample)
+
+        linkage_info = linkages_by_sample.get(sample, {})
+        percentage_called = linkage_info.get("percentage_called", None)
+
+        # Higher percentage_called should win, so negate it for min()
+        # Missing values sort after valid values
+        missing_pct = percentage_called is None
+        pct_key = 0 if percentage_called is None else -percentage_called
+
+        return (
+            missing_pct,     # False (has value) sorts before True (missing)
+            pct_key,         # larger percentage_called first
+            num_contigs,     # fewer contigs first
+            -total_len,      # longer assembly first
+            sample,          # alphabetical
+        )
 
     if not samples_info:
         return None
@@ -176,26 +262,27 @@ def choose_reference_sample(samples_info, metrics_cache):
     return best
 
 
+
 def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_path, bactopia_path):
     """
     Build paths for a sample:
-      - start with defaults (empty fastqs/gff, default assembly path)
+      - start with defaults (empty fastqs/annotation, default assembly path)
       - fill phoenix or bactopia if provided
       - override with master_paths if present for the sample
     """
     # Default assembly path
     assembly = get_default_assembly_path(outdir, species_value, sample)
 
-    # Default fastq/gff: empty
+    # Default fastq/annotation: empty
     fastq_1 = ""
     fastq_2 = ""
-    gff = ""
+    annotation = ""
 
     # Phoenix / Bactopia (only one should be used, as Nextflow chooses)
     if phoenix_path:
-        fastq_1, fastq_2, gff = build_paths_from_phoenix(sample, phoenix_path)
+        fastq_1, fastq_2, annotation = build_paths_from_phoenix(sample, phoenix_path)
     elif bactopia_path:
-        fastq_1, fastq_2, gff = build_paths_from_bactopia(sample, bactopia_path)
+        fastq_1, fastq_2, annotation = build_paths_from_bactopia(sample, bactopia_path)
 
     # master_paths overrides everything per sample
     if sample in master_paths:
@@ -204,8 +291,8 @@ def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_pa
             fastq_1 = mp["fastq_1"]
         if mp.get("fastq_2"):
             fastq_2 = mp["fastq_2"]
-        if mp.get("gff"):
-            gff = mp["gff"]
+        if mp.get("annotation"):
+            annotation = mp["annotation"]
         if mp.get("assembly"):
             assembly = mp["assembly"]
 
@@ -213,7 +300,7 @@ def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_pa
         "sample": sample,
         "fastq_1": fastq_1,
         "fastq_2": fastq_2,
-        "gff": gff,
+        "annotation": annotation,
         "assembly": assembly,
         "species": species_value,
     }
@@ -228,6 +315,7 @@ def process_threshold(
     phoenix_path,
     bactopia_path,
     metrics_cache,
+    linkages_by_sample,
 ):
     """
     For a single threshold:
@@ -280,7 +368,11 @@ def process_threshold(
             resolved_samples.append(info)
             samples_info.append({"sample": info["sample"], "assembly": info["assembly"]})
 
-        ref_sample_info = choose_reference_sample(samples_info, metrics_cache)
+        ref_sample_info = choose_reference_sample(
+            samples_info,
+            metrics_cache,
+            linkages_by_sample=linkages_by_sample,
+        )
         reference_path = ref_sample_info["assembly"] if ref_sample_info else ""
 
         for info in resolved_samples:
@@ -289,7 +381,7 @@ def process_threshold(
                     "sample": info["sample"],
                     "fastq_1": info["fastq_1"],
                     "fastq_2": info["fastq_2"],
-                    "gff": info["gff"],
+                    "annotation": info["annotation"],
                     "assembly": info["assembly"],
                     "cluster_id": group_name,
                     "species": info["species"],
@@ -318,6 +410,7 @@ def main():
 
     master_paths = load_master_paths(args.master_paths)
     metrics_cache = {}
+    linkages_by_sample = load_linkages(args.linkages)
 
     for thr in thresholds:
         process_threshold(
@@ -329,6 +422,7 @@ def main():
             phoenix_path=args.phoenix_path,
             bactopia_path=args.bactopia_path,
             metrics_cache=metrics_cache,
+            linkages_by_sample=linkages_by_sample,
         )
 
 

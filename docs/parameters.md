@@ -26,8 +26,8 @@ These parameters are required for most pipeline runs.
 | `--outdir`         | string | ✓        | `./corge_results` | Output directory (acts as a growing database across runs).  |
 | `--cgmlst_schemas` | string | –        | –                 | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). |
 | `--thresholds`     | string | ✓        | `15,20,40,150`    | Distance thresholds for grouping samples. Comma-separated (no spaces). |
-| `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `schema`, `regroup`, or `remove`. |
-| `--email`          | string | –        | –                 | Email address to receive pipeline completion notifications.  |
+| `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `schema`, `regroup`, `remove` or `tree`. |
+| `--tree`           | boolean| –        |`false`            | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove` |
 
 ---
 
@@ -39,8 +39,7 @@ These parameters control analysis behavior.
 | ---------------------- | ------- | ------- | ------------------------------------------------------------------ |
 | `--schema_ids`         | string  | –       | cgMLST schema IDs (required for `--mode schema`). Comma-separated (no spaces)                  |
 | `--samples_to_remove`  | string  | –       | CSV of samples to remove (required for `--mode remove`, columns: `sample,species`).           |
-| `--species_to_regroup` | string  | –       | Species to regroup with new thresholds (required for `--mode regroup`). Comma-separated (no spaces)         |
-| `--tree`               | boolean | `false` | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove` |
+| `--species`            | string  | –       | Species to reanalyze using prior results from `outdir` (required for `--mode regroup` or `--mode tree`).          |
 
 ---
 
@@ -50,7 +49,7 @@ Optional parameters to populate PoODLE manifests automatically.
 
 | Parameter         | Type   | Default | Description                                       |
 | ----------------- | ------ | ------- | ------------------------------------------------- |
-| `--master_paths`  | string | –       | CSV with explicit absolute paths to reads and annotations (`sample,fastq_1,fastq_2,gff`). Use this when you already have all paths from the database organized in a single file. |
+| `--master_paths`  | string | –       | CSV with explicit absolute paths to reads and annotations (`sample,fastq_1,fastq_2,annotation`). Use this when you already have all paths from the database organized in a single file. |
 | `--phoenix_path`  | string | –       | Path to PHoeNIx results directory.                |
 | `--bactopia_path` | string | –       | Path to Bactopia results directory.               |
 

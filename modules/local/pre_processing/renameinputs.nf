@@ -6,7 +6,7 @@ process RENAME_INPUTS {
     tuple val(meta), path(assembly)
 
     output:
-    tuple val(meta), path("${meta.id}.fna"), emit:renamed_files
+    tuple val(meta), path("${meta.id}.fna"), emit: renamed_files
 
     when:
     task.ext.when == null || task.ext.when
@@ -17,8 +17,10 @@ process RENAME_INPUTS {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    # rename the assembly file
-    mv ${assembly} "${prefix}.fna"
-
+    if [[ "${assembly}" == *.gz ]]; then
+        gzip -cd "${assembly}" > "${prefix}.fna"
+    else
+        cp "${assembly}" "${prefix}.fna"
+    fi
     """
 }

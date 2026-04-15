@@ -27,10 +27,14 @@ class RowChecker:
     """
 
     VALID_ASSEMBLY_FORMATS = (
-        ".fasta", 
-        ".fna", 
+        ".fasta",
+        ".fna",
         ".fa",
-        ".fas"
+        ".fas",
+        ".fasta.gz",
+        ".fna.gz",
+        ".fa.gz",
+        ".fas.gz",
     )
 
     def __init__(
@@ -69,7 +73,10 @@ class RowChecker:
     def _validate_assembly(self, row):
         """Assert that the assembly entry is non-empty and has the right format."""
         assembly = row.get(self._assembly_col, "")
-        if assembly and not any(assembly.endswith(ext) for ext in self.VALID_ASSEMBLY_FORMATS):
+        if not assembly:
+            raise AssertionError("Assembly input is required.")
+
+        if not any(str(assembly).endswith(ext) for ext in self.VALID_ASSEMBLY_FORMATS):
             raise AssertionError(
                 f"The Assembly file has an unrecognized extension: {assembly}\n"
                 f"It should be one of: {', '.join(self.VALID_ASSEMBLY_FORMATS)}"

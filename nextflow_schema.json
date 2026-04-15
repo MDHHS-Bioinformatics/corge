@@ -41,10 +41,10 @@
                 },
                 "mode": {
                     "type": "string",
-                    "description": "Pipeline mode: 'default' (cluster analysis), 'schema' (download cgMLST schemas) or 'remove' (remove sample from database).",
+                    "description": "Pipeline mode: 'default' (cluster analysis), 'schema' (download cgMLST schemas), 'remove' (remove sample from database), 'regroup' (regroup species with new threholds using prior results) or 'tree' (build a phylogenetic tree using prior results).",
                     "fa_icon": "fas fa-cog",
                     "default": "default",
-                    "enum": ["default", "schema", "regroup", "remove"]
+                    "enum": ["default", "schema", "regroup", "remove", "tree"]
                 },
                 "thresholds": {
                     "type": "string",
@@ -57,6 +57,12 @@
                     "description": "Make a maximum-likelihood tree based on DNA multiple-sequence-alignment",
                     "fa_icon": "fas fa-check-square",
                     "help_text": "Make a maximum-likelihood tree based on DNA MSA. You may choose this option if you want a phylogenetic tree. It requires considerably more time and resources."
+                },
+                "species": {
+                "type": "string",
+                "description": "Species from database (separated by commas) (e.g., 'Klebsiella_pneumoniae,Salmonella_enterica'). Use only when using '--mode regroup' or '--mode tree'",
+                "default": "null",
+                "fa_icon": "fas fa-list"
                 }
             }
         },
@@ -112,7 +118,7 @@
                     "format": "file-path",
                     "mimetype": "text/csv",
                     "pattern": "^\\S+\\.csv$",
-                    "description": "CSV file with sample paths for PoODLE manifests (`sample,fastq_1,fastq_2,gff`).",
+                    "description": "CSV file with sample paths for PoODLE manifests (`sample,fastq_1,fastq_2,annotation`).",
                     "default": "null",
                     "fa_icon": "fas fa-file-csv"
                 },
@@ -193,21 +199,6 @@
                     "description": "CSV file with columns: 'sample,species' to remove from database. Use only when '--mode remove'",
                     "default": "null",
                     "fa_icon": "fas fa-file-csv"
-                }
-            }
-        },
-         "regroup": {
-            "title": "Options to regroup samples with new thresholds",
-            "type": "object",
-            "fa_icon": "fas fa-terminal",
-            "description": "Define species priorly analyzed that you want to regroup with new thresholds",
-            "required": [],
-            "properties": {
-                 "species_to_regroup": {
-                    "type": "string",
-                    "description": "Species from database (separated by commas) to regroup (e.g., 'Klebsiella_pneumoniae,Salmonella_enterica'). Use only when '--mode regroup'",
-                    "default": "null",
-                    "fa_icon": "fas fa-list"
                 }
             }
         },

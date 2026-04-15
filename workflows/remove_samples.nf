@@ -9,9 +9,6 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowCorgeplus.initialise(params, log)
 
-// Check schema path parameters to see if they exist
-// Define schemaList/outdir_abs at script level (before the if block)
-def schemaList = []
 def outdir_abs = file(params.outdir).toAbsolutePath()
 if (params.mode == 'remove') { //following params only need to be validated for remove mode
     def checkPathParamList = [ params.samples_to_remove, params.outdir]
@@ -94,18 +91,32 @@ workflow REMOVE_SAMPLES {
     //
     // SUBWORKFLOW: Read in csv containing cgmlst paths per species and validate they exist
     //
-    INPUT_CHECK_CGMLST(
-        file(params.cgmlst_schemas),
-        INPUT_CHECK_REMOVE_SAMPLES.out.species_count
-    )
-    ch_versions = ch_versions.mix(INPUT_CHECK_CGMLST.out.versions)
+
+    if (params.cgmlst_schemas) {
+        INPUT_CHECK_CGMLST(
+            file(params.cgmlst_schemas),
+            INPUT_CHECK.out.species_count
+        )
+
+        ch_species_counts_cgmlst = INPUT_CHECK_CGMLST.out.species_counts_cgmlst
+        ch_species_count_nocgmlst = INPUT_CHECK_CGMLST.out.species_count_nocgmlst
+        ch_versions              = ch_versions.mix(INPUT_CHECK_CGMLST.out.versions)
+
+    } else {
+        ch_species_counts_cgmlst = Channel.empty()
+
+        ch_species_count_nocgmlst = INPUT_CHECK.out.species_count
+            .map { species, count ->
+                [[species: species, count: count ?: 0]]
+            }
+    }
 
     //
     // SUBWORKFLOW: Check the previous results if provided and determine what analysis will be performed for each species
     //
     VERIFY_PREVIOUS_RESULTS(
-        INPUT_CHECK_CGMLST.out.species_counts_cgmlst,
-        INPUT_CHECK_CGMLST.out.species_count_nocgmlst
+        ch_species_counts_cgmlst,
+        ch_species_count_nocgmlst
     )
 
     //
