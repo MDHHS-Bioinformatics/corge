@@ -18,9 +18,9 @@
 
 ### Suggested workflow
 
-Genome assemblies from sequencing pipelines (e.g., PHoeNIx, Bactopia) or public databases (e.g., AllTheBacteria, NCBI) are analyzed with CorGe+ to group genetically similar samples. These groups can help identify potential linkages to support routine surveillance and outbreak investigation.
+Genome assemblies from sequencing pipelines (e.g., PHoeNIx, Bactopia, TheiaProk, or custom workflows) or public databases (e.g., AllTheBacteria, NCBI) can be analyzed with CorGe+ to identify potential linkages and group genetically similar samples. These groupings support more granular analyses for detecting related cases in routine surveillance and outbreak investigations.
 
-Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) provides higher-resolution comparisons for each group, including SNP-based and pangenome analyses.
+Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) enables higher-resolution comparisons within each group, including SNP-based and pangenome analyses.
 
 <p align="center">
 <img src="docs/images/corge_overview.png" width="500">
@@ -68,9 +68,11 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 
 
 ### 2️⃣ Download cgMLST schemas (optional, recommended)
-> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which is slower and may produce less consistent results across runs.
+> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which may produce less consistent results across runs.
 
-CorGe+ can automatically download cgMLST schemas from [cgmlst.org](https://cgmlst.org/). Schemas only need to be downloaded once per species.
+CorGe+ can automatically download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
+
+Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species in [`cgMLST species`](assets/species_schemas.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -80,7 +82,9 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results
 ```
 
-Example cgMLST schema file:
+ > The paths to the downloaded schemas with the supported species will be appended to a CSV file `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs
+ 
+ Example of cgMLST schema file:
 
 ```csv
 species,cgmlst_path
@@ -91,13 +95,9 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 ```
 
 
-> [!TIP]
-> Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species in [`cgMLST species`](assets/species_schemas.csv).
-
 > [!NOTE]
-> - The generated file (`cgmlst_schemas.csv`) is used as input in the next step.
 > - If a species does not have a corresponding cgMLST schema, it will automatically be processed with Parsnp.
-> - cgMLST schemas can also be downloaded from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), created or prepared with [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Add any custom schema to the schema file once ready.
+> - cgMLST schemas can also be downloaded from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), created or prepared with [`ChewBBACA`](https://chewbbaca.readthedocs.io/en/latest/index.html). Add any custom schema to the schema file once ready.
 
 ---
 
@@ -136,6 +136,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 > [!TIP]
 > - Default clustering thresholds (alleles for cgMLST or SNPs for Parsnp): `15,20,40,150`
 > - Customize them with `--thresholds`
+> - Reference thresholds from different sources are available at [`docs/cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md).
 
 _Advanced run:_
 
@@ -155,15 +156,17 @@ This example shows some optional features for metadata-aware reporting, maximum-
 
 * 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples) .
 
-* 📦 **Automated PoODLE manifests**: Infers read and annotation paths from PHoeNIx `--phoenix_path`, Bactopia `--bactopia_path`, or a user-provided table `--master_paths` to generate ready-to-use sample sheets. If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE.
+* 📦 **Automated PoODLE manifests**: Infers read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
 
-  Example `--master_paths master_paths.csv`
+  Example for `--master_paths master_paths.csv`
 
   ```csv
   sample,fastq_1,fastq_2,annotation
-  ISO1,/path/ISO1_R1.fq.gz,/path/ISO1_R2.fq.gz,/path/ISO1.gff
-  ISO2,/path/ISO2_R1.fq.gz,/path/ISO2_R2.fq.gz,/path/ISO2.gff
+  ISO1,/path/ISO1_R1.trim.fq.gz,/path/ISO1_R2.trim.fq.gz,/path/ISO1.gff
+  ISO2,/path/ISO2_R1.trim.fq.gz,/path/ISO2_R2.trim.fq.gz,/path/ISO2.gff
   ```
+
+  > If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE. 
 
 Example:
 ```bash
