@@ -253,6 +253,9 @@ ISO2,/path/iso2.fasta,Acinetobacter_baumannii
 | `assembly` | Path to FASTA file (`.fasta`, `.fna`, `.fa`, `fas`, `.fasta.gz`, `.fna.gz`, `.fa.gz`, `.fas.gz`) |
 | `species`  | Species name (must match `species` from schema file if cgMLST is used) |
 
+
+An example samplesheet is available in [`assets/samplesheet.csv`](../assets/samplesheet.csv)
+
 ---
 
 ## 🚀 Run analyses
@@ -289,29 +292,60 @@ These options enhance analysis and reporting and can be combined.
 
 More info below [`Choosing thresholds`](#-choosing-thresholds) 
 
-#### 🕒 Metadata-aware reporting
+#### 🕒 **Metadata-aware reporting**
 
-CorGe+ integrates ReporTree to link clusters with metadata.
+  ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
 
-```bash
---metadata metadata.csv
-```
+  At minimum, you can provide a metadata file like this:
 
-Optional:
+    ```bash
+    --metadata metadata.csv
+    ```
 
-```bash
---columns_summary_report lineage,country,date
---metadata2report st
---filter 'country == USA;date > 2024-01-01'
---frequency_matrix lineage,iso_week
-```
+  Example:
 
-Enables:
+    ```csv
+    sample,st,source,location,date
+    ISO1,ST2,wound,FacilityA,2026-01-03
+    ISO2,ST2,urine,FacilityA,2026-02-12
+    ```
 
-* Cluster summaries (counts, distributions)
-* Temporal insights (first/last detection, duration)
-* Filtering and targeted analyses
+  Once metadata is included, ReporTree will enrich cluster outputs with useful summaries such as:
 
+  - number of samples per cluster
+  - distribution across locations or sources
+  - temporal signals (e.g. first and last detection dates, duration of circulation)
+
+  💡 **Going further**
+
+  You can refine and expand these reports depending on your needs.
+
+  For example, you might want to:
+
+  - focus only on a subset of samples (e.g. a country or time period)
+  - track specific metadata fields separately (e.g. sequence type or resistance profile)
+  - explore how lineages change over time
+
+  This can be done with options like:
+
+  Optional:
+
+  ```bash
+  --columns_summary_report lineage,country,date
+  --metadata2report st
+  --filter 'country == USA;date > 2024-01-01'
+  --frequency_matrix lineage,iso_week
+  ```
+  These allow you to:
+
+  - customize what gets summarized per cluster
+  - generate dedicated reports for key variables
+  - filter your dataset before analysis
+  - produce matrices for downstream visualization (e.g. lineage trends over time)
+
+
+
+  More details about these options in [`parameters.md`](parameters.md) and [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
 
 #### 🌳 Phylogenetic trees (ML)
 
@@ -325,23 +359,23 @@ Enables:
 * More computationally intensive
 
 #### 📦 PoODLE sample sheets
+> [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
 
-Automatically generate manifests for PoODLE:
+CorGe+ can infer read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
 
-```bash
---phoenix_path /path/to/results
-```
+  Example for `--master_paths master_paths.csv`
 
-Alternatives:
+  ```csv
+  sample,fastq_1,fastq_2,annotation
+  ISO1,/path/ISO1_R1.trim.fq.gz,/path/ISO1_R2.trim.fq.gz,/path/ISO1.gff
+  ISO2,/path/ISO2_R1.trim.fq.gz,/path/ISO2_R2.trim.fq.gz,/path/ISO2.gff
+  ```
 
-```bash
---bactopia_path /path/to/results
---master_paths paths.csv
-```
+  > If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE. 
 
-* Infers read and annotation paths
-* Avoids manual file tracking
-* Use only **one option per run**
+> [!NOTE]
+> * Avoids manual file tracking
+> * Use only **one option per run**
 
 ---
 
