@@ -185,6 +185,15 @@ Summarizes genome completeness and identifies related samples based on **allelic
 > * contamination or misassembly
 > * incorrect species assignment
 
+Example:
+
+```csv
+sample,species,percentage_called,completeness_qc,min_dist,strong_linkages,intermediate_linkages,lineage_level
+sample1,Escherichia_coli,0.9697572622363708,PASS,0,"sample2 (0), sample3 (1)",None,None
+sample2,Escherichia_coli,0.9693593314763232,PASS,0,"sample1 (0), sample3 (1)",None,None
+sample3,Escherichia_coli,0.9701551929964186,PASS,1,"sample1 (1), sample2 (1)",None,None
+```
+
 >[!IMPORTANT]
 > Linkages involving samples flagged as **FAIL** should be interpreted with caution. We recommend re-sequencing or confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links. Completeness of cgMLST schemes has been highlighted as crucial to ensure correct clustering [Merda et. al, 2024](https://link.springer.com/article/10.1186/s12864-024-10982-z).
 
@@ -211,6 +220,15 @@ Defines groups of related samples at each clustering threshold.
 | `group_samples` | Comma-separated list of samples |
 | `report_date`   | Analysis timestamp              |
 
+
+Example:
+
+```csv
+sample,species,group_name,group_length,group_samples,report_date
+sample1,Escherichia_coli,HC1-C1,3,"sample1,sample2,sample3",2026-04-01
+sample2,Escherichia_coli,HC1-C1,3,"sample1,sample2,sample3",2026-04-01
+sample3,Escherichia_coli,HC1-C1,3,"sample1,sample2,sample3",2026-04-01
+```
 
 > [!NOTE]
 > Groups are labeled using the standardized format `HC<partition>-C<id>` (e.g. `HC20-C25`):
@@ -241,7 +259,7 @@ sample,fastq_1,fastq_2,annotation,assembly,cluster_id,species,reference
 ```
 The FASTQ and annotation (GFF) fields are left empty by default, but CorGe+ can fill them automatically if you provide a [PHoeNIx](https://github.com/CDCgov/phoenix) results directory (`--phoenix_path`), a [Bactopia](https://bactopia.github.io/latest/) results directory (`--bactopia_path`), or a CSV with paths via `--master_paths`.
 
-For each cluster, CorGe+ selects a reference genome based on the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
+For each cluster, CorGe+ selects a reference genome based on the highest core-genome completeness, followed by the "best" assembly quality (fewest contigs, longest length, and alphabetical tie-break).
 
 
 ## 🧬 Microreact visualization
