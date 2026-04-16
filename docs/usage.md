@@ -298,17 +298,17 @@ More info below [`Choosing thresholds`](#-choosing-thresholds)
 
   At minimum, you can provide a metadata file like this:
 
-    ```bash
-    --metadata metadata.csv
-    ```
+  ```bash
+  --metadata metadata.csv
+  ```
 
   Example:
 
-    ```csv
-    sample,st,source,location,date
-    ISO1,ST2,wound,FacilityA,2026-01-03
-    ISO2,ST2,urine,FacilityA,2026-02-12
-    ```
+  ```csv
+  sample,st,source,location,date
+  ISO1,ST2,wound,FacilityA,2026-01-03
+  ISO2,ST2,urine,FacilityA,2026-02-12
+  ```
 
   Once metadata is included, ReporTree will enrich cluster outputs with useful summaries such as:
 
