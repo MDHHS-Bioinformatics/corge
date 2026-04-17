@@ -1,5 +1,20 @@
+# 🔢 Choosing thresholds
+
+Thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
+
+These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
+
+| Threshold | Use case                         |
+| --------- | -------------------------------- |
+| 15–20     | Tight clusters (high-resolution) |
+| 40        | General clustering               |
+| 150       | Broad lineage grouping           |
+
+
 # cgMLST Allelic Distance (AD) Thresholds – Reference
 
+> 💡 Ideal group size: **≥4 samples**
+> If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
 AD thresholds are species-specific and depend on the scale desired. General overview:
 
 | Scale                   | Typical AD range           |

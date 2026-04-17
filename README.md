@@ -14,7 +14,8 @@
 
 [![DOI](https://zenodo.org/badge/DOI/XXXX.svg)](https://zenodo.org/badge/latestdoi/XXXXXX)
 
-**CorGe+** is a bioinformatics pipeline for analyzing bacterial genome assemblies. It takes a sample sheet with FASTA files and performs either core genome MLST (cgMLST) or core genome alignment. Outputs include linkage tables, Microreact visualizations, metadata summaries, and sample groupings based on allelic or SNP distances.
+
+**CorGe+** (“_core-gee_,” as in _core genome_) is bioinformatics pipeline for analyzing bacterial genomes, built to quickly determine genomic linkages and to group related isolates. By combining core genome MLST (cgMLST) and core genome alignment approaches, it provides a scalable way to triage datasets before deeper analysis, making it especially useful for genomic surveillance and outbreak investigations. From a simple sample sheet of FASTA files, CorGe+ produces linkage tables, Microreact-ready visualizations, metadata summaries, and distance-based cluster assignments.
 
 ### Suggested workflow
 
@@ -68,7 +69,7 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 
 
 ### 2️⃣ Download cgMLST schemas (optional, recommended)
-> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which may produce less consistent results across runs.
+> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which may yield less consistent SNP-based results, as it depends on assembly quality and a core genome that can change with dataset composition.
 
 CorGe+ can automatically download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
 
@@ -226,7 +227,7 @@ Key outputs:
 
 ## 👥 Credits
 
-CorGe+ was built and is maintained by the Genomics Analysis Unit at the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories. This pipeline was developed by [Douglas Maldonado-Torres](https://github.com/MTDouglas) and [Karla Vasco](https://github.com/vascokarla) using the nf-core template.
+CorGe+ was built and is maintained by the Genomic Analysis Unit at the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories. This pipeline was developed by [Douglas Maldonado-Torres](https://github.com/MTDouglas) and [Karla Vasco](https://github.com/vascokarla) using the nf-core template.
 
 ## 🤝 Contributions
 Contributions, issues, and pull requests are welcome! If you would like to contribute to this pipeline, please see the [`Contribution guidelines`](CONTRIBUTING.md). 
