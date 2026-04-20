@@ -1,0 +1,33 @@
+cff-version: 1.2.0
+title: "CorGe+: Core Genome plus"
+message: "If you use this pipeline, please cite it as below."
+type: pipeline
+
+authors:
+  - family-names: Vasco
+    given-names: Karla
+  - family-names: Maldonado-Torres
+    given-names: Douglas
+  - family-names: Miles-Jay
+    given-names: Arianna
+
+version: "1.0.0"
+date-released: 2026-05-01
+
+doi: 10.XXXX/zenodo.XXXXXX
+
+repository-code: "https://github.com/MDHHS-Bioinformatics/CorGe+"
+url: "https://github.com/MDHHS-Bioinformatics/CorGe+"
+
+keywords:
+  - bioinformatics
+  - surveillance
+  - clustering
+  - reporting
+  - public-health
+  - core-genome
+  - cgmlst
+  - outbreak
+  - genomic-epidemiology
+
+license: MIT
