@@ -15,7 +15,7 @@
 [![DOI](https://zenodo.org/badge/DOI/XXXX.svg)](https://zenodo.org/badge/latestdoi/XXXXXX)
 
 
-**CorGe+** (“_core-gee_,” as in _core genome_) is bioinformatics pipeline for analyzing bacterial genomes, built to quickly determine genomic linkages and to group related isolates. By combining core genome MLST (cgMLST) and core genome alignment approaches, it provides a scalable way to triage datasets before deeper analysis, making it especially useful for genomic surveillance and outbreak investigations. From a simple sample sheet of FASTA files, CorGe+ produces linkage tables, Microreact-ready visualizations, metadata summaries, and distance-based cluster assignments.
+**CorGe+** (“_core-gee_”) is a bioinformatics pipeline for analyzing bacterial genomes, built to quickly determine genomic linkages and to group related isolates. By combining core genome MLST (cgMLST) and core genome alignment approaches, it provides a scalable way to triage datasets before deeper analysis, making it especially useful for genomic surveillance and outbreak investigations. From a simple sample sheet of FASTA files, CorGe+ produces linkage tables, Microreact-ready visualizations, metadata summaries, and distance-based cluster assignments.
 
 ### Suggested workflow
 
@@ -83,7 +83,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results
 ```
 
- > The paths to the downloaded schemas with the supported species will be appended to a CSV file `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream runs
+ > Paths to downloaded schemas for supported species are appended `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
  
  Example of cgMLST schema file:
 
@@ -227,17 +227,21 @@ Key outputs:
 
 ## 👥 Credits
 
-CorGe+ was built and is maintained by the Genomic Analysis Unit at the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories. This pipeline was developed by [Douglas Maldonado-Torres](https://github.com/MTDouglas) and [Karla Vasco](https://github.com/vascokarla) using the nf-core template.
+CorGe+ was built and is maintained by the Genomic Analysis Unit at the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories. This pipeline was developed by  [Karla Vasco](https://github.com/vascokarla) and [Douglas Maldonado-Torres](https://github.com/MTDouglas) using the nf-core template.
+
+Additional conceptual guidance and scientific input were provided by [Arianna Miles-Jay](https://github.com/amilesj).
+
+See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for a full list of contributors and their roles.
 
 ## 🤝 Contributions
 Contributions, issues, and pull requests are welcome! If you would like to contribute to this pipeline, please see the [`Contribution guidelines`](CONTRIBUTING.md). 
 
 ## 📚 Citations
 
-If you use CorGe+ for your analysis, please cite the following doi:
+If you use CorGe+ for your analysis, please cite:
 
-Maldonado-Torres D & Vasco K (2026). 
-MDHHS-Bioinformatics/CorGe+: v1.0.0 (v1.0.0). 
+Vasco K, Maldonado-Torres D & Miles-Jay A (2026). 
+MDHHS-Bioinformatics/CorGe+: Core Genome plus (Version 1.0.0). 
 Zenodo. https://doi.org/XX.XXX/zenodo.XXXX
 
 An extensive list of references for the tools used by the pipeline can be found in [`CITATIONS.md`](CITATIONS.md).
