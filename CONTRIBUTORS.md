@@ -8,9 +8,10 @@ We acknowledge all individuals who contributed to the development, evaluation, a
 
 ## Scientific and Conceptual Contributions
 - Arianna Miles-Jay — Conceptualization review, supervision
+- Heather Blankenship — Conceptualization review, supervision
 
-## Validation and Domain Expertise
-- Sara McNamara — Epidemiological insight, comparison with reference pipelines, feedback
+## Domain Expertise
+- Sara McNamara — Epidemiological insight, feedback
 
 ## Testing and Feedback
 - Ellen Yoon — Feedback and pipeline testing

@@ -83,7 +83,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results
 ```
 
- > Paths to downloaded schemas for supported species are appended `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
+ > Paths to downloaded schemas for supported species are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
  
  Example of cgMLST schema file:
 
@@ -229,7 +229,7 @@ Key outputs:
 
 CorGe+ was built and is maintained by the Genomic Analysis Unit at the Michigan Department of Health & Human Services (MDHHS) Bureau of Laboratories. This pipeline was developed by  [Karla Vasco](https://github.com/vascokarla) and [Douglas Maldonado-Torres](https://github.com/MTDouglas) using the nf-core template.
 
-Additional conceptual guidance and scientific input were provided by [Arianna Miles-Jay](https://github.com/amilesj).
+Additional conceptual guidance and scientific input were provided by [Arianna Miles-Jay](https://github.com/amilesj) and [Heather Blankenship](https://github.com/HeatherBlankenship).
 
 See [`CONTRIBUTORS.md`](CONTRIBUTORS.md) for a full list of contributors and their roles.
 
@@ -240,7 +240,7 @@ Contributions, issues, and pull requests are welcome! If you would like to contr
 
 If you use CorGe+ for your analysis, please cite:
 
-Vasco K, Maldonado-Torres D & Miles-Jay A (2026). 
+Vasco K, Maldonado-Torres D, Blankenship H & Miles-Jay A (2026). 
 MDHHS-Bioinformatics/CorGe+: Core Genome plus (Version 1.0.0). 
 Zenodo. https://doi.org/XX.XXX/zenodo.XXXX
 
