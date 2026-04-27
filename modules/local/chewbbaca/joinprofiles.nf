@@ -3,8 +3,8 @@ process CHEWBBACA_JOINPROFILES {
     tag "$meta.species"
     label 'process_single'
     
-    conda "bioconda::chewbbaca=3.5.3"
-    container 'quay.io/biocontainers/chewbbaca:3.5.3--pyh106432d_1'
+    conda "bioconda::chewbbaca=3.5.4"
+    container 'quay.io/biocontainers/chewbbaca:3.5.4--pyh106432d_0'
 
     input:
     tuple val(meta), path(new_alleles), path(old_alleles)
@@ -32,7 +32,7 @@ process CHEWBBACA_JOINPROFILES {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        chewbbaca: \$(echo \$(chewie --version 2>&1 | sed 's/^.*chewBBACA version: //g; s/Using.*\$//' ))
+        chewbbaca: \$(echo \$(chewie --version 2>&1 | tail -n 1 | sed 's/^.*chewBBACA version: //g; s/Using.*\$//' ))
     END_VERSIONS
     """
 }
