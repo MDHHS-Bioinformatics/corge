@@ -12,6 +12,6 @@ process DOWNLOAD_CGMLST_SCHEMA {
 
     script:
     """
-    curl -s ${url} -o ${name}_alleles.zip
+    curl -fsSL --retry 3 --retry-delay 5 -o "${name}_alleles.zip" "${url}"
     """
 }
