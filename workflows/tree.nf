@@ -102,10 +102,9 @@ workflow TREE {
 
         ch_species_count_nocgmlst = ch_species_count_input
             .map { species, count ->
-                [species: species, count: count ?: 0]
+                tuple([species: species, count: count ?: 0])
             }
     }
-
     //
     // SUBWORKFLOW: Check the previous results if provided and determine what analysis will be performed for each species
     //
