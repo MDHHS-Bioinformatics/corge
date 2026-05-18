@@ -112,7 +112,7 @@ workflow CORGEPLUS {
 
         ch_species_count_nocgmlst = INPUT_CHECK.out.species_count
             .map { species, count ->
-                [[species: species, count: count ?: 0]]
+                tuple([species: species, count: count ?: 0])
             }
     }
 
