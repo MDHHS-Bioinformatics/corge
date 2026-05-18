@@ -4,7 +4,8 @@ process CHEWBBACA_COMPUTEMSA {
     label 'process_single'
     
     conda "bioconda::chewbbaca=3.5.4"
-    container 'quay.io/biocontainers/chewbbaca:3.5.4--pyh106432d_0'
+    container 'quay.io/biocontainers/chewbbaca@sha256:39cde3bf7cfa90f5f936998f56c15a2452004e438611002d4a269d9d2812e573'
+    //'quay.io/biocontainers/chewbbaca:3.5.4--pyh106432d_0'
 
     input:
     tuple val(meta), path(schema), path(alleles)

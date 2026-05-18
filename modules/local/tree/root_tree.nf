@@ -3,7 +3,8 @@ process ROOT_TREE {
     label 'process_single'
 
     conda "conda-forge::r-phytools=0.7_47"
-    container 'quay.io/biocontainers/r-phytools:0.6_44--r3.4.1_0'
+    container 'quay.io/biocontainers/r-phytools@sha256:5672e6d56f36bdace102047e4d3aa5f143accd09b5f211eb3503e4da5d411934'
+    // 'quay.io/biocontainers/r-phytools:0.6_44--r3.4.1_0'
 
     input:
     tuple val(meta), path(tree)

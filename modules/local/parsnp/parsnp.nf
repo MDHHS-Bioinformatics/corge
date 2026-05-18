@@ -3,7 +3,8 @@ process PARSNP {
     label 'process_high'
 
     conda "bioconda::parsnp=2.1.5"
-    container "quay.io/staphb/parsnp:2.1.5"
+    container 'quay.io/staphb/parsnp@sha256:bb0246aa25118199b721caaba538fad7ee7f64d7e8683faf324dbf37baab0792' 
+    // 'quay.io/staphb/parsnp:2.1.5'
 
     input:
 

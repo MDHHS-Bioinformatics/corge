@@ -2,7 +2,8 @@ process REPORTREE_CGMLST {
     tag "$meta.species"
     label 'process_medium'
 
-    container "quay.io/mdhhs_bioinformatics/reportree:2.6.0"
+    container 'quay.io/mdhhs_bioinformatics/reportree@sha256:58b3d79ab21497738a373ff6f763193bb5d044fa4acac4e303bb1c05cf8b4911'
+    // "quay.io/mdhhs_bioinformatics/reportree:2.6.0"
 
     input:
     tuple val(meta), path(allele_table)
