@@ -170,11 +170,16 @@ workflow REGROUP {
     //
     // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
     //
-    if (!params.master_paths){MAKE_POODLE_MANIFEST(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs.toString())
-        ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)}
+    ch_linkages = LINKAGE_ANALYSIS.out.selected_cluster
+    .join(LINKAGE_ANALYSIS.out.potential_linkages)
 
-    if (params.master_paths){MAKE_POODLE_MANIFEST_MASTER(LINKAGE_ANALYSIS.out.selected_cluster, outdir_abs.toString(), master_paths)
-    ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST_MASTER.out.versions)}
+    if (!params.master_paths){
+        MAKE_POODLE_MANIFEST(ch_linkages, outdir_abs)
+        ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)
+    } else {
+        MAKE_POODLE_MANIFEST_MASTER(ch_linkages, outdir_abs, master_paths)
+        ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST_MASTER.out.versions)
+    }
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
