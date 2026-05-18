@@ -84,12 +84,7 @@ def sniff_format(handle):
     """
     peek = read_head(handle)
     handle.seek(0)
-    sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
-        sys.exit(1)
-    dialect = sniffer.sniff(peek)
-    return dialect
+    return csv.Sniffer().sniff(peek)
 
 
 def check_samplesheet(file_in, file_out):
@@ -110,9 +105,16 @@ def check_samplesheet(file_in, file_out):
             ISO3,Acinetobacter baumannii
 
     """
-
-    with file_in.open(newline="") as in_handle:
+    with file_in.open(newline="", encoding="utf-8-sig") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
+
+        required = {"sample", "species"}
+        if not required.issubset(reader.fieldnames or []):
+            logger.critical(
+                f"Missing required columns: {required}. Found: {reader.fieldnames}"
+            )
+            sys.exit(1)
+
         checker = RowChecker()
         for i, row in enumerate(reader):
             try:
@@ -120,14 +122,15 @@ def check_samplesheet(file_in, file_out):
             except AssertionError as error:
                 logger.critical(f"{str(error)} On line {i + 2}.")
                 sys.exit(1)
-    header = list(reader.fieldnames)
-    with file_out.open(mode="w", newline="") as out_handle:
-        writer = csv.DictWriter(out_handle, header, delimiter=",")
+
+
+        header = list(reader.fieldnames)
+
+    with file_out.open(mode="w", newline="", encoding="utf-8") as out_handle:
+        writer = csv.DictWriter(out_handle, fieldnames=header, delimiter=",")
         writer.writeheader()
-        for row in checker.modified:
-            writer.writerow(row)
-
-
+        writer.writerows(checker.modified)
+        
 def parse_args(argv=None):
     """Define and immediately parse command line arguments."""
     parser = argparse.ArgumentParser(
