@@ -32,7 +32,7 @@ Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinforma
 
 * 🧬 **Fast & scalable**: Built for high-throughput screening of large genomic datasets
 * 🧪 **Multi-species support**: Analyzes multiple species in a single run
-* 🔗 **Linkage detection & grouping**: Identifies related samples (cgMLST/SNP) and groups them using flexible thresholds
+* 🔗 **Linkage detection & grouping**: Identifies related samples (alleles or SNPs) and groups them using flexible thresholds
 * 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle)-ready sample sheets
 * 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data while preserving group nomenclature
 * 🕒 **Metadata-driven insights**: Uses [`ReporTree`](https://github.com/insapathogenomics/ReporTree) to summarize genetic clusters across metadata fields (e.g., time, location, clinical data) for enhanced epidemiological interpretation

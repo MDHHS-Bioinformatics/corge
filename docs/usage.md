@@ -409,7 +409,7 @@ Recompute clusters with new thresholds.
 
 The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds (old results are overwritten).
 
-Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**.
+Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**. If available, include one of the following to populate the updated PoODLE samplesheets: `--phoenix_path`, `--bactopia_path`, or `--master_paths master_paths.csv`.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
