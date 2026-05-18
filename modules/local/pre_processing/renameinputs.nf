@@ -20,7 +20,9 @@ process RENAME_INPUTS {
     if [[ "${assembly}" == *.gz ]]; then
         gzip -cd "${assembly}" > "${prefix}.fna"
     else
-        cp "${assembly}" "${prefix}.fna"
+        if [[ "\$(realpath "${assembly}")" != "\$(realpath "${prefix}.fna")" ]]; then
+            cp "${assembly}" "${prefix}.fna"
+        fi
     fi
     """
 }
