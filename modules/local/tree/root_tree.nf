@@ -21,11 +21,7 @@ process ROOT_TREE {
     species = task.ext.prefix ?: "${meta.species}"
 
     """
-    Rscript -e "library(phytools); \
-    tree <- read.tree('${tree}'); \
-    midpoint_tree <- midpoint.root(tree); \
-    midpoint_tree <- ladderize(midpoint_tree, right = F); \
-    write.tree(midpoint_tree, file='${species}_rooted_${args_extension}.tre')"
+    root_tree.R '${tree}' '${species}_rooted_${args_extension}.tre' 50
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
