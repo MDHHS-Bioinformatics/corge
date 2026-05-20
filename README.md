@@ -69,7 +69,7 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 
 
 ### 2️⃣ Download cgMLST schemas (optional, recommended)
-> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will be analyzed with Parsnp, which may yield less consistent SNP-based results, as it depends on assembly quality and a core genome that can change with dataset composition.
+> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will instead be analyzed with Parsnp. Compared to cgMLST, SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition.
 
 CorGe+ can automatically download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
 
