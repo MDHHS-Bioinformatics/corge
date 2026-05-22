@@ -43,7 +43,7 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-    IMPORT LOCAL MODULES/SUBWORKFLOWS
+    IMPORT LOCAL MODULES
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 */
 
@@ -52,11 +52,7 @@ include { MICROREACT                     } from '../modules/local/microreact/mic
 include { MICROREACT_ML                  } from '../modules/local/microreact/microreact_ml.nf'
 include { MAKE_POODLE_MANIFEST           } from '../modules/local/post_processing/make_poodle_manifest.nf'
 include { MAKE_POODLE_MANIFEST_MASTER    } from '../modules/local/post_processing/make_poodle_manifest_master.nf'
-
-//
-// SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
-//
-include { LINKAGE_ANALYSIS            } from '../subworkflows/local/linkage_analysis.nf'
+include { CLUSTER_SELECTION              } from '../modules/local/post_processing/cluster_selection.nf'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -97,11 +93,12 @@ workflow REGROUP {
     }
 
     // ReporTree
-    ch_dist_hamming         = existingFileChannel("<species>/ReporTree/<species>_dist_hamming.tsv")
     ch_cluster_composition  = existingFileChannel("<species>/ReporTree/<species>_clusterComposition.tsv")
-    ch_loci_report          = existingFileChannel("<species>/ReporTree/<species>_loci_report.tsv")
     ch_partitions_tsv       = existingFileChannel("<species>/ReporTree/<species>_partitions.tsv")
     ch_dist_tree            = existingFileChannel("<species>/ReporTree/<species>_single_HC.nwk")
+
+    // Linkages
+    ch_potential_linkages    = existingFileChannel("<species>/linkages/<species>_potential_linkages.csv")
 
     // mashtree
     ch_mashtree_tree        = existingFileChannel("<species>/mashtree/<species>_rooted_mash.tre")
@@ -155,23 +152,18 @@ workflow REGROUP {
     ch_versions = ch_versions.mix(MICROREACT_ML.out.versions)
 
     //
-    // SUBWORKFLOW: Determine if there are linkages and select clusters
+    // MODULE: Get genomic context groups for each species
     //
-    LINKAGE_ANALYSIS(
-        ch_dist_hamming,
-        Channel.empty(),
-        ch_cluster_composition,
-        Channel.empty(),
-        ch_loci_report,
-        Channel.empty()
+    CLUSTER_SELECTION(
+        ch_cluster_composition
     )
-    ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
+    ch_versions = ch_versions.mix(CLUSTER_SELECTION.out.versions)
 
     //
     // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
     //
-    ch_linkages = LINKAGE_ANALYSIS.out.selected_cluster
-    .join(LINKAGE_ANALYSIS.out.potential_linkages)
+    ch_linkages = CLUSTER_SELECTION.out.genomic_context_groups
+    .join(ch_potential_linkages)
 
     if (!params.master_paths){
         MAKE_POODLE_MANIFEST(ch_linkages, outdir_abs)
