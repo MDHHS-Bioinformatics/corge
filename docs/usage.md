@@ -50,7 +50,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 * Use **unique sample names** across runs
 * Do **not run multiple jobs on the same cgMLST schema** simultaneously. By default, ChewBBACA adds new alleles to a cgMLST schema while it runs. If multiple jobs use the **same schema directory**, they may interfere with each other and cause problems with how new alleles are named.
-* Parsnp results may vary across runs
+* Parsnp results may vary across runs because they depend on assembly quality and on a core genome that changes with dataset composition.
 * The `--outdir` acts as a **growing database**
 
 ---
@@ -442,8 +442,6 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 The `--mode remove` helps remove samples already added to the CorGe+ database (e.g., due to contamination, mislabeling, or reanalysis)
 
-> Recommended when cgMLST was used, if Parsnp was used it may affect cluster nomenclature.
-
 Create a CSV file listing the samples to remove, including their corresponding species:
 
 ```csv
@@ -480,12 +478,15 @@ nextflow run MDHHS-Bioinformatics/corge \
 * Stable and reproducible
 * Works with few samples (min 2 samples)
 * Preferred method
+* Group names remain **stable across runs**, as CorGe+ reuses previous clustering nomenclature (`partitions.csv`).
+
 
 ### Parsnp
 
 * Used as fallback
 * Requires more samples (≥5 recommended)
 * SNP distances may be inflated → use higher thresholds (~150 SNPs) when evaluating potential linkages.
+* SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is not used by default for SNP/Parsnp analyses. To force reuse of previous clustering nomenclature, use `--use_previous_partitions_for_snp`. Note that ReporTree may take **several hours** to map prior partitions onto the new analysis.
 
 ---
 

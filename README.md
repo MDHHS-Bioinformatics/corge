@@ -34,7 +34,7 @@ Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinforma
 * 🧪 **Multi-species support**: Analyzes multiple species in a single run
 * 🔗 **Linkage detection & grouping**: Identifies related samples (alleles or SNPs) and groups them using flexible thresholds
 * 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle)-ready sample sheets
-* 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data while preserving group nomenclature
+* 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data. Group nomenclature is preserved when using cgMLST
 * 🕒 **Metadata-driven insights**: Uses [`ReporTree`](https://github.com/insapathogenomics/ReporTree) to summarize genetic clusters across metadata fields (e.g., time, location, clinical data) for enhanced epidemiological interpretation
 * ⚙️ **Flexible workflows**: Supports regrouping, phylogenetic tree generation from prior results, and selective sample removal from the database
 
@@ -43,7 +43,7 @@ Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinforma
 
 ### ![CorGe flow](docs/images/corge_flow.png)
 
-High-level steps:
+High-level steps for the `default` mode:
 
 1. Verify cgMLST schema availability for each species.
 2. Perform core genome analysis using [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA) (cgMLST) or [`Parsnp`](https://github.com/marbl/parsnp) (core alignment if schema unavailable).
@@ -69,7 +69,7 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 
 
 ### 2️⃣ Download cgMLST schemas (optional, recommended)
-> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will instead be analyzed with Parsnp. Compared to cgMLST, SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition.
+> Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will instead be analyzed with Parsnp. Compared to cgMLST, SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is preserved for cgMLST analyses only, not for SNP/Parsnp analyses.
 
 CorGe+ can automatically download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
 
