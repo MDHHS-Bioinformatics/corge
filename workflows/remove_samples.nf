@@ -238,11 +238,11 @@ workflow REMOVE_SAMPLES {
     //
     LINKAGE_ANALYSIS(
         REMOVE_CGMLST.out.dist_hamming,
-        REMOVE_PARSNP.out.dist_hamming,
+        REMOVE_PARSNP.out.snp_dists,
         REMOVE_CGMLST.out.cluster_composition,
         REMOVE_PARSNP.out.cluster_composition,
         REMOVE_CGMLST.out.loci_report,
-        REMOVE_PARSNP.out.loci_report
+        REMOVE_PARSNP.out.alignment_stats
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     

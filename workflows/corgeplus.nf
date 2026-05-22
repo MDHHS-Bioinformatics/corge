@@ -223,11 +223,11 @@ workflow CORGEPLUS {
     //
     LINKAGE_ANALYSIS(
         CHEWBBACA_ANALYSIS.out.dist_hamming,
-        PARSNP_ANALYSIS.out.dist_hamming,
+        PARSNP_ANALYSIS.out.snp_dists,
         CHEWBBACA_ANALYSIS.out.cluster_composition,
         PARSNP_ANALYSIS.out.cluster_composition,
         CHEWBBACA_ANALYSIS.out.loci_report,
-        PARSNP_ANALYSIS.out.loci_report
+        PARSNP_ANALYSIS.out.alignment_stats
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     //
