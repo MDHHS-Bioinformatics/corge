@@ -19,31 +19,34 @@ workflow LINKAGE_ANALYSIS {
 
     take:
     ch_chewbbaca_dist_hamming         // channel: [ val(meta), [ results ] ]
-    ch_parsnp_dist_hamming            // channel: [ val(meta), [ results ] ]
+    ch_parsnp_snp_dists               // channel: [ val(meta), [ results ] ]
     ch_chewbbaca_cluster_composition  // channel: [ val(meta), [ cluster_composition ] ]
     ch_parsnp_cluster_composition     // channel: [ val(meta), [ cluster_composition ] ]
     ch_chewbbaca_loci_report          // channel: [ val(meta), [ loci_report ] ]
-    ch_parsnp_loci_report             // channel: [ val(meta), [ loci_report ] ]
+    ch_parsnp_alignment_stats         // channel: [ val(meta), [ log ] ]
 
     main:
 
     ch_versions = Channel.empty()
     //
-    // Combine all the distance matrix
+    // Create two linkage input channels
     //
-    ch_all_dist_hamming = Channel.empty()
-    ch_all_dist_hamming = ch_all_dist_hamming.mix(ch_chewbbaca_dist_hamming)
-    ch_all_dist_hamming = ch_all_dist_hamming.mix(ch_parsnp_dist_hamming)
-    //
-    // Combine all the loci reports
-    //
-    ch_all_loci_report = Channel.empty()
-    ch_all_loci_report = ch_all_loci_report.mix(ch_chewbbaca_loci_report)
-    ch_all_loci_report = ch_all_loci_report.mix(ch_parsnp_loci_report)
+    ch_chewbbaca_linkage = ch_chewbbaca_dist_hamming
+        .join(ch_chewbbaca_loci_report)
+        .map { meta, dist_hamming, loci_report ->
+            tuple(meta + [data_type: 'cgMLST'], dist_hamming, loci_report, [])
+        }
+
+    ch_parsnp_linkage = ch_parsnp_snp_dists
+        .join(ch_parsnp_alignment_stats)
+        .map { meta, snp_dists, parsnp_log ->
+            tuple(meta + [data_type: 'SNP'], snp_dists, [], parsnp_log)
+        }
+
+    ch_dist_loci = ch_chewbbaca_linkage.mix(ch_parsnp_linkage)
+
     //
     // MODULE: Create bacterial linkage table per species
-    //
-    ch_dist_loci = ch_all_dist_hamming.join(ch_all_loci_report)
     //
     BACTERIAL_LINKAGE(
         ch_dist_loci
