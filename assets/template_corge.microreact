@@ -142,7 +142,7 @@
                       {
                         "type": "tab",
                         "id": "tree-1",
-                        "name": "MSTreeV2",
+                        "name": "single_HC",
                         "component": "Tree"
                       }
                     ]
