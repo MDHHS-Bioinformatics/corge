@@ -203,10 +203,15 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Run ReporTree for hierarchical clustering and analysis
     //
+    ch_reportree_input = CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        .join(ch_metadata)
+        .join(ch_previous_partitions)
+        .map { meta, masked_alleles, metadata_tsv, previous_partitions ->
+            tuple(meta, masked_alleles, metadata_tsv, previous_partitions)
+        }
+
     REPORTREE_CGMLST(
-            CHEWBBACA_EXTRACTCGMLST.out.masked_alleles,
-            ch_metadata,
-            ch_previous_partitions
+            ch_reportree_input
         )
     ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
 

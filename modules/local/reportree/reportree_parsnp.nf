@@ -2,21 +2,17 @@ process REPORTREE_PARSNP {
     tag "$meta.species"
     label 'process_high'
 
-    container 'quay.io/mdhhs_bioinformatics/reportree@sha256:58b3d79ab21497738a373ff6f763193bb5d044fa4acac4e303bb1c05cf8b4911'
-    // "quay.io/mdhhs_bioinformatics/reportree:2.6.0"
+    container 'quay.io/mdhhs_bioinformatics/reportree@sha256:4f0efd4c5c5beeace35e8a4b734fe94b14f778f6a77a592e03ef41de4242e99e'
+    // "quay.io/mdhhs_bioinformatics/reportree:2.6.0-fixed"
     
     input:
-    tuple val(meta), path(snps_alignment_fasta)
-    tuple val(meta), path(metadata)
-    tuple val(meta), path(previous_partitions)
+    tuple val(meta), path(snps_dists), path(metadata), path(previous_partitions)
 
     output:
     tuple val(meta), path("ReporTree/")                                               , emit: reportree_results
     tuple val(meta), path("ReporTree/${meta.species}_clusterComposition.tsv")         , emit: cluster_composition
-    tuple val(meta), path("ReporTree/${meta.species}_dist_hamming.tsv")               , emit: dist_hamming
     tuple val(meta), path("ReporTree/${meta.species}_partitions.tsv")                 , emit: partitions
     tuple val(meta), path("ReporTree/${meta.species}_single_HC.nwk")                  , emit: single_HC
-    tuple val(meta), path("ReporTree/${meta.species}_loci_report.tsv")                , emit: loci_report
     path "versions.yml", emit: versions
 
     when:
@@ -44,9 +40,9 @@ process REPORTREE_PARSNP {
     reportree.py \
         $metadata \
         --output ReporTree/${species} \
-        --alignment $snps_alignment_fasta \
-        --method MSTreeV2 \
+        --distance_matrix $snps_dists \
         --analysis HC \
+        --HC-threshold single-0-2000,single-5000,single-10000 \
         --n_proc $task.cpus \
         $partitions $columns_summary_report $metadata2report $filter $frequency_matrix $count_matrix
 

@@ -6,9 +6,7 @@ process REPORTREE_CGMLST {
     // "quay.io/mdhhs_bioinformatics/reportree:2.6.0"
 
     input:
-    tuple val(meta), path(allele_table)
-    tuple val(meta), path(metadata)
-    tuple val(meta), path(previous_partitions)
+    tuple val(meta), path(allele_table), path(metadata), path(previous_partitions)
 
     output:
     tuple val(meta), path("ReporTree/")                                               , emit: reportree_results
