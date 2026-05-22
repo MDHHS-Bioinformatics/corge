@@ -127,10 +127,16 @@ workflow REMOVE_CGMLST {
     //
     // MODULE: Run ReporTree for hierarchical clustering and analysis
     //
+    ch_reportree_input = REMOVE_FROM_ALLELES.out.masked_alleles
+        .join(ch_metadata)
+        .join(REMOVE_FROM_PARTITIONS.out.partitions)
+        .map { meta, masked_alleles, metadata_tsv, previous_partitions ->
+            tuple(meta, masked_alleles, metadata_tsv, previous_partitions)
+        }
+
     REPORTREE_CGMLST(
-        REMOVE_FROM_ALLELES.out.masked_alleles,
-        ch_metadata,
-        REMOVE_FROM_PARTITIONS.out.partitions)
+        ch_reportree_input
+        )
     ch_versions = ch_versions.mix(REPORTREE_CGMLST.out.versions)
     
     emit:
