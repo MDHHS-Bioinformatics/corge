@@ -63,7 +63,13 @@
                 "description": "Species from database (separated by commas) (e.g., 'Klebsiella_pneumoniae,Salmonella_enterica'). Use only when using '--mode regroup' or '--mode tree'",
                 "default": "null",
                 "fa_icon": "fas fa-list"
-                }
+                },
+                "use_previous_partitions_for_snp": {
+                    "type": "string",
+                    "description": "Use prior group nomenclature when running SNP-based analysis",
+                    "default": "false",
+                    "fa_icon": "fas fa-list"
+                    }
             }
         },
         "downloading_cgmlst_schemas": {
