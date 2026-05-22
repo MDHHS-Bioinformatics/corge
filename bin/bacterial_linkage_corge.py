@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import sys
 import pandas as pd
 import numpy as np
@@ -7,10 +8,107 @@ import argparse
 import logging
 
 
-def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, output: str):
+def bacterial_linkage_corge(species: str, data_type: str, dist_hamming: str, loci_report: str, parsnp_log: str, output: str):
     """
     Generate a summary bacterial linkage table with potential strong and intermediate linkages.
     """
+
+    def is_parsnp_reference(x):
+        x = os.path.basename(str(x).strip())
+        return x.endswith(".ref") or ".ref" in x
+
+    def clean_sample_name(x):
+        x = os.path.basename(str(x).strip())
+
+        for suffix in [
+            ".fna.ref",
+            ".fasta.ref",
+            ".fa.ref",
+            ".fna",
+            ".fasta",
+            ".fa"
+        ]:
+            if x.endswith(suffix):
+                x = x[:-len(suffix)]
+
+        return x
+
+    def parse_parsnp_log(parsnp_log):
+        """
+        Parse Parsnp log and return per-sample QC metrics.
+
+        Returns:
+            sample
+            analysis_length
+            percentage_called
+        """
+
+        records = []
+        current_seq = None
+        current_sample = None
+        current_length = None
+
+        sequence_info = {}
+
+        with open(parsnp_log, "r") as handle:
+            lines = handle.readlines()
+
+        for i, line in enumerate(lines):
+            stripped = line.strip()
+
+            seq_match = re.match(r"Sequence\s+(\d+)\s+:\s+(.+)", stripped)
+            if seq_match:
+                current_seq = int(seq_match.group(1))
+                path = seq_match.group(2).strip()
+
+                # Parsnp log usually has the cleaner sample name on the next line
+                if i + 1 < len(lines):
+                    next_line = lines[i + 1].strip()
+                else:
+                    next_line = ""
+
+                # Detect random Parsnp reference before cleaning sample names
+                is_reference = is_parsnp_reference(path) or is_parsnp_reference(next_line)
+
+                if is_reference:
+                    current_seq = None
+                    continue
+
+                if next_line and not next_line.startswith("Length:"):
+                    current_sample = clean_sample_name(next_line)
+                else:
+                    current_sample = clean_sample_name(path)
+
+                sequence_info[current_seq] = {
+                    "sample": current_sample,
+                    "analysis_length": None,
+                    "percentage_called": None
+                }
+
+            length_match = re.match(r"Length:\s+(\d+)\s+bps", stripped)
+            if length_match and current_seq is not None:
+                sequence_info[current_seq]["analysis_length"] = int(length_match.group(1))
+
+            cov_match = re.match(
+                r"Cluster coverage in sequence\s+(\d+):\s+([\d.]+)%",
+                stripped
+            )
+            if cov_match:
+                seq_num = int(cov_match.group(1))
+                coverage_pct = float(cov_match.group(2))
+                coverage_decimal = coverage_pct / 100.0
+
+                if seq_num in sequence_info:
+                    sequence_info[seq_num]["percentage_called"] = coverage_decimal
+
+        for seq_num, info in sequence_info.items():
+            records.append({
+                "sample": info["sample"],
+                "analysis_length": info["analysis_length"],
+                "percentage_called": info["percentage_called"]
+            })
+
+        return pd.DataFrame(records)
 
     # -----------------------------
     # Helper: format linkages
@@ -55,40 +153,86 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, o
     min_dist = matrix_df.min(axis=1)
 
     # -----------------------------
-    # Load loci report
+    # Load method-specific completeness metrics
     # -----------------------------
-    if not os.path.exists(loci_report):
-        logging.error(f"Error: Loci report not found - {loci_report}")
-        sys.exit(1)
 
-    try:
-        loci_df = pd.read_csv(loci_report, sep='\t')
-    except Exception as e:
-        logging.error(f"Error reading loci report {loci_report}: {e}")
-        sys.exit(1)
-
-    if 'samples' not in loci_df.columns or 'pct_called' not in loci_df.columns:
-        logging.error("Loci report must contain columns: 'samples' and 'pct_called'")
-        sys.exit(1)
-
-    loci_df = loci_df.rename(columns={'samples': 'sample'})
-    loci_df = loci_df[['sample', 'pct_called']]
-
-    # -----------------------------
-    # Completeness logic
-    # -----------------------------
-    def completeness_check(pct):
+    def completeness_check_cgmlst(pct):
         if pd.isna(pct):
-            return 'FAIL'
+            return "FAIL"
         if pct >= 0.95:
-            return 'PASS'
+            return "PASS"
         elif pct >= 0.90:
-            return 'WARN'
+            return "WARN"
         else:
-            return 'FAIL'
+            return "FAIL"
 
-    loci_df['completeness_qc'] = loci_df['pct_called'].apply(completeness_check)
+    def completeness_check_snp(pct):
+        if pd.isna(pct):
+            return "FAIL"
+        if pct >= 0.50:
+            return "PASS"
+        elif pct >= 0.40:
+            return "WARN"
+        else:
+            return "FAIL"
+        
+    if data_type == "cgMLST":
 
+        if loci_report is None or not os.path.exists(loci_report):
+            logging.error(f"Error: cgMLST requires a loci report, but none was found: {loci_report}")
+            sys.exit(1)
+
+        try:
+            qc_df = pd.read_csv(loci_report, sep="\t")
+        except Exception as e:
+            logging.error(f"Error reading loci report {loci_report}: {e}")
+            sys.exit(1)
+
+        required_cols = {"samples", "missing", "called", "pct_called"}
+        missing_cols = required_cols - set(qc_df.columns)
+
+        if missing_cols:
+            logging.error(f"Loci report is missing required columns: {', '.join(sorted(missing_cols))}")
+            sys.exit(1)
+
+        qc_df = qc_df.rename(columns={
+            "samples": "sample",
+            "pct_called": "percentage_called"
+        })
+
+        qc_df["sample"] = qc_df["sample"].apply(clean_sample_name)
+        qc_df["analysis_length"] = qc_df["missing"].astype(int) + qc_df["called"].astype(int)
+        qc_df["percentage_called"] = pd.to_numeric(qc_df["percentage_called"], errors="coerce")
+        qc_df["completeness_qc"] = qc_df["percentage_called"].apply(completeness_check_cgmlst)
+
+        qc_df = qc_df[[
+            "sample",
+            "analysis_length",
+            "percentage_called",
+            "completeness_qc"
+        ]]
+
+
+    elif data_type == "SNP":
+
+        if parsnp_log is None or not os.path.exists(parsnp_log):
+            logging.error(f"Error: SNP analysis requires a Parsnp log, but none was found: {parsnp_log}")
+            sys.exit(1)
+
+        qc_df = parse_parsnp_log(parsnp_log)
+
+        qc_df["sample"] = qc_df["sample"].apply(clean_sample_name)
+        qc_df["analysis_length"] = pd.to_numeric(qc_df["analysis_length"], errors="coerce")
+        qc_df["percentage_called"] = pd.to_numeric(qc_df["percentage_called"], errors="coerce").round(3)
+        qc_df["completeness_qc"] = qc_df["percentage_called"].apply(completeness_check_snp)
+
+        qc_df = qc_df[[
+            "sample",
+            "analysis_length",
+            "percentage_called",
+            "completeness_qc"
+        ]]
+        
     # -----------------------------
     # Compute linkages
     # -----------------------------
@@ -99,24 +243,30 @@ def bacterial_linkage_corge(species: str, dist_hamming: str, loci_report: str, o
     # -----------------------------
     # Build results table
     # -----------------------------
+    qc_index = qc_df.set_index("sample")
+
     result_df = pd.DataFrame({
-        'sample': matrix_df.index,
-        'species': species,
-        'percentage_called': matrix_df.index.map(loci_df.set_index('sample')['pct_called']),
-        'completeness_qc': matrix_df.index.map(loci_df.set_index('sample')['completeness_qc']),
-        'min_dist': min_dist,
-        'strong_linkages': strong_linkages,
-        'intermediate_linkages': intermediate_linkages,
-        'lineage_level': lineage_level
+        "sample": matrix_df.index,
+        "species": species,
+        "data_type": data_type,
+        "analysis_length": matrix_df.index.map(qc_index["analysis_length"]),
+        "percentage_called": matrix_df.index.map(qc_index["percentage_called"]),
+        "completeness_qc": matrix_df.index.map(qc_index["completeness_qc"]),
+        "min_dist": min_dist,
+        "strong_linkages": strong_linkages,
+        "intermediate_linkages": intermediate_linkages,
+        "lineage_level": lineage_level
     })
 
     # Fill missing safely
     for col in ['strong_linkages', 'intermediate_linkages', 'lineage_level']:
         result_df[col] = result_df[col].fillna('None')
 
-    result_df['percentage_called'] = result_df['percentage_called'].astype(float)
-    result_df['min_dist'] = result_df['min_dist'].astype(int)
-
+    result_df["analysis_length"] = pd.to_numeric(result_df["analysis_length"], errors="coerce").astype("Int64")
+    result_df["percentage_called"] = pd.to_numeric(result_df["percentage_called"], errors="coerce")
+    result_df["min_dist"] = pd.to_numeric(result_df["min_dist"], errors="coerce").astype("Int64")
+    result_df = result_df.sort_values("sample").reset_index(drop=True)
+    
     # -----------------------------
     # Save to CSV
     # -----------------------------
@@ -134,7 +284,9 @@ def main():
     )
     parser.add_argument("--species", required=True)
     parser.add_argument("--dist-hamming", required=True)
-    parser.add_argument("--loci-report", required=True)
+    parser.add_argument("--data-type", required=True, choices=["cgMLST", "SNP"])
+    parser.add_argument("--loci-report", required=False, default=None)
+    parser.add_argument("--parsnp-log", required=False, default=None)
     parser.add_argument("--output", required=True)
 
     args = parser.parse_args()
@@ -146,11 +298,12 @@ def main():
 
     bacterial_linkage_corge(
         args.species,
+        args.data_type,
         args.dist_hamming,
         args.loci_report,
+        args.parsnp_log,
         args.output
     )
-
 
 if __name__ == "__main__":
     main()
