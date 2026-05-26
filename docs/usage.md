@@ -487,6 +487,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 * Requires more samples (≥5 recommended)
 * SNP distances may be inflated → use higher thresholds (~150 SNPs) when evaluating potential linkages.
 * SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is not used by default for SNP/Parsnp analyses. To force reuse of previous clustering nomenclature, use `--use_previous_partitions_for_snp`. Note that ReporTree may take **several hours** to map prior partitions onto the new analysis.
+* For SNP analyses, a practical subset of thresholds is calculated with ReporTree to provide detailed resolution for closely related samples (0-2000 SNPs), while still including broader population-level thresholds (5,000 and 10,000 SNPs). This avoids generating unnecessary partitions for every SNP threshold up to very large distances (i.e. ~200k SNPs).
 
 ---
 
