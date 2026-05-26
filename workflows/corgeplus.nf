@@ -186,7 +186,7 @@ workflow CORGEPLUS {
     }
 
     if(params.tree) {
-        template_microreact = file(params.microreact_template_ml)
+        template_microreact_ml = file(params.microreact_template_ml)
         // Using cgMLST results
         ch_cgmlst_microreact_ml = CHEWBBACA_ANALYSIS.out.partitions
             .join(CHEWBBACA_ANALYSIS.out.dist_tree)
@@ -195,7 +195,7 @@ workflow CORGEPLUS {
             .join(CHEWBBACA_ANALYSIS.out.snp_tree)
             .join(MASHTREE_CORGE.out.mashtree_tree)
             .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
         MICROREACT_ML_CGMLST(
             ch_cgmlst_microreact_ml
@@ -210,7 +210,7 @@ workflow CORGEPLUS {
                 [[species:meta.species], partitions_tsv, dist_tree, snp_tree]}
             .join(MASHTREE_CORGE.out.mashtree_tree)         
             .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
         MICROREACT_ML_SNP(
             ch_parsnp_microreact_ml

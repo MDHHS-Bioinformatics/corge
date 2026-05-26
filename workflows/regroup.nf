@@ -139,12 +139,13 @@ workflow REGROUP {
     )
     ch_versions = ch_versions.mix(MICROREACT.out.versions)
 
+    template_microreact_ml = file(params.microreact_template_ml)
     ch_microreact_ml = ch_partitions_tsv
         .join(ch_dist_tree)
         .join(ch_has_tree)
         .join(ch_mashtree_tree)
         .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
     MICROREACT_ML(
         ch_microreact_ml
