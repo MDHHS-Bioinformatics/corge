@@ -1,6 +1,6 @@
 process DELETE_ASSEMBLIES {
-
     tag "${species}"
+    label 'process_single'
 
     input:
     tuple val(species), val(ids)

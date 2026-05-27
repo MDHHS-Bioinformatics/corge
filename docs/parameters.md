@@ -28,6 +28,7 @@ These parameters are required for most pipeline runs.
 | `--thresholds`     | string | ✓        | `15,20,40,150`    | Distance thresholds for grouping samples. Comma-separated (no spaces). |
 | `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `schema`, `regroup`, `remove` or `tree`. |
 | `--tree`           | boolean| –        |`false`            | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove` |
+| `--use_previous_partitions_for_snp`           | boolean | ✓        | `false`         | Force reuse of previous clustering nomenclature for SNP-based analysis done with Parsnp. Not recommended, it can take several hours to resolve.  |
 
 ---
 

@@ -62,12 +62,16 @@ def load_linkages(path):
     Load linkage CSV into a mapping:
       sample -> {
           "species": ...,
+          "data_type": ...,
           "percentage_called": float or None,
           ...
       }
 
     Expected columns include at least:
-      sample, percentage_called
+      sample, data_type
+
+    percentage_called is required only for non-SNP data types where it is useful,
+    such as cgMLST.
     """
     if path is None:
         return {}
@@ -75,7 +79,7 @@ def load_linkages(path):
     try:
         df = pd.read_csv(path)
 
-        required = {"sample", "percentage_called"}
+        required = {"sample", "data_type"}
         missing = required - set(df.columns)
         if missing:
             print(
@@ -90,6 +94,8 @@ def load_linkages(path):
             if not sample:
                 continue
 
+            data_type = str(row.get("data_type", "")).strip()
+
             percentage_called = row.get("percentage_called", None)
             if pd.isna(percentage_called):
                 percentage_called = None
@@ -101,6 +107,7 @@ def load_linkages(path):
 
             linkages[sample] = {
                 "species": row.get("species", ""),
+                "data_type": data_type,
                 "percentage_called": percentage_called,
                 "completeness_qc": row.get("completeness_qc", ""),
                 "min_dist": row.get("min_dist", ""),
@@ -114,7 +121,6 @@ def load_linkages(path):
     except Exception as e:
         print(f"[WARN] Failed to load linkages from {path}: {e}", file=sys.stderr)
         return {}
-    
 
 def load_master_paths(path):
     """
@@ -219,37 +225,56 @@ def get_assembly_metrics(assembly_path, cache):
 
 def choose_reference_sample(samples_info, metrics_cache, linkages_by_sample=None):
     """
-    samples_info: list of dicts with keys:
-      - sample
-      - assembly
+    Choose the best reference sample.
 
-    Reference selection priority:
-      1) highest percentage_called (from --linkages)
+    If the linkage table data_type is SNP:
+      1) fewest contigs
+      2) largest total assembly length
+      3) alphabetical sample name
+
+    If the linkage table data_type is cgMLST or anything else:
+      1) highest percentage_called
       2) fewest contigs
       3) largest total assembly length
       4) alphabetical sample name
 
-    If a sample is absent from the linkage file or percentage_called is missing,
-    it is treated as worse than any sample with a valid percentage_called.
+    For SNP, percentage_called is not used because it depends on the core genome
+    and sequence length; a longer sequence can have a lower percentage_called,
+    which does not necessarily make it a worse reference.
     """
     linkages_by_sample = linkages_by_sample or {}
+
+    # Since each analysis/species is either all SNP or all cgMLST,
+    # infer data_type once from the linkage table.
+    data_types = {
+        str(v.get("data_type", "")).strip().upper()
+        for v in linkages_by_sample.values()
+        if str(v.get("data_type", "")).strip()
+    }
+
+    is_snp = data_types == {"SNP"}
 
     def sort_key(info):
         sample = info["sample"]
         assembly = info["assembly"]
         num_contigs, total_len = get_assembly_metrics(assembly, metrics_cache)
 
+        if is_snp:
+            return (
+                num_contigs,   # fewer contigs first
+                -total_len,    # longer assembly first
+                sample,        # alphabetical
+            )
+
         linkage_info = linkages_by_sample.get(sample, {})
         percentage_called = linkage_info.get("percentage_called", None)
 
-        # Higher percentage_called should win, so negate it for min()
-        # Missing values sort after valid values
         missing_pct = percentage_called is None
         pct_key = 0 if percentage_called is None else -percentage_called
 
         return (
-            missing_pct,     # False (has value) sorts before True (missing)
-            pct_key,         # larger percentage_called first
+            missing_pct,     # valid percentage_called before missing
+            pct_key,         # higher percentage_called first
             num_contigs,     # fewer contigs first
             -total_len,      # longer assembly first
             sample,          # alphabetical
@@ -260,7 +285,6 @@ def choose_reference_sample(samples_info, metrics_cache, linkages_by_sample=None
 
     best = min(samples_info, key=sort_key)
     return best
-
 
 
 def resolve_sample_paths(sample, species_value, outdir, master_paths, phoenix_path, bactopia_path):

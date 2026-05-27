@@ -28,9 +28,9 @@ AD thresholds are species-specific and depend on the scale desired. General over
 
 **Reference:**
 Mixão V. *et al.*
-*Clustering stability and congruence across bacterial cgMLST pipelines*
+*Multi-country and intersectoral assessment of cluster congruence between pipelines for genomics surveillance of foodborne pathogens*
 Nature Communications (2025)
-DOI: 10.1038/s41467-025-59246-8
+DOI: [10.1038/s41467-025-59246-8](https://www.nature.com/articles/s41467-025-59246-8)
 
 ### 1.1 Per-species congruence thresholds (ADs)
 

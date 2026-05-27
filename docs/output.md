@@ -106,7 +106,8 @@ Results are organized by **species**:
             │   ├── 📄 <Species>_parsnp.xmfa
             │   ├── 📄 <Species>_parsnpAligner.ini
             │   ├── 📄 <Species>_parsnpAligner.log
-            │   └── 📄 <Species>_snps_alignment.fasta
+            │   ├── 📄 <Species>_snps_alignment.fasta
+            │   └── 📄 <Species>_snp_dist.tsv
             ├── 📁 linkages
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
@@ -156,7 +157,7 @@ CorGe+ generates outputs to support surveillance, cluster interpretation, and do
 linkages/<Species>_potential_linkages.csv
 ```
 
-Summarizes genome completeness and identifies related samples based on **allelic (cgMLST)** or **SNP distances (Parsnp)**.
+Summarizes genome/schema completeness and identifies genetically related samples using either **allelic from gMLST** or **SNP distances from Parsnp**.
 
 ### Columns
 
@@ -164,7 +165,9 @@ Summarizes genome completeness and identifies related samples based on **allelic
 | ----------------------- | --------------------------------------------- |
 | `sample`                | Sample identifier                             |
 | `species`               | Species name                                  |
-| `percentage_called`     | Proportion of genome/schema recovered (0–1)   |
+| `data_type`             | Analysis type: SNP or cgMLST                  |
+| `analysis_length`       | Assembly length (SNP) or loci # (cgMLST)      |
+| `percentage_called`     | Proportion of the genome or cgMLST schema recovered (0–1)   |
 | `completeness_qc`       | Quality flag based on completeness            |
 | `min_dist`              | Minimum genetic distance to another sample    |
 | `strong_linkages`       | Closely related samples (0–10 distance)       |
@@ -173,29 +176,30 @@ Summarizes genome completeness and identifies related samples based on **allelic
 
 ### Completeness QC thresholds
 
-| Status | Completeness |
-| ------ | ------------ |
-| PASS   | ≥ 95%        |
-| WARN   | 90–94.9%     |
-| FAIL   | < 90%        |
+| Status | cgMLST Completeness | Coverage in sequence (core-genome, SNP) |
+| ------ | ------------------- |----------------------|
+| PASS   | ≥ 95%               | ≥ 50%                |
+| WARN   | 90–94.9%            | 40–49.9%             |
+| FAIL   | < 90%               | < 40%                |
 
-> ⚠ **Low completeness may indicate:**
+> ⚠ **FAILED completeness may indicate:**
 >
 > * incomplete or poor-quality assemblies
 > * contamination or misassembly
 > * incorrect species assignment
 
+
 Example:
 
 ```csv
-sample,species,percentage_called,completeness_qc,min_dist,strong_linkages,intermediate_linkages,lineage_level
-sample1,Escherichia_coli,0.9697572622363708,PASS,0,"sample2 (0), sample3 (1)",None,None
-sample2,Escherichia_coli,0.9693593314763232,PASS,0,"sample1 (0), sample3 (1)",None,None
-sample3,Escherichia_coli,0.9701551929964186,PASS,1,"sample1 (1), sample2 (1)",None,None
+sample,species,data_type,analysis_length,percentage_called,completeness_qc,min_dist,strong_linkages,intermediate_linkages,lineage_level
+sample1,Escherichia_coli,cgMLST,2513,0.9697572622363708,PASS,0,"sample2 (0), sample3 (1)",None,None
+sample2,Escherichia_coli,cgMLST,2513,0.9693593314763232,PASS,0,"sample1 (0), sample3 (1)",None,None
+sample3,Escherichia_coli,cgMLST,2513,0.9701551929964186,PASS,1,"sample1 (1), sample2 (1)",None,None
 ```
 
 >[!IMPORTANT]
-> Linkages involving samples flagged as **FAIL** should be interpreted with caution. We recommend re-sequencing or confirming relatedness using **read-based analyses** with samples at the **lineage level** to avoid missing potential links. Completeness of cgMLST schemes has been highlighted as crucial to ensure correct clustering [Merda et. al, 2024](https://link.springer.com/article/10.1186/s12864-024-10982-z).
+> Linkages involving samples flagged as **FAIL** should be interpreted with caution. We recommend re-sequencing these samples or confirming relatedness using **read-based analyses**, especially when samples fall within the **lineage level** distance range, to avoid missing potential links. Completeness of cgMLST schemes has been highlighted as crucial to ensure correct clustering [Merda et. al, 2024](https://link.springer.com/article/10.1186/s12864-024-10982-z).
 
 ---
 
@@ -236,7 +240,7 @@ sample3,Escherichia_coli,HC1-C1,3,"sample1,sample2,sample3",2026-04-01
 > * `HC<partition>`: the lowest distance at which all samples in the group cluster together at a given distance threshold (single-linkage)
 > * `C<id>`: unique cluster identifier within that level
 >
-> Group names remain **stable across runs**, as CorGe+ reuses previous clustering results (`partitions.csv`).
+> Group names remain **stable across cgMLST runs**, as CorGe+ reuses previous clustering results (`partitions.csv`).
 
 ---
 
@@ -382,7 +386,8 @@ parsnp/
 | `<Species>_parsnp.xmfa` | **Extended Multi-FASTA Alignment (XMFA)** — alignment of core-genome regions in XMFA format, compatible with tools like Mauve. |
 | `<Species>_parsnpAligner.ini` | **Configuration File** — records the parameters and settings used during the Parsnp run. |
 | `<Species>_parsnpAligner.log` | **Log File** — detailed log of the Parsnp execution, including progress and any warnings or errors. |
-| `<Species>_snps_alignment.fasta` | **SNP Alignment** — FASTA file containing the core-genome SNP alignment with reference and assembly extensions removed, used for ReporTree. | |
+| `<Species>_snps_alignment.fasta` | **SNP Alignment** — FASTA file containing the core-genome SNP alignment with reference and assembly extensions removed. | |
+| `<Species>_snp_dist.tsv` | **Pairwise SNP distance matrix** — core-genome SNP distance matrix used as input for ReporTree. | |
 
 </details>
 

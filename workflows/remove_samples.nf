@@ -199,7 +199,7 @@ workflow REMOVE_SAMPLES {
     }
 
     if(params.tree) {
-        template_microreact = file(params.microreact_template_ml)
+        template_microreact_ml = file(params.microreact_template_ml)
         // Using cgMLST results
         ch_cgmlst_microreact_ml = REMOVE_CGMLST.out.partitions
             .join(REMOVE_CGMLST.out.dist_tree)
@@ -208,7 +208,7 @@ workflow REMOVE_SAMPLES {
             .join(REMOVE_CGMLST.out.snp_tree)
             .join(ROOT_TREE_MASHTREE.out.tre)
             .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
         MICROREACT_ML_CGMLST(
             ch_cgmlst_microreact_ml
@@ -223,7 +223,7 @@ workflow REMOVE_SAMPLES {
                 [[species:meta.species], partitions_tsv, dist_tree, snp_tree]}
             .join(ROOT_TREE_MASHTREE.out.tre)         
             .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+                tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
         MICROREACT_ML_SNP(
             ch_parsnp_microreact_ml
@@ -231,18 +231,16 @@ workflow REMOVE_SAMPLES {
         ch_versions = ch_versions.mix(MICROREACT_ML_SNP.out.versions)
     }
 
-    template_microreact = file(params.microreact_template)
-
     //
     // SUBWORKFLOW: Determine if there are linkages and select clusters
     //
     LINKAGE_ANALYSIS(
         REMOVE_CGMLST.out.dist_hamming,
-        REMOVE_PARSNP.out.dist_hamming,
+        REMOVE_PARSNP.out.snp_dists,
         REMOVE_CGMLST.out.cluster_composition,
         REMOVE_PARSNP.out.cluster_composition,
         REMOVE_CGMLST.out.loci_report,
-        REMOVE_PARSNP.out.loci_report
+        REMOVE_PARSNP.out.alignment_stats
     )
     ch_versions = ch_versions.mix(LINKAGE_ANALYSIS.out.versions)
     

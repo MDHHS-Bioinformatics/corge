@@ -9,6 +9,7 @@
 */
 include { PARSNP                                   } from '../../modules/local/parsnp/parsnp.nf'
 include { CLEAN_FASTA                              } from '../../modules/local/parsnp/clean_fasta.nf'
+include { SNPDISTS                                 } from '../../modules/local/parsnp/snpdists.nf'
 include { REMOVE_FROM_PARTITIONS                   } from '../../modules/local/remove_samples/remove_from_partitions.nf'
 include { CHECK_METADATA_MSA                       } from '../../modules/local/reportree/check_metadata_msa.nf'
 include { REPORTREE_PARSNP                         } from '../../modules/local/reportree/reportree_parsnp.nf'
@@ -59,7 +60,11 @@ workflow REMOVE_PARSNP {
         PARSNP.out.snps_alignment
     )
     ch_versions = ch_versions.mix(CLEAN_FASTA.out.versions)
-
+    //
+    // MODULE: Get SNP distance matrix
+    //
+    SNPDISTS(CLEAN_FASTA.out.cleaned_snps_alignment)
+    ch_versions = ch_versions.mix(SNPDISTS.out.versions)
     //
     // MODULE: If a phylogenetic tree is required generate an ML tree based on SNPs with adjusted branch length
     //
@@ -121,26 +126,38 @@ workflow REMOVE_PARSNP {
     //
     // MODULE: Remove selected samples from partitions
     //
-    REMOVE_FROM_PARTITIONS(ch_samples_rm_parsnp,
-                            outdir)
-    ch_versions = ch_versions.mix(REMOVE_FROM_PARTITIONS.out.versions)
+    if (params.use_previous_partitions_for_snp) {
+        REMOVE_FROM_PARTITIONS(ch_samples_rm_parsnp, outdir)
+        ch_versions = ch_versions.mix(REMOVE_FROM_PARTITIONS.out.versions)
+
+        ch_previous_partitions = REMOVE_FROM_PARTITIONS.out.partitions
+    } else {
+        ch_previous_partitions = SNPDISTS.out.tsv.map { meta, snpdist_tsv ->
+            tuple(meta, [])
+        }
+    }
 
     //
-    //MODULE: Run ReporTree on the Parsnp results
+    // MODULE: Run ReporTree on the Parsnp results
     //
+    ch_reportree_input = SNPDISTS.out.tsv
+        .join(ch_metadata)
+        .join(ch_previous_partitions)
+        .map { meta, snpdist_tsv, metadata_tsv, previous_partitions ->
+            tuple(meta, snpdist_tsv, metadata_tsv, previous_partitions)
+        }
+
     REPORTREE_PARSNP(
-        CLEAN_FASTA.out.cleaned_snps_alignment,
-        ch_metadata,
-        REMOVE_FROM_PARTITIONS.out.partitions
+        ch_reportree_input
     )
     ch_versions = ch_versions.mix(REPORTREE_PARSNP.out.versions)
 
     emit:
-    dist_hamming        = REPORTREE_PARSNP.out.dist_hamming           //channel: [val (meta), dist_hamming ]
+    snp_dists           = SNPDISTS.out.tsv                            //channel: [val (meta), snp_dists ]
     partitions          = REPORTREE_PARSNP.out.partitions             //channel: [val (meta), partitions_summary]
     dist_tree           = REPORTREE_PARSNP.out.single_HC              //channel: [val(meta), single_hc]
     cluster_composition = REPORTREE_PARSNP.out.cluster_composition    //channel: [val(meta), cluster_composition]
-    loci_report         = REPORTREE_PARSNP.out.loci_report            //channel: [val(meta), loci_report]
+    alignment_stats     = PARSNP.out.log                              //channel: [val(meta), log_file]
     snp_tree            = ch_snp_tree                                 //channel: [val(meta), tree]
     versions            = ch_versions                                 // channel: [ versions.yml ]
 }

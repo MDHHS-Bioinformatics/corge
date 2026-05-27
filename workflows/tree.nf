@@ -192,7 +192,7 @@ workflow TREE {
     //
     // MODULE: Make a Microreact file with trees and selected groups
     //
-    template_microreact = file(params.microreact_template_ml)
+    template_microreact_ml = file(params.microreact_template_ml)
 
     // Using cgMLST results
     ch_cgmlst_microreact_ml = ch_partitions_tsv
@@ -202,7 +202,7 @@ workflow TREE {
         .join(TREE_CGMLST.out.snp_tree)
         .join(ch_mashtree_tree)
         .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
     MICROREACT_ML_CGMLST(
         ch_cgmlst_microreact_ml
@@ -217,7 +217,7 @@ workflow TREE {
             [[species:meta.species], partitions_tsv, dist_tree, snp_tree]}
         .join(ch_mashtree_tree)         
         .map { meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree ->
-            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact)}
+            tuple(meta, partitions_tsv, dist_tree, snp_tree, mashtree_tree, template_microreact_ml)}
 
     MICROREACT_ML_SNP(
         ch_parsnp_microreact_ml
