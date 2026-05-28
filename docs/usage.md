@@ -225,6 +225,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 > 💡 Use this file in all downstream runs.
 
+> The `DOWNLOAD_CGMLST_SCHEMA` step may occasionally fail with `curl` error 52 (`Empty reply from server`) when downloading schemas from `cgmlst.org`. This is usually a temporary server-side issue. Resume or re-run the pipeline after a few minutes; the step typically succeeds once the server responds again.
+
+
 > [!TIP]
 > After the cgMLST schemas have been successfully downloaded, the `work/` folder inside the working directory can be safely deleted.
 
