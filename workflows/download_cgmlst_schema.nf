@@ -13,7 +13,7 @@ WorkflowCorgeplus.initialise(params, log)
 // Define schemaList/outdir_abs at script level (before the if block)
 def schemaList = []
 def outdir_abs = []
-if (params.mode == 'schema') { //following params only need to be validated for schema mode
+if (params.mode == 'download_schema') { //following params only need to be validated for schema mode
     def checkPathParamList = [ params.schema_info, params.trn_files,  params.species_schemas]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
@@ -93,13 +93,15 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 
-workflow PREPARE_CGMLST_SCHEMA {
+workflow DOWNLOAD_CGMLST_SCHEMA {
 
     ch_versions = Channel.empty()
     //
     // MODULE: Get the latest schema urls
     //
     FETCH_CGMLST_SCHEMAS(params.schema_info)
+    ch_versions = ch_versions.mix(FETCH_CGMLST_SCHEMAS.out.versions)
+
     // Broadcast the list to use in filtering
     Channel
         .from(schemaList.toSet())
@@ -119,7 +121,6 @@ workflow PREPARE_CGMLST_SCHEMA {
             tuple(row.id, row.schema_name, row.url_alleles, "${params.trn_files}/${row.trn}")
         }
         .set { schema_channel }
-    // schema_channel.view()
     //
     // MODULE: Download the cgMLST schemas
     //
@@ -138,6 +139,7 @@ workflow PREPARE_CGMLST_SCHEMA {
     CONFIGURE_CGMLST_SCHEMA(
         UNZIP_CGMLST_SCHEMA.out.alleles
     )
+    
     //
     // Wait for all schema dirs to finish
     //
@@ -145,6 +147,8 @@ workflow PREPARE_CGMLST_SCHEMA {
         .collect()
         .map { dirs -> true }  // just a signal
         .set { ready_ch }
+    ch_versions = ch_versions.mix(CONFIGURE_CGMLST_SCHEMA.out.versions)
+
     //
     // Combine static path and species file with completion signal
     //
@@ -158,6 +162,12 @@ workflow PREPARE_CGMLST_SCHEMA {
     UPDATE_CGMLST_FILE(
         update_ch
     )
+    ch_versions = ch_versions.mix(UPDATE_CGMLST_FILE.out.versions)
+    
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
 }
 
 /*
