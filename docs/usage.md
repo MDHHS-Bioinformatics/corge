@@ -10,7 +10,7 @@ For full parameter details, see 👉 [`parameters.md`](parameters.md)
 
 CorGe+ is designed for **incremental genomic surveillance**:
 
-1. Download cgMLST schemas (once per species)
+1. Download or create cgMLST schemas (once per species)
 2. Prepare a sample manifest
 3. Run the pipeline
 4. Results are added to a **growing database** (`--outdir`)
@@ -28,7 +28,7 @@ CorGe+ is designed for **incremental genomic surveillance**:
 ```bash
 # 1. Download schemas
 nextflow run MDHHS-Bioinformatics/corge \
-  --mode schema \
+  --mode download_schema \
   --schema_ids s20 \
   --outdir corge_results \
   -profile apptainer
@@ -78,13 +78,15 @@ Install:
 > ``````
 ---
 
-## 2️⃣ Download cgMLST schemas
+## 2️⃣ Get cgMLST schemas
+CorGe+ can help yo to either download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/) or create custom cgMLST schemas with ChewBBACA.
 
+### Download cgMLST schemas
 Schemas are required for cgMLST analysis and only need to be downloaded once.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  --mode schema \
+  --mode download_schema \
   --schema_ids s1,s20 \
   --outdir corge_results \
   -profile apptainer
@@ -232,9 +234,44 @@ nextflow run MDHHS-Bioinformatics/corge \
 > After the cgMLST schemas have been successfully downloaded, the `work/` folder inside the working directory can be safely deleted.
 
 
+### Create cgMLST schemas
+
+If a cgMLST schema for your species is not available in [`cgmlst.org`](https://cgmlst.org/), CorGe+ can create a new species-specific cgMLST schema using chewBBACA.
+
+Schema creation should be run for **one species at a time**. Provide a text file with one assembly FASTA path per line using `--assembly_sheet` (no header), and specify the target species with `--species`.
+
+For best results, use a representative set of high-quality assemblies that captures the genomic diversity of the species or lineage of interest. Complete genomes from NCBI RefSeq are preferred when available because they can reduce problems caused by incomplete or fragmented genes in draft assemblies. However, complete genomes are not always error-free, and some may contain issues such as frameshifts or poor annotations, so genome quality should still be reviewed before schema creation.
+
+There is no strict minimum number of assemblies, but a dataset with at least ~12 distinct genotypes can be a reasonable starting point. If complete RefSeq genomes do not adequately represent the diversity of the species or lineage, high-quality draft genomes may be included.
+
+The `--reference_path` parameter specifies the representative assembly used to generate the Prodigal training file for chewBBACA. This assembly should ideally be high quality, contiguous, and representative of the dataset. 
+
+The `--cgmlst_threshold` parameter defines the proportion of assemblies in which a locus must be present to be included in the cgMLST schema (default: `0.95`).
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  --mode create_schema \
+  --species Vibrio_cholerae \
+  --assembly_sheet /path/to/assembly_paths.txt \
+  --reference_path /path/to/reference.fasta \
+  --cgmlst_threshold 0.95 \
+  --outdir corge_results \
+  -profile apptainer
+```
+
+Example `assembly_paths.txt`:
+
+```text
+/path/to/assembly_01.fasta
+/path/to/assembly_02.fna
+/path/to/assembly_03.fa.gz
+/path/to/assembly_04.fasta.gz
+```
+
+
 > [!NOTE]
-> If a species schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
-> You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/) or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> You can still use CorGe+ without a cgMLST schema.
 
 ---
 

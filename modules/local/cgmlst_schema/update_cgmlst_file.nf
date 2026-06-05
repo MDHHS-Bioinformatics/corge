@@ -9,7 +9,8 @@ process UPDATE_CGMLST_FILE {
     tuple val(outdir), path(species_schemas), val(ready)
     
     output:
-    path("cgmlst_schemas.csv"), emit: cgmls_list
+    path("cgmlst_schemas.csv"), emit: cgmlst_list
+    path "versions.yml"       , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,6 +23,10 @@ process UPDATE_CGMLST_FILE {
         $outdir \
         $species_schemas \
         'cgmlst_schemas.csv'
-    
+        cat <<-END_VERSIONS > versions.yml
+
+    "${task.process}":
+        python: \$(python --version | sed 's/Python //g')
+    END_VERSIONS
     """
 }

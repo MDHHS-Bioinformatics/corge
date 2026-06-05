@@ -41,10 +41,10 @@
                 },
                 "mode": {
                     "type": "string",
-                    "description": "Pipeline mode: 'default' (cluster analysis), 'schema' (download cgMLST schemas), 'remove' (remove sample from database), 'regroup' (regroup species with new threholds using prior results) or 'tree' (build a phylogenetic tree using prior results).",
+                    "description": "Pipeline mode: 'default' (cluster analysis), 'download_schema' (download cgMLST schemas), 'create_schema' (create cgMLST schema), 'remove' (remove sample from database), 'regroup' (regroup species with new threholds using prior results) or 'tree' (build a phylogenetic tree using prior results).",
                     "fa_icon": "fas fa-cog",
                     "default": "default",
-                    "enum": ["default", "schema", "regroup", "remove", "tree"]
+                    "enum": ["default", "download_schema", "create_schema", "regroup", "remove", "tree"]
                 },
                 "thresholds": {
                     "type": "string",
@@ -81,7 +81,7 @@
             "properties": {
                 "schema_ids": {
                     "type": "string",
-                    "description": "Comma-separated schema IDs to retrieve when --mode schema is used.",
+                    "description": "Comma-separated schema IDs to retrieve when --mode download_schema is used.",
                     "default": "null",
                     "fa_icon": "fas fa-list"
                 },
@@ -112,6 +112,38 @@
                 }
             }
         },
+        "creating_cgmlst_schemas":
+        {
+            "title": "Schema creation options",
+            "type": "object",
+            "description": "Options used when creating a new chewBBACA cgMLST schema.",
+            "properties": {
+              "assembly_sheet": {
+                "type": "string",
+                "format": "file-path",
+                "mimetype": "text/plain",
+                "description": "Path to a text file containing one assembly FASTA path per line. Required when running in create_schema mode.",
+                "help_text": "Each non-empty line should contain the path to one assembly file. Supported assembly extensions are .fa, .fas, .fasta, .fna and their gzipped versions.",
+                "fa_icon": "fas fa-file-alt"
+              },
+              "reference_path": {
+                "type": "string",
+                "format": "file-path",
+                "description": "Path to the reference or representative assembly used to generate the Prodigal training file for schema creation.",
+                "help_text": "If provided, this assembly must exist and should belong to the species specified with --species. Supported extensions are .fa, .fas, .fasta, .fna and their gzipped versions.",
+                "fa_icon": "fas fa-dna"
+              },
+              "cgmlst_threshold": {
+                "type": "number",
+                "default": 0.95,
+                "minimum": 0,
+                "maximum": 1,
+                "description": "Core-genome threshold used to define the cgMLST schema.",
+                "help_text": "Single numeric value greater than 0 and less than or equal to 1. For example, 0.95 keeps loci present in at least 95% of assemblies; 1 requires loci to be present in all assemblies.",
+                "fa_icon": "fas fa-percentage"
+              }
+            }
+          },
         "poodle_manifests": {
             "title": "Data source options for PoODLE manifests",
             "type": "object",
@@ -413,6 +445,9 @@
         },
         {
             "$ref": "#/definitions/downloading_cgmlst_schemas"
+        },
+        {
+            "$ref": "#/definitions/creating_cgmlst_schemas"
         },
         {
             "$ref": "#/definitions/poodle_manifests"
