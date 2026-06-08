@@ -10,7 +10,7 @@
 
 include { CHEWBBACA_ALLELECALL                     } from '../../modules/local/chewbbaca/allelecall.nf'
 include { CHEWBBACA_JOINPROFILES                   } from '../../modules/local/chewbbaca/joinprofiles.nf'
-include { CHEWBBACA_EXTRACTCGMLST                  } from '../../modules/local/chewbbaca/extractcgmlst.nf'
+include { CHEWBBACA_MASK_ALLELES                  } from '../../modules/local/chewbbaca/mask_alleles.nf'
 include { CHEWBBACA_COMPUTEMSA                     } from '../../modules/local/chewbbaca/computemsa.nf'
 include { IQTREE as IQTREE_CGMLST                  } from '../../modules/local/tree/iqtree.nf'
 include { CONSTANTSITES as CONSTANT_SITES_CGMLST   } from '../../modules/local/tree/constant_sites.nf'
@@ -128,16 +128,16 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Properly format the alleles matrix for possible new allels
     //
-    CHEWBBACA_EXTRACTCGMLST(
+    CHEWBBACA_MASK_ALLELES(
         DEDUPLICATE_ALLELES.out.deduplicated_alleles_table
     )
-    ch_versions = ch_versions.mix(CHEWBBACA_EXTRACTCGMLST.out.versions)
+    ch_versions = ch_versions.mix(CHEWBBACA_MASK_ALLELES.out.versions)
     //
     // MODULE: If a phylogenetic tree is required compute MSA from cgMLST alleles and generate ML tree
     //
     ch_snp_tree = Channel.empty()
     if(params.tree) {
-        ch_masked_by_species = CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        ch_masked_by_species = CHEWBBACA_MASK_ALLELES.out.masked_alleles
             .map { meta, alleles ->
                 tuple([species: meta.species], alleles)
             }
@@ -179,11 +179,11 @@ workflow CHEWBBACA_ANALYSIS {
     // MODULE: Check that metadata has info for all the samples in the final masked_alleles results
     //
     if(params.metadata) {
-        CHECK_METADATA(CHEWBBACA_EXTRACTCGMLST.out.masked_alleles, file(params.metadata))
+        CHECK_METADATA(CHEWBBACA_MASK_ALLELES.out.masked_alleles, file(params.metadata))
         ch_metadata = CHECK_METADATA.out.metadata
         ch_versions = ch_versions.mix(CHECK_METADATA.out.versions)}
     else {
-        CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+        CHEWBBACA_MASK_ALLELES.out.masked_alleles
         .map { meta, _ -> 
             def metadata = []
             tuple( meta, metadata)
@@ -194,7 +194,7 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // Check if there are previous partitions to keep consistent nomenclature
     // 
-    CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+    CHEWBBACA_MASK_ALLELES.out.masked_alleles
         .map { meta, _ -> 
             def prev = get_previous_partitions_tsv(meta.species)
             [ meta, prev ]
@@ -203,7 +203,7 @@ workflow CHEWBBACA_ANALYSIS {
     //
     // MODULE: Run ReporTree for hierarchical clustering and analysis
     //
-    ch_reportree_input = CHEWBBACA_EXTRACTCGMLST.out.masked_alleles
+    ch_reportree_input = CHEWBBACA_MASK_ALLELES.out.masked_alleles
         .join(ch_metadata)
         .join(ch_previous_partitions)
         .map { meta, masked_alleles, metadata_tsv, previous_partitions ->

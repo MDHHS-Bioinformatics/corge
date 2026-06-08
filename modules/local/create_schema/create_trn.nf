@@ -1,4 +1,4 @@
-process CREATE_TRN {
+process PRODIGAL_CREATE_TRN {
     tag "$meta.species"
     label 'process_single'
    
@@ -22,7 +22,7 @@ process CREATE_TRN {
 
     """
     prodigal \\
-        -i "\$assembly" \\
+        -i "${assembly}" \\
         -p single \\
         -t "${species}.trn"
 

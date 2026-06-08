@@ -1,4 +1,4 @@
-process CHEWBBACA_CREATESCHEMA {
+process CHEWBBACA_CREATE_SCHEMA {
     tag "$meta.species"
     label 'process_high'
    
@@ -10,7 +10,7 @@ process CHEWBBACA_CREATESCHEMA {
     tuple val(meta), path(assemblies), path(trn)
 
     output:
-    tuple val(meta), path("${species}_wgmlst"), path("references/*") , emit: wgmlst
+    tuple val(meta), path("create/${species}_wgmlst"), path("references/*") , emit: wgmlst
     path "versions.yml"                                              , emit: versions
 
     when:
@@ -47,7 +47,7 @@ process CHEWBBACA_CREATESCHEMA {
     # Create wgMLST schema
     chewBBACA.py CreateSchema  \
         --input-files references \
-        --output-directory . \
+        --output-directory create \
         --schema-name ${species}_wgmlst \
         --training-file ${trn} \
         --cpu $task.cpus

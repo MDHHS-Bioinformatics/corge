@@ -1,4 +1,4 @@
-process PREPARE_CGMLST {
+process CHEWBBACA_PREPARE_CGMLST {
     tag "$meta.species"
     label 'process_medium'
    
