@@ -68,22 +68,44 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
   * [`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC)
 
 
-### 2️⃣ Download cgMLST schemas (optional, recommended)
+### 2️⃣ Get cgMLST schemas (optional, recommended)
+CorGe+ can help you either download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/) or create cgMLST schemas with [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA).
+
 > Providing cgMLST schemas enables downstream cgMLST analysis. If no schemas are provided, samples will instead be analyzed with Parsnp. Compared to cgMLST, SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is preserved for cgMLST analyses only, not for SNP/Parsnp analyses.
 
-CorGe+ can automatically download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
+#### Download cgMLST schemas
+CorGe+ can automatically download and prepare cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/). Schemas only need to be downloaded once per species.
 
 Find available schema IDs in [`cgMLST schema IDs`](assets/cgmlst_schemas_id.csv) and supported species in [`cgMLST species`](assets/species_schemas.csv) (e.g., *A. baumannii* = `s1`, *E. coli* = `s20`). Multiple IDs can be listed as: `--schema_ids s1,s20`
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -profile apptainer \
-  --mode schema \
+  --mode download_schema \
   --schema_ids s1,s20 \
-  --outdir corge_results
+  --outdir corge_results \
+  -profile apptainer \
 ```
 
- > Paths to downloaded schemas for supported species are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
+#### Create cgMLST schemas
+
+If a cgMLST schema for your species is not available from [`cgmlst.org`](https://cgmlst.org/), CorGe+ can create a species-specific cgMLST schema using chewBBACA.
+
+Provide a text file with one assembly FASTA path per line and a representative reference assembly.
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  --mode create_schema \
+  --species Vibrio_cholerae \
+  --assembly_sheet /path/to/assembly_paths.txt \
+  --reference_path /path/to/reference.fasta \
+  --outdir corge_results \
+  -profile apptainer
+```
+
+For more details see the
+[`Usage documentation`](docs/usage.md) and [`Parameter documentation`](docs/parameters.md)
+
+> Paths to downloaded or created schemas are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
  
  Example of cgMLST schema file:
 
@@ -99,6 +121,7 @@ Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
 > [!NOTE]
 > - If a species does not have a corresponding cgMLST schema, it will automatically be processed with Parsnp.
 > - cgMLST schemas can also be downloaded from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), created or prepared with [`ChewBBACA`](https://chewbbaca.readthedocs.io/en/latest/index.html). Add any custom schema to the schema file once ready.
+
 
 ---
 

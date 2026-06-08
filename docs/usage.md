@@ -79,7 +79,7 @@ Install:
 ---
 
 ## 2️⃣ Get cgMLST schemas
-CorGe+ can help yo to either download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/) or create custom cgMLST schemas with ChewBBACA.
+CorGe+ can help you either download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/) or create cgMLST schemas with [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA).
 
 ### Download cgMLST schemas
 Schemas are required for cgMLST analysis and only need to be downloaded once.
@@ -91,6 +91,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --outdir corge_results \
   -profile apptainer
 ```
+
 <details>
 <summary><b>Click here to check cgMLST schema IDs</b></summary>
 
@@ -238,13 +239,13 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 If a cgMLST schema for your species is not available in [`cgmlst.org`](https://cgmlst.org/), CorGe+ can create a new species-specific cgMLST schema using chewBBACA.
 
-Schema creation should be run for **one species at a time**. Provide a text file with one assembly FASTA path per line using `--assembly_sheet` (no header), and specify the target species with `--species`.
+Schema creation should be run for **one species at a time**. Provide a text file with one assembly FASTA path per line using `--assembly_sheet` (no header), and specify the target species with `--species`. For example:
 
 For best results, use a representative set of high-quality assemblies that captures the genomic diversity of the species or lineage of interest. Complete genomes from NCBI RefSeq are preferred when available because they can reduce problems caused by incomplete or fragmented genes in draft assemblies. However, complete genomes are not always error-free, and some may contain issues such as frameshifts or poor annotations, so genome quality should still be reviewed before schema creation.
 
 There is no strict minimum number of assemblies, but a dataset with at least ~12 distinct genotypes can be a reasonable starting point. If complete RefSeq genomes do not adequately represent the diversity of the species or lineage, high-quality draft genomes may be included.
 
-The `--reference_path` parameter specifies the representative assembly used to generate the Prodigal training file for chewBBACA. This assembly should ideally be high quality, contiguous, and representative of the dataset. 
+The `--reference_path` parameter specifies the path to a representative assembly used to generate the Prodigal training file for chewBBACA. This assembly should ideally be high quality, contiguous, and representative of the dataset. 
 
 The `--cgmlst_threshold` parameter defines the proportion of assemblies in which a locus must be present to be included in the cgMLST schema (default: `0.95`).
 
@@ -270,8 +271,8 @@ Example `assembly_paths.txt`:
 
 
 > [!NOTE]
-> You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/) or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
-> You can still use CorGe+ without a cgMLST schema.
+> - You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/) or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> - You can still use CorGe+ without a cgMLST schema.
 
 ---
 
