@@ -10,8 +10,8 @@ process CHEWBBACA_EXTRACT_CGMLST {
     tuple val(meta), path(results_alleles)
 
     output:
-    tuple val(meta), path("cgMLSTschema*.txt")  , emit: cgmlst_txt
-    path "versions.yml"                         , emit: versions
+    tuple val(meta), path("cgmlst/cgMLSTschema*.txt")  , emit: cgmlst_txt
+    path "versions.yml"                                , emit: versions
 
     when:
     task.ext.when == null || task.ext.when
@@ -22,8 +22,8 @@ process CHEWBBACA_EXTRACT_CGMLST {
 
     """
     chewBBACA.py ExtractCgMLST  \
-        --input-files ${results_alleles} \
-        --output-directory . \
+        --input-file ${results_alleles} \
+        --output-directory cgmlst \
         --threshold $params.cgmlst_threshold
     
     cat <<-END_VERSIONS > versions.yml
