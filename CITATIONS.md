@@ -32,6 +32,8 @@
 - [cgmlst.org](https://cgmlst.org/)
 
   > Ridom GmbH. *cgmlst.org Nomenclature Server.* Accessed 2025.
+  > Schema-specific citations should be retrieved from [cgmlst.org](https://cgmlst.org/).
+
 
 - [IQ-TREE](https://www.iqtree.org/)
   > Minh, Bui Quang, Heiko A. Schmidt, Olga Chernomor, Dominik Schrempf, Michael D. Woodhams, Arndt Von Haeseler, and Robert Lanfear. "IQ-TREE 2: new models and efficient methods for phylogenetic inference in the genomic era." Molecular biology and evolution 37, no. 5 (2020): 1530-1534.
