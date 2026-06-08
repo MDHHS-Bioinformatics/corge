@@ -11,8 +11,8 @@
 nextflow.enable.dsl = 2
 
 include { CORGEPLUS              } from './workflows/corgeplus'
-include { DOWNLOAD_CGMLST_SCHEMA } from './workflows/download_cgmlst_schema'
-include { CREATE_CGMLST_SCHEMA   } from './workflows/create_cgmlst_schema'
+include { DOWNLOAD_SCHEMA        } from './workflows/download_schema'
+include { CREATE_SCHEMA          } from './workflows/create_schema'
 include { REGROUP                } from './workflows/regroup'
 include { REMOVE_SAMPLES         } from './workflows/remove_samples'
 include { TREE                   } from './workflows/tree'
@@ -38,9 +38,9 @@ workflow {
     if (params.mode == 'default') {
         CORGEPLUS()
     } else if (params.mode == 'download_schema') {
-        DOWNLOAD_CGMLST_SCHEMA()
+        DOWNLOAD_SCHEMA()
     } else if (params.mode == 'create_schema') {
-        CREATE_CGMLST_SCHEMA()
+        CREATE_SCHEMA()
     } else if (params.mode == 'regroup') {
         REGROUP()
     } else if (params.mode == 'remove') {
