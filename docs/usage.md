@@ -322,10 +322,10 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 These options enhance analysis and reporting and can be combined.
 
-#### 🔹 Custom thresholds
+#### 🔹 Custom hierarchical-clustering (HC) thresholds
 
 ```bash
---thresholds 5,10,20,50
+--hc_thresholds 5,10,20,50
 ```
 
 * Comma-separated (no spaces)
@@ -429,7 +429,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
-  --thresholds 5,10,20,30,150 \
+  --hc_thresholds 5,10,20,30,150 \
   --tree \
   --metadata full_lims_data.csv \
   --columns_summary_report st,source,county,date,first_seq_date,last_seq_date,timespan_days \
@@ -446,9 +446,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 ## 🔄 Working with existing results
 
 ### 🔁 Regroup
-Recompute clusters with new thresholds.
+Recompute clusters with new HC thresholds.
 
-The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds (old results are overwritten).
+The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new HC thresholds (old results are overwritten).
 
 Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**. If available, include one of the following to populate the updated PoODLE samplesheets: `--phoenix_path`, `--bactopia_path`, or `--master_paths master_paths.csv`.
 
@@ -457,7 +457,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --mode regroup \
   --species Escherichia_coli,Acinetobacter_baumannii \
   --outdir corge_results \
-  --thresholds 50,100 \
+  --hc_thresholds 50,100 \
   -profile apptainer
 ```
 
@@ -508,7 +508,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 * **Add new samples** → reuse same `--outdir`
 * **Independent analysis** → use new `--outdir`
-* **Adjust thresholds** → use `--mode regroup`
+* **Adjust HC thresholds** → use `--mode regroup`
 
 ---
 
@@ -526,15 +526,15 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 * Used as fallback
 * Requires more samples (≥5 recommended)
-* SNP distances may be inflated → use higher thresholds (~150 SNPs) when evaluating potential linkages.
+* SNP distances may be inflated → use higher HC thresholds (~150 SNPs) when evaluating potential linkages.
 * SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is not used by default for SNP/Parsnp analyses. To force reuse of previous clustering nomenclature, use `--use_previous_partitions_for_snp`. Note that ReporTree may take **several hours** to map prior partitions onto the new analysis.
-* For SNP analyses, a practical subset of thresholds is calculated with ReporTree to provide detailed resolution for closely related samples (0-2000 SNPs), while still including broader population-level thresholds (5,000 and 10,000 SNPs). This avoids generating unnecessary partitions for every SNP threshold up to very large distances (i.e. ~200k SNPs).
+* For SNP analyses, a practical subset of HC thresholds is calculated with ReporTree to provide detailed resolution for closely related samples (0-2000 SNPs), while still including broader population-level HC thresholds (5,000 and 10,000 SNPs). This avoids generating unnecessary partitions for every SNP threshold up to very large distances (i.e. ~200k SNPs).
 
 ---
 
-## 🔢 Choosing thresholds
+## 🔢 Choosing HC thresholds
 
-Thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
+HC thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
 
 These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
 
@@ -545,14 +545,14 @@ These groups are **not strict “clusters”**, since they can include contextua
 | 40        | General clustering               |
 | 150       | Broad lineage grouping           |
 
-Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
+Reference HC thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
 
 > 💡 Ideal group size: **≥4 samples**
 > If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
 
 
 > [!TIP]
-> Use the [**Microreact visualization**](output.md#-microreact-visualization) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+> Use the [**Microreact visualization**](output.md#-microreact-visualization) to explore the dataset and decide which HC thresholds best capture meaningful relationships for your species or lineage.
 
 ---
 
@@ -609,7 +609,7 @@ nextflow pull MDHHS-Bioinformatics/corge
 
 ## 🛠 Troubleshooting
 
-* **No clusters** → increase `--thresholds`
+* **No clusters** → increase `--hc_thresholds`
 * **Different group IDs across runs** → expected with Parsnp
 * **Switching from Parsnp to cgMLST** → remove prior results for that species and re-run all samples for consistency
 * **Low-quality results** → check assembly quality. The output `linkages/<Species>_potential_linkages.csv` reports the completeness quality check.

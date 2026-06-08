@@ -1,6 +1,6 @@
-# 🔢 Choosing thresholds
+# 🔢 Choosing hierarchical-clustering (HC) thresholds
 
-Thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
+HC thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
 
 These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
 

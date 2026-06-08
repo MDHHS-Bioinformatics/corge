@@ -32,7 +32,7 @@ Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinforma
 
 * 🧬 **Fast & scalable**: Built for high-throughput screening of large genomic datasets
 * 🧪 **Multi-species support**: Analyzes multiple species in a single run
-* 🔗 **Linkage detection & grouping**: Identifies related samples (alleles or SNPs) and groups them using flexible thresholds
+* 🔗 **Linkage detection & grouping**: Identifies related samples (alleles or SNPs) and groups them using flexible hierarchical-clustering (HC) thresholds
 * 📊 **Actionable outputs**: Generates CSV reports, Microreact visualizations, and [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle)-ready sample sheets
 * 🗂️ **Persistent surveillance database**: Automatically compares new samples to historical data. Group nomenclature is preserved when using cgMLST
 * 🕒 **Metadata-driven insights**: Uses [`ReporTree`](https://github.com/insapathogenomics/ReporTree) to summarize genetic clusters across metadata fields (e.g., time, location, clinical data) for enhanced epidemiological interpretation
@@ -50,7 +50,7 @@ High-level steps for the `default` mode:
 3. Generate a phylogenetic tree with [`IQ-TREE`](https://www.iqtree.org/) (optional with `--tree`).
 4. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree).
 5. Create potential linkage tables per species.
-6. Select groups per sample using user-defined thresholds.
+6. Select groups per sample using user-defined HC thresholds.
 7. Generate [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) manifests.
 8. Run [`MashTree`](https://github.com/lskatz/mashtree).
 9. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees.
@@ -88,9 +88,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 #### Create cgMLST schemas
 
-If a cgMLST schema for your species is not available from [`cgmlst.org`](https://cgmlst.org/), CorGe+ can create a species-specific cgMLST schema using chewBBACA.
+If a cgMLST schema for your species is not available from [`cgmlst.org`](https://cgmlst.org/), CorGe+ can help create a species-specific cgMLST schema using [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA).
 
-Provide a text file with one assembly FASTA path per line and a representative reference assembly.
+Provide a text file with one assembly FASTA path per line. The representative reference assembly should also be included in this file and provided separately with `--reference_path`.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
@@ -102,8 +102,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   -profile apptainer
 ```
 
-For more details see the
-[`Usage documentation`](docs/usage.md) and [`Parameter documentation`](docs/parameters.md)
+For more details about schema creation see the [`Usage documentation`](docs/usage.md) and [`Parameter documentation`](docs/parameters.md)
 
 > Paths to downloaded or created schemas are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
  
@@ -158,9 +157,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 ```
 
 > [!TIP]
-> - Default clustering thresholds (alleles for cgMLST or SNPs for Parsnp): `15,20,40,150`
-> - Customize them with `--thresholds`
-> - Reference thresholds from different sources are available at [`docs/cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md).
+> - Default HC thresholds (alleles for cgMLST or SNPs for Parsnp): `15,20,40,150`
+> - Customize them with `--hc_thresholds`
+> - Reference HC thresholds from different sources are available at [`docs/cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md).
 
 _Advanced run:_
 
@@ -199,7 +198,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
-  --thresholds 5,10,20,30,150 \
+  --hc_thresholds 5,10,20,30,150 \
   --tree \
   --metadata metadata.csv \
   --columns_summary_report st,source,location,date,first_seq_date,last_seq_date,timespan_days \
@@ -212,7 +211,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 CorGe+ also supports alternative modes for working with existing results:
 
-- `regroup`: Recompute clusters using different thresholds  
+- `regroup`: Recompute clusters using different HC thresholds  
 - `tree`: Generate phylogenetic trees from prior results  
 - `remove`: Remove specific samples from the database  
 
