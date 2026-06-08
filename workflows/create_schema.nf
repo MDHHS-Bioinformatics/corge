@@ -17,12 +17,14 @@ if (params.mode == 'create_schema') {
 
     file(params.assembly_sheet, checkIfExists: true)
 
-    if (!params.species) {
-        exit 1, "Species not specified! (--species is required for mode: ${params.mode})"
+    if (!params.reference_path) {
+        exit 1, "Reference genome not specified! (--reference_path is required for mode: ${params.mode})"
     }
 
-    if (params.reference_path) {
-        file(params.reference_path, checkIfExists: true)
+    file(params.reference_path, checkIfExists: true)
+
+    if (!params.species) {
+        exit 1, "Species not specified! (--species is required for mode: ${params.mode})"
     }
 
     if (params.cgmlst_threshold == null) {
@@ -72,13 +74,12 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { INPUT_CHECK_CREATE          } from '../modules/local/pre_processing/samplesheet_check_create'
-include { CREATE_TRN                  } from '../modules/local/create_schema/create_trn'
-include { CREATE_SCHEMA               } from '../modules/local/create_schema/create_schema'
-include { EXTRACT_CGMLST              } from '../modules/local/create_schema/extract_cgmlst'
-include { PREPARE_CGMLST              } from '../modules/local/create_schema/prepare_cgmlst'
+include { PRODIGAL_CREATE_TRN         } from '../modules/local/create_schema/create_trn'
+include { CHEWBBACA_CREATE_SCHEMA     } from '../modules/local/create_schema/create_schema'
 include { CHEWBBACA_ALLELECALL        } from '../modules/local/chewbbaca/allelecall'
-include { UPDATE_CGMLST_FILE          } from '../modules/local/cgmlst_schema/update_cgmlst_file'
+include { CHEWBBACA_EXTRACT_CGMLST    } from '../modules/local/create_schema/extract_cgmlst'
+include { CHEWBBACA_PREPARE_CGMLST    } from '../modules/local/create_schema/prepare_cgmlst'
+include { UPDATE_SCHEMAS_FILE         } from '../modules/local/create_schema/update_schemas_file'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -102,7 +103,7 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 
-workflow PREPARE_CGMLST_SCHEMA {
+workflow CREATE_SCHEMA {
 
     ch_versions = Channel.empty()
     //
@@ -114,8 +115,8 @@ workflow PREPARE_CGMLST_SCHEMA {
             file(params.reference_path)
         )
     )
-    CREATE_TRN(ch_reference)
-    ch_versions = ch_versions.mix(CREATE_TRN.out.versions)
+    PRODIGAL_CREATE_TRN(ch_reference)
+    ch_versions = ch_versions.mix(PRODIGAL_CREATE_TRN.out.versions)
     //
     // MODULE: Create wgMLST schema
     //
@@ -126,55 +127,48 @@ workflow PREPARE_CGMLST_SCHEMA {
         .filter { line -> line && !line.startsWith('#') }
         .map { assembly_path -> file(assembly_path) }
         .collect()
-    
-    ch_create = CREATE_TRN.out.trn
+        .map { assemblies -> [ assemblies: assemblies ] }
+        
+    ch_create = PRODIGAL_CREATE_TRN.out.trn
         .combine(ch_assemblies)
-        .map { meta, reference, trn, assemblies ->
-            tuple(meta, assemblies, trn)
+        .map { meta, trn, assembly_box ->
+            tuple(meta, assembly_box.assemblies, trn)
         }
 
-    CREATE_SCHEMA(ch_create)
-    ch_versions = ch_versions.mix(CREATE_SCHEMA.out.versions)
+    CHEWBBACA_CREATE_SCHEMA(ch_create)
+    ch_versions = ch_versions.mix(CHEWBBACA_CREATE_SCHEMA.out.versions)
     //
     // MODULE: Allele call
     //
-    CHEWBBACA_ALLELECALL(CREATE_SCHEMA.out.wgmlst)
+    CHEWBBACA_ALLELECALL(CHEWBBACA_CREATE_SCHEMA.out.wgmlst)
     ch_versions = ch_versions.mix(CHEWBBACA_ALLELECALL.out.versions)
     //
     // MODULE: Extract cgMLST loci list
     //
-    EXTRACT_CGMLST(
+    CHEWBBACA_EXTRACT_CGMLST(
         CHEWBBACA_ALLELECALL.out.results_alleles
     )
-    ch_versions = ch_versions.mix(EXTRACT_CGMLST.out.versions)
+    ch_versions = ch_versions.mix(CHEWBBACA_EXTRACT_CGMLST.out.versions)
     //
     // MODULE: Prepare cgMLST
     //
     ch_cgmlst = CHEWBBACA_ALLELECALL.out.results_alleles
-        .join(EXTRACT_CGMLST.out.cgmlst_txt)
+        .join(CHEWBBACA_EXTRACT_CGMLST.out.cgmlst_txt)
         .map { meta, results_alleles, schema, cgmlst_txt ->
             tuple(meta, cgmlst_txt, schema)
         }
 
-    PREPARE_CGMLST(
+    CHEWBBACA_PREPARE_CGMLST(
         ch_cgmlst
     )
-    ch_versions = ch_versions.mix(PREPARE_CGMLST.out.versions)
-
-    PREPARE_CGMLST.out.cgmlst_schema
-        .collect()
-        .map { dirs -> true }  // just a signal
-        .set { ready_ch }
-    
-    ///TODO GET CHANNEL TO UPDATE CGMLST FILE WITH SPECIES AND PATH TO NEW SCHEMA
+    ch_versions = ch_versions.mix(CHEWBBACA_PREPARE_CGMLST.out.versions)
     //
-    // MODULE: Update cgMLST
+    // MODULE: Update cgMLST schemas file
     //
-    UPDATE_CGMLST_FILE(
-        update_ch
-    )
-    ch_versions = ch_versions.mix(UPDATE_CGMLST_FILE.out.versions)
-   
+    UPDATE_SCHEMAS_FILE(
+        CHEWBBACA_PREPARE_CGMLST.out.cgmlst_schema,
+        outdir_abs
+    )   
 
     CUSTOM_DUMPSOFTWAREVERSIONS (
         ch_versions.unique().collectFile(name: 'collated_versions.yml')
