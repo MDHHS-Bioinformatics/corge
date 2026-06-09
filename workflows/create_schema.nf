@@ -152,10 +152,10 @@ workflow CREATE_SCHEMA {
     //
     // MODULE: Prepare cgMLST
     //
-    ch_cgmlst = CHEWBBACA_ALLELECALL.out.results_alleles
+    ch_cgmlst = CHEWBBACA_CREATE_SCHEMA.out.wgmlst
         .join(CHEWBBACA_EXTRACT_CGMLST.out.cgmlst_txt)
-        .map { meta, results_alleles, schema, cgmlst_txt ->
-            tuple(meta, cgmlst_txt, schema)
+        .map { meta, schema, assemblies, cgmlst_txt ->
+            tuple(meta, schema, cgmlst_txt)
         }
 
     CHEWBBACA_PREPARE_CGMLST(
