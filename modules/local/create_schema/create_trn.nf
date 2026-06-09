@@ -28,7 +28,7 @@ process PRODIGAL_CREATE_TRN {
 
     cat <<-END_VERSIONS > versions.yml
     "${task.process}":
-        prodigal: \$(echo \$(prodigal --version 2>&1 | sed 's/^.*Prodigal V\\([^: ]*\\).*/\\1/p' ))
+        prodigal: \$(prodigal -v 2>&1 | sed -n 's/^.*Prodigal V\\([0-9.]*\\):.*\$/\\1/p')
     END_VERSIONS
     """
 }
