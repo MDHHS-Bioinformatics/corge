@@ -46,9 +46,9 @@
                     "default": "default",
                     "enum": ["default", "download_schema", "create_schema", "regroup", "remove", "tree"]
                 },
-                "thresholds": {
+                "hc_thresholds": {
                     "type": "string",
-                    "description": "Comma-separated distance thresholds for grouping (e.g., 15,20,40,150).",
+                    "description": "Comma-separated hierarchical-clustering thresholds for grouping (e.g., 15,20,40,150).",
                     "default": "15,20,40,150",
                     "fa_icon": "fas fa-sliders-h"
                 },
