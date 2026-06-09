@@ -7,7 +7,7 @@ process CHEWBBACA_PREPARE_CGMLST {
     //'quay.io/biocontainers/chewbbaca:3.5.4--pyh106432d_0'
         
     input:
-    tuple val(meta), path(cgmlst_txt), path(schema)
+    tuple val(meta), path(schema), path(cgmlst_txt)
 
     output:
     tuple val(meta), path("${species}_cgMLST")   , emit: cgmlst_schema
