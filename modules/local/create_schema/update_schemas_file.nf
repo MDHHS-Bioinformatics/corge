@@ -15,9 +15,7 @@ process UPDATE_SCHEMAS_FILE {
     script:
     species = task.ext.species ?: "${meta.species}"
 
-    """
-    mkdir -p "${outdir_abs}/cgmlst_schemas"
-    
+    """    
     csv="${outdir_abs}/cgmlst_schemas/cgmlst_schemas.csv"
     cgmlst_path="${outdir_abs}/cgmlst_schemas/${species}_cgMLST"
 
@@ -26,9 +24,11 @@ process UPDATE_SCHEMAS_FILE {
     fi
 
     # Remove any existing row for this species, then append the updated row
-    awk -F',' -v species="${species}" 'NR == 1 || \$1 != species' "\$csv" > cgmlst_schemas.csv
+    awk -F',' -v species="${species}" 'NR == 1 || \$1 != species' "\$csv" > cgmlst_schemas.tmp
 
-    echo "${species},\$cgmlst_path" >> cgmlst_schemas.csv
+    echo "${species},\$cgmlst_path" >> cgmlst_schemas.tmp
+
+    mv cgmlst_schemas.tmp cgmlst_schemas.csv
 
     """
 }
