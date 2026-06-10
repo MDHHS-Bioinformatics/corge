@@ -99,27 +99,18 @@ def read_head(handle, num_lines=10):
 
 
 def sniff_format(handle):
-    """
-    Detect the tabular format.
-
-    Args:
-        handle (text file): A handle to a `text file`_ object. The read position is
-        expected to be at the beginning (index 0).
-
-    Returns:
-        csv.Dialect: The detected tabular format.
-
-    .. _text file:
-        https://docs.python.org/3/glossary.html#term-text-file
-
-    """
+    """Detect the tabular format."""
     peek = read_head(handle)
     handle.seek(0)
+
     sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.")
+
+    try:
+        dialect = sniffer.sniff(peek)
+    except csv.Error:
+        logger.critical("Could not determine the delimiter of the sample sheet.")
         sys.exit(1)
-    dialect = sniffer.sniff(peek)
+
     return dialect
 
 
@@ -143,17 +134,44 @@ def check_samplesheet(file_in, file_out):
             ISO4,/path/iso4.fasta,Acinetobacter baumannii
 
     """
+    required_columns = {"sample", "assembly", "species"}
 
     with file_in.open(newline="") as in_handle:
         reader = csv.DictReader(in_handle, dialect=sniff_format(in_handle))
+
+        if reader.fieldnames is None:
+            logger.critical("The given sample sheet is empty or has no header row.")
+            sys.exit(1)
+
+        reader.fieldnames = [
+            col.strip().lstrip("\ufeff")
+            for col in reader.fieldnames
+        ]
+
+        missing = required_columns - set(reader.fieldnames)
+        if missing:
+            logger.critical(
+                f"The sample sheet is missing required column(s): {', '.join(sorted(missing))}. "
+                f"Found columns: {', '.join(reader.fieldnames)}"
+            )
+            sys.exit(1)
+
         checker = RowChecker()
+
         for i, row in enumerate(reader):
+            row = {
+                key.strip().lstrip("\ufeff"): value
+                for key, value in row.items()
+            }
+
             try:
                 checker.validate_and_transform(row)
             except AssertionError as error:
                 logger.critical(f"{str(error)} On line {i + 2}.")
                 sys.exit(1)
+
     header = list(reader.fieldnames)
+
     with file_out.open(mode="w", newline="") as out_handle:
         writer = csv.DictWriter(out_handle, header, delimiter=",")
         writer.writeheader()

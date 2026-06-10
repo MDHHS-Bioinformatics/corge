@@ -88,12 +88,14 @@ def sniff_format(handle):
     """
     peek = read_head(handle)
     handle.seek(0)
+
     sniffer = csv.Sniffer()
-    if not sniffer.has_header(peek):
-        logger.critical("The given sample sheet does not appear to contain a header.This warning is not always accurate")
-        #sys.exit(1)
-    dialect = sniffer.sniff(peek)
-    return dialect
+
+    try:
+        dialect = sniffer.sniff(peek)
+    except csv.Error:
+        logger.critical("Could not determine the delimiter of the sample sheet.")
+        sys.exit(1)
 
 
 def check_samplesheet(file_in, file_out):
