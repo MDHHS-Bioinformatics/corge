@@ -19,10 +19,17 @@ process PRODIGAL_CREATE_TRN {
     script:
     def args = task.ext.args ?: ''
     species = task.ext.species ?: "${meta.species}"
+    fasta = assembly[0]
+    is_compressed = fasta.getName().endsWith('.gz')
+    fasta_name = fasta.getName().replace('.gz', '')
 
     """
+    if [ "$is_compressed" == "true" ]; then
+        gzip -c -d $fasta > $fasta_name
+    fi
+
     prodigal \\
-        -i "${assembly}" \\
+        -i "${fasta_name}" \\
         -p single \\
         -t "${species}.trn"
 
