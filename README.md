@@ -83,7 +83,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --mode download_schema \
   --schema_ids s1,s20 \
   --outdir corge_results \
-  -profile apptainer \
+  -profile apptainer
 ```
 
 #### Create cgMLST schemas
@@ -104,7 +104,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 For more details about schema creation see the [`Usage documentation`](docs/usage.md) and [`Parameter documentation`](docs/parameters.md)
 
-> Paths to downloaded or created schemas are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
+> Paths to downloaded and created schemas are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
  
  Example of cgMLST schema file:
 
