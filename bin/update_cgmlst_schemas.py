@@ -1,50 +1,131 @@
 #!/usr/bin/env python
 
-import os
 import argparse
+from pathlib import Path
 import pandas as pd
 
-def update_cgmlst_schemas(db_path: str, species_schemas_csv: str, output_csv: str = "cgmlst_schemas.csv"):
-    """
-    Generate or update a CSV mapping species to their cgMLST schema directory path.
-    If the output CSV already exists, merge new data with existing entries.
 
-    Parameters:
-        db_path (str): Path to the base directory containing cgMLST schema directories.
-        species_schemas_csv (str): Path to CSV file mapping species to schema.
-        output_csv (str): Path to save the output CSV. Defaults to 'cgmlst_schemas_list.csv'.
+def update_cgmlst_schemas(
+    db_path: str,
+    species_schemas_csv: str,
+    output_csv: str,
+    prior_file: str | None = None,
+):
     """
-    # Load species-schemas CSV
-    df = pd.read_csv(species_schemas_csv) 
+    Generate or update a CSV mapping species to cgMLST schema directory paths.
 
-    # Get the schema names from subdirectories in db_path
+    The species_schemas_csv input should contain:
+
+        species,schema
+
+    where schema is the directory name inside:
+
+        <db_path>/cgmlst_schemas/
+
+    If prior_file is provided, it is appended and duplicates are removed.
+    """
+
+    db_path = Path(db_path)
+    cgmlst_dir = db_path / "cgmlst_schemas"
+
+    if not cgmlst_dir.exists():
+        raise FileNotFoundError(f"cgMLST schema directory does not exist: {cgmlst_dir}")
+
+    species_df = pd.read_csv(species_schemas_csv)
+
+    required_cols = {"species", "schema"}
+    missing_cols = required_cols - set(species_df.columns)
+    if missing_cols:
+        raise ValueError(
+            f"Input CSV is missing required column(s): {', '.join(sorted(missing_cols))}"
+        )
+
     available_schemas = {
-        name for name in os.listdir(os.path.join(db_path, "cgmlst_schemas"))
-        if os.path.isdir(os.path.join(db_path, "cgmlst_schemas", name))
+        p.name
+        for p in cgmlst_dir.iterdir()
+        if p.is_dir()
     }
-    
-    # Filter rows where schema is a subdirectory of db_path
-    filtered_df = df[df['schema'].isin(available_schemas)].copy()
-    filtered_df['cgmlst_path'] = filtered_df['schema'].apply(lambda s: os.path.join(db_path, "cgmlst_schemas", s))
-    new_df = filtered_df[['species', 'cgmlst_path']]
 
-    if os.path.exists(output_csv):
-        # Load existing file and merge
-        existing_df = pd.read_csv(output_csv)
-        combined_df = pd.concat([existing_df, new_df], ignore_index=True)
-        combined_df.drop_duplicates(subset=['species', 'cgmlst_path'], inplace=True)
+    new_df = species_df[species_df["schema"].isin(available_schemas)].copy()
+
+    new_df["cgmlst_path"] = new_df["schema"].apply(
+        lambda schema: str(cgmlst_dir / schema)
+    )
+
+    new_df = new_df[["species", "cgmlst_path"]]
+
+    if prior_file:
+        prior_path = Path(prior_file)
+
+        if prior_path.exists() and prior_path.stat().st_size > 0:
+            prior_df = pd.read_csv(prior_path)
+
+            required_prior_cols = {"species", "cgmlst_path"}
+            missing_prior_cols = required_prior_cols - set(prior_df.columns)
+            if missing_prior_cols:
+                raise ValueError(
+                    f"Prior CSV is missing required column(s): "
+                    f"{', '.join(sorted(missing_prior_cols))}"
+                )
+
+            prior_df = prior_df[["species", "cgmlst_path"]]
+            combined_df = pd.concat([prior_df, new_df], ignore_index=True)
+        else:
+            combined_df = new_df
     else:
         combined_df = new_df
+
+    combined_df = combined_df.dropna(subset=["species", "cgmlst_path"])
+
+    combined_df = combined_df.drop_duplicates(
+        subset=["species", "cgmlst_path"],
+        keep="last",
+    )
+
+    combined_df = combined_df.sort_values(["species", "cgmlst_path"])
+
+    output_path = Path(output_csv)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+
+    combined_df.to_csv(output_path, index=False)
+
     print(combined_df)
-    # Save the merged or new file
-    combined_df.to_csv(output_csv, index=False)
+
 
 if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Update cgMLST schema list for species.")
-    parser.add_argument("db_path", help="Directory containing cgMLST schemas")
-    parser.add_argument("species_schemas_csv", help="CSV mapping species to schema")
-    parser.add_argument("output_csv", nargs='?', default="cgmlst_schemas.csv", help="Output CSV file (optional)")
+    parser = argparse.ArgumentParser(
+        description="Update cgMLST schema list for species."
+    )
+
+    parser.add_argument(
+        "--db-path",
+        required=True,
+        help="Base database/output directory containing cgmlst_schemas/.",
+    )
+
+    parser.add_argument(
+        "--species-schemas-csv",
+        required=True,
+        help="CSV mapping species to cgMLST schema directory names.",
+    )
+
+    parser.add_argument(
+        "--prior-file",
+        default=None,
+        help="Optional previous cgMLST schemas CSV to append before removing duplicates.",
+    )
+
+    parser.add_argument(
+        "--output-csv",
+        default="updated/cgmlst_schemas.csv",
+        help="Output CSV file.",
+    )
 
     args = parser.parse_args()
-    update_cgmlst_schemas(args.db_path, args.species_schemas_csv, args.output_csv)
-    
+
+    update_cgmlst_schemas(
+        db_path=args.db_path,
+        species_schemas_csv=args.species_schemas_csv,
+        prior_file=args.prior_file,
+        output_csv=args.output_csv,
+    )

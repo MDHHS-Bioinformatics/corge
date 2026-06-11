@@ -45,6 +45,12 @@ if (params.mode == 'download_schema') { //following params only need to be valid
     println "Absolute outdir: $outdir_abs"
 }
 
+//Function to return the previous cgMLST schemas file or empty list
+def get_previous_cgmlst_schemas_file() {
+    def c = "${params.outdir}/cgmlst_schemas/cgmlst_schemas.csv"
+    return new File(c).exists() ? file(c) : []
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -152,8 +158,10 @@ workflow DOWNLOAD_SCHEMA {
     //
     // Combine static path and species file with completion signal
     //
+    def prev = get_previous_cgmlst_schemas_file()
+
     Channel
-        .of(tuple((outdir_abs), file(params.species_schemas)))
+        .of(tuple(prev, outdir_abs, file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
     //
