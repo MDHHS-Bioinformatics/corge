@@ -10,7 +10,7 @@ For full parameter details, see 👉 [`parameters.md`](parameters.md)
 
 CorGe+ is designed for **incremental genomic surveillance**:
 
-1. Download cgMLST schemas (once per species)
+1. Download or create cgMLST schemas (once per species)
 2. Prepare a sample manifest
 3. Run the pipeline
 4. Results are added to a **growing database** (`--outdir`)
@@ -28,7 +28,7 @@ CorGe+ is designed for **incremental genomic surveillance**:
 ```bash
 # 1. Download schemas
 nextflow run MDHHS-Bioinformatics/corge \
-  --mode schema \
+  --mode download_schema \
   --schema_ids s20 \
   --outdir corge_results \
   -profile apptainer
@@ -78,17 +78,20 @@ Install:
 > ``````
 ---
 
-## 2️⃣ Download cgMLST schemas
+## 2️⃣ Get cgMLST schemas
+CorGe+ can help you either download cgMLST schemas from [`cgmlst.org`](https://cgmlst.org/) or create cgMLST schemas with [`ChewBBACA`](https://github.com/B-UMMI/chewBBACA).
 
+### Download cgMLST schemas
 Schemas are required for cgMLST analysis and only need to be downloaded once.
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  --mode schema \
+  --mode download_schema \
   --schema_ids s1,s20 \
   --outdir corge_results \
   -profile apptainer
 ```
+
 <details>
 <summary><b>Click here to check cgMLST schema IDs</b></summary>
 
@@ -217,13 +220,6 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 </details>
 
-* Output file:
-
-  ```
-  <outdir>/cgmlst_schemas/cgmlst_schemas.csv
-  ```
-
-> 💡 Use this file in all downstream runs.
 
 > The `DOWNLOAD_CGMLST_SCHEMA` step may occasionally fail with `curl` error 52 (`Empty reply from server`) when downloading schemas from `cgmlst.org`. This is usually a temporary server-side issue. Resume or re-run the pipeline after a few minutes; the step typically succeeds once the server responds again.
 
@@ -232,9 +228,57 @@ nextflow run MDHHS-Bioinformatics/corge \
 > After the cgMLST schemas have been successfully downloaded, the `work/` folder inside the working directory can be safely deleted.
 
 
+### Create cgMLST schemas
+
+If a cgMLST schema for your species is not available in [`cgmlst.org`](https://cgmlst.org/), CorGe+ can create a new species-specific cgMLST schema using chewBBACA.
+
+Schema creation should be run for **one species at a time**. Provide a text file with one assembly FASTA path per line (can be gzipped) using `--assembly_sheet` (no header), and specify the target species with `--species`. Example `assembly_paths.txt`:
+
+```text
+/path/to/assembly_01.fasta
+/path/to/assembly_02.fna
+/path/to/assembly_03.fa.gz
+/path/to/assembly_04.fasta.gz
+```
+
+For best results, use a representative set of high-quality assemblies that captures the genomic diversity of the species or lineage of interest. Complete genomes from NCBI RefSeq are preferred when available because they can reduce problems caused by incomplete or fragmented genes in draft assemblies. However, complete genomes are not always error-free, and some may contain issues such as frameshifts or poor annotations, so genome quality should still be reviewed before schema creation.
+
+There is no strict minimum number of assemblies, but a dataset with at least ~12 distinct genotypes can be a reasonable starting point. If complete RefSeq genomes do not adequately represent the diversity of the species or lineage, high-quality draft genomes may be included.
+
+The `--reference_path` parameter specifies the path to a representative assembly used to generate the Prodigal training file for chewBBACA. This assembly should ideally be high quality, contiguous, and representative of the dataset (can be gzipped). The representative reference assembly should also be included in the assembly sheet.
+
+The `--cgmlst_threshold` parameter defines the proportion of assemblies in which a locus must be present to be included in the cgMLST schema (default: `0.95`).
+
+```bash
+nextflow run MDHHS-Bioinformatics/corge \
+  --mode create_schema \
+  --species Vibrio_cholerae \
+  --assembly_sheet /path/to/assembly_paths.txt \
+  --reference_path /path/to/reference.fasta \
+  --cgmlst_threshold 0.95 \
+  --outdir corge_results \
+  -profile apptainer
+```
+
+
+> Paths to downloaded and created schemas are appended to `<outdir>/cgmlst_schemas/cgmlst_schemas.csv` for downstream use.
+ 
+ Example of cgMLST schema file:
+
+```csv
+species,cgmlst_path
+Acinetobacter_baumannii,/path/to/Acinetobacter_baumannii_cgMLST
+Escherichia_coli,/path/to/Escherichia_coli_cgMLST
+Shigella_flexneri,/path/to/Escherichia_coli_cgMLST
+Shigella_sonnei,/path/to/Escherichia_coli_cgMLST
+```
+
+
+> 💡 Use this file in all downstream runs.
+
 > [!NOTE]
-> If a species schema is not available on [`cgmlst.org`](https://cgmlst.org/), you can still use CorGe+ without a schema.
-> You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/), create your own schema, or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> - You could also download schemas from [`Chewie-NS`](https://chewie-ns.readthedocs.io/en/latest/) or prepare an external one using [ChewBBACA](https://chewbbaca.readthedocs.io/en/latest/index.html). Once your custom schema is ready, add it to the schema's file.
+> - You can still use CorGe+ without a cgMLST schema.
 
 ---
 
@@ -284,10 +328,10 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 These options enhance analysis and reporting and can be combined.
 
-#### 🔹 Custom thresholds
+#### 🔹 Custom hierarchical-clustering (HC) thresholds
 
 ```bash
---thresholds 5,10,20,50
+--hc_thresholds 5,10,20,50
 ```
 
 * Comma-separated (no spaces)
@@ -391,7 +435,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --input manifest.csv \
   --cgmlst_schemas cgmlst_schemas.csv \
   --outdir corge_results \
-  --thresholds 5,10,20,30,150 \
+  --hc_thresholds 5,10,20,30,150 \
   --tree \
   --metadata full_lims_data.csv \
   --columns_summary_report st,source,county,date,first_seq_date,last_seq_date,timespan_days \
@@ -408,9 +452,9 @@ nextflow run MDHHS-Bioinformatics/corge \
 ## 🔄 Working with existing results
 
 ### 🔁 Regroup
-Recompute clusters with new thresholds.
+Recompute clusters with new HC thresholds.
 
-The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new thresholds (old results are overwritten).
+The `--mode regroup` allows you to generate new clustering groups using **existing database results**. New genomic context groups, PoODLE samplesheets, and Microreact outputs will be generated with the new HC thresholds (old results are overwritten).
 
 Specify the species to regroup using `--species`. Multiple species can be provided as a comma-separated list **without spaces**. If available, include one of the following to populate the updated PoODLE samplesheets: `--phoenix_path`, `--bactopia_path`, or `--master_paths master_paths.csv`.
 
@@ -419,7 +463,7 @@ nextflow run MDHHS-Bioinformatics/corge \
   --mode regroup \
   --species Escherichia_coli,Acinetobacter_baumannii \
   --outdir corge_results \
-  --thresholds 50,100 \
+  --hc_thresholds 50,100 \
   -profile apptainer
 ```
 
@@ -470,7 +514,7 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 * **Add new samples** → reuse same `--outdir`
 * **Independent analysis** → use new `--outdir`
-* **Adjust thresholds** → use `--mode regroup`
+* **Adjust HC thresholds** → use `--mode regroup`
 
 ---
 
@@ -488,15 +532,15 @@ nextflow run MDHHS-Bioinformatics/corge \
 
 * Used as fallback
 * Requires more samples (≥5 recommended)
-* SNP distances may be inflated → use higher thresholds (~150 SNPs) when evaluating potential linkages.
+* SNP distances may be inflated → use higher HC thresholds (~150 SNPs) when evaluating potential linkages.
 * SNP-based analysis may yield less reproducible results because they depend on assembly quality and on a core genome that changes with dataset composition. Therefore, historical group nomenclature is not used by default for SNP/Parsnp analyses. To force reuse of previous clustering nomenclature, use `--use_previous_partitions_for_snp`. Note that ReporTree may take **several hours** to map prior partitions onto the new analysis.
-* For SNP analyses, a practical subset of thresholds is calculated with ReporTree to provide detailed resolution for closely related samples (0-2000 SNPs), while still including broader population-level thresholds (5,000 and 10,000 SNPs). This avoids generating unnecessary partitions for every SNP threshold up to very large distances (i.e. ~200k SNPs).
+* For SNP analyses, a practical subset of HC thresholds is calculated with ReporTree to provide detailed resolution for closely related samples (0-2000 SNPs), while still including broader population-level HC thresholds (5,000 and 10,000 SNPs). This avoids generating unnecessary partitions for every SNP threshold up to very large distances (i.e. ~200k SNPs).
 
 ---
 
-## 🔢 Choosing thresholds
+## 🔢 Choosing HC thresholds
 
-Thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
+HC thresholds define **groups for downstream analysis** like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
 
 These groups are **not strict “clusters”**, since they can include contextual samples to maintain lineage-level resolution.
 
@@ -507,14 +551,14 @@ These groups are **not strict “clusters”**, since they can include contextua
 | 40        | General clustering               |
 | 150       | Broad lineage grouping           |
 
-Reference thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
+Reference HC thresholds from different sources are available at [`cgmlst_thresholds_reference.md`](cgmlst_thresholds_reference.md). 
 
 > 💡 Ideal group size: **≥4 samples**
 > If your group becomes too large, **lower the threshold** to retain only the most strongly related isolates.
 
 
 > [!TIP]
-> Use the [**Microreact visualization**](output.md#-microreact-visualization) to explore the dataset and decide which thresholds best capture meaningful relationships for your species or lineage.
+> Use the [**Microreact visualization**](output.md#-microreact-visualization) to explore the dataset and decide which HC thresholds best capture meaningful relationships for your species or lineage.
 
 ---
 
@@ -571,7 +615,7 @@ nextflow pull MDHHS-Bioinformatics/corge
 
 ## 🛠 Troubleshooting
 
-* **No clusters** → increase `--thresholds`
+* **No clusters** → increase `--hc_thresholds`
 * **Different group IDs across runs** → expected with Parsnp
 * **Switching from Parsnp to cgMLST** → remove prior results for that species and re-run all samples for consistency
 * **Low-quality results** → check assembly quality. The output `linkages/<Species>_potential_linkages.csv` reports the completeness quality check.

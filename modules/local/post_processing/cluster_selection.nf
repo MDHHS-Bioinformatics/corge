@@ -19,7 +19,7 @@ process CLUSTER_SELECTION {
 
     script:
     def args = task.ext.args ?: ''
-    def thresholds = params.thresholds ?: ''
+    def thresholds = params.hc_thresholds ?: ''
     species = task.ext.species ?: "${meta.species}"
 
     """

@@ -20,7 +20,7 @@ process MAKE_POODLE_MANIFEST {
 
     script:
     def args = task.ext.args ?: ''
-    def thresholds = params.thresholds ?: ''
+    def thresholds = params.hc_thresholds ?: ''
     species = task.ext.species ?: "${meta.species}"
     // Determine which input to use: prioritize master_paths, fallback to phoenix or bactopia paths, or nothing
     def sample_paths = ''

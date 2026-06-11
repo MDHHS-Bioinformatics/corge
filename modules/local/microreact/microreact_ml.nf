@@ -19,7 +19,7 @@ process MICROREACT_ML {
 
     script:
     def args = task.ext.args ?: ''
-    def thresholds = params.thresholds ?: ''
+    def thresholds = params.hc_thresholds ?: ''
     species = task.ext.prefix ?: "${meta.species}"
 
     """

@@ -25,8 +25,8 @@ These parameters are required for most pipeline runs.
 | `--input`          | string | ✓        | –                 | Manifest CSV (`sample,assembly,species`).                   |
 | `--outdir`         | string | ✓        | `./corge_results` | Output directory (acts as a growing database across runs).  |
 | `--cgmlst_schemas` | string | –        | –                 | CSV mapping species to cgMLST schemas (`species,cgmlst_path`). |
-| `--thresholds`     | string | ✓        | `15,20,40,150`    | Distance thresholds for grouping samples. Comma-separated (no spaces). |
-| `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `schema`, `regroup`, `remove` or `tree`. |
+| `--hc_thresholds`     | string | ✓        | `15,20,40,150`    | Hierarchical-clustering thresholds (method single) for grouping samples. They represent allelic or SNP distances depending on the analysis performed. Comma-separated (no spaces). |
+| `--mode`           | string | ✓        | `default`         | Pipeline mode: `default`, `download_schema`, `create_schema`, `regroup`, `remove` or `tree`. |
 | `--tree`           | boolean| –        |`false`            | Build a maximum-likelihood phylogenetic tree (GTR+G4) from a DNA multiple-sequence alignment (MSA). By default, the pipeline outputs only distance-based trees (MashTree and MSTreeV2 from allele or SNP distances). Enabling this option requires substantially more computational time and resources. When a cgMLST schema is used, the MSA is derived from the cgMLST allelic profiles. Only when using modes `default` or `remove` |
 | `--use_previous_partitions_for_snp`           | boolean | ✓        | `false`         | Force reuse of previous clustering nomenclature for SNP-based analysis done with Parsnp. Not recommended, it can take several hours to resolve.  |
 
@@ -38,10 +38,12 @@ These parameters control analysis behavior.
 
 | Parameter              | Type    | Default | Description                                                        |
 | ---------------------- | ------- | ------- | ------------------------------------------------------------------ |
-| `--schema_ids`         | string  | –       | cgMLST schema IDs (required for `--mode schema`). Comma-separated (no spaces)                  |
-| `--samples_to_remove`  | string  | –       | CSV of samples to remove (required for `--mode remove`, columns: `sample,species`).           |
-| `--species`            | string  | –       | Species to reanalyze using prior results from `outdir` (required for `--mode regroup` or `--mode tree`).          |
-
+| `--schema_ids`         | string  | –       | cgMLST schema IDs (required for `--mode schema`). Comma-separated (no spaces). |
+| `--samples_to_remove`  | string  | –       | CSV of samples to remove (required for `--mode remove`, columns: `sample,species`). |
+| `--species`            | string  | –       | Species to reanalyze using prior results from `outdir` (required for `--mode regroup` or `--mode tree`). Also required for `--mode create_schema`. |
+| `--assembly_sheet`     | string  | –       | Text file with one assembly FASTA path per line. Required for `--mode create_schema`. Supports `.fa`, `.fas`, `.fasta`, `.fna`, and gzipped versions. |
+| `--reference_path`     | string  | –       | Path to reference/representative assembly FASTA used to generate the Prodigal training file for `--mode create_schema`. Supports `.fa`, `.fas`, `.fasta`, `.fna`, and gzipped versions.|
+| `--cgmlst_threshold`   | number  | `0.95`  | Core-genome threshold for defining the cgMLST schema in `--mode create_schema`. Must be a single value > 0 and <= 1. |
 ---
 
 ## 📦 Read and annotation file source options (PoODLE)

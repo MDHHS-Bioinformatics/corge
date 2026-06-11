@@ -13,7 +13,7 @@ WorkflowCorgeplus.initialise(params, log)
 // Define schemaList/outdir_abs at script level (before the if block)
 def schemaList = []
 def outdir_abs = []
-if (params.mode == 'schema') { //following params only need to be validated for schema mode
+if (params.mode == 'download_schema') { //following params only need to be validated for schema mode
     def checkPathParamList = [ params.schema_info, params.trn_files,  params.species_schemas]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
 
@@ -45,6 +45,12 @@ if (params.mode == 'schema') { //following params only need to be validated for 
     println "Absolute outdir: $outdir_abs"
 }
 
+//Function to return the previous cgMLST schemas file or empty list
+def get_previous_cgmlst_schemas_file() {
+    def c = "${params.outdir}/cgmlst_schemas/cgmlst_schemas.csv"
+    return new File(c).exists() ? file(c) : []
+}
+
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
     CONFIG FILES
@@ -65,11 +71,11 @@ ch_multiqc_custom_methods_description = params.multiqc_methods_description ? fil
 //
 // SUBWORKFLOW: Consisting of a mix of local and nf-core/modules
 //
-include { FETCH_CGMLST_SCHEMAS      } from '../modules/local/cgmlst_schema/fetch_cgmlst_schemas'
-include { DOWNLOAD_CGMLST_SCHEMA    } from '../modules/local/cgmlst_schema/download_cgmlst_schema'
-include { UNZIP_CGMLST_SCHEMA       } from '../modules/local/cgmlst_schema/unzip_cgmlst_schema'
-include { CONFIGURE_CGMLST_SCHEMA   } from '../modules/local/cgmlst_schema/configure_cgmlst_schema'
-include { UPDATE_CGMLST_FILE        } from '../modules/local/cgmlst_schema/update_cgmlst_file'
+include { FETCH_CGMLST_SCHEMAS      } from '../modules/local/download_schema/fetch_cgmlst_schemas'
+include { DOWNLOAD_CGMLST_SCHEMA    } from '../modules/local/download_schema/download_cgmlst_schema'
+include { UNZIP_CGMLST_SCHEMA       } from '../modules/local/download_schema/unzip_cgmlst_schema'
+include { CONFIGURE_CGMLST_SCHEMA   } from '../modules/local/download_schema/configure_cgmlst_schema'
+include { UPDATE_CGMLST_FILE        } from '../modules/local/download_schema/update_cgmlst_file'
 
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -93,13 +99,15 @@ include { CUSTOM_DUMPSOFTWAREVERSIONS } from '../modules/nf-core/custom/dumpsoft
 def multiqc_report = []
 
 
-workflow PREPARE_CGMLST_SCHEMA {
+workflow DOWNLOAD_SCHEMA {
 
     ch_versions = Channel.empty()
     //
     // MODULE: Get the latest schema urls
     //
     FETCH_CGMLST_SCHEMAS(params.schema_info)
+    ch_versions = ch_versions.mix(FETCH_CGMLST_SCHEMAS.out.versions)
+
     // Broadcast the list to use in filtering
     Channel
         .from(schemaList.toSet())
@@ -119,7 +127,6 @@ workflow PREPARE_CGMLST_SCHEMA {
             tuple(row.id, row.schema_name, row.url_alleles, "${params.trn_files}/${row.trn}")
         }
         .set { schema_channel }
-    // schema_channel.view()
     //
     // MODULE: Download the cgMLST schemas
     //
@@ -138,6 +145,8 @@ workflow PREPARE_CGMLST_SCHEMA {
     CONFIGURE_CGMLST_SCHEMA(
         UNZIP_CGMLST_SCHEMA.out.alleles
     )
+    ch_versions = ch_versions.mix(CONFIGURE_CGMLST_SCHEMA.out.versions)
+
     //
     // Wait for all schema dirs to finish
     //
@@ -145,11 +154,14 @@ workflow PREPARE_CGMLST_SCHEMA {
         .collect()
         .map { dirs -> true }  // just a signal
         .set { ready_ch }
+
     //
     // Combine static path and species file with completion signal
     //
+    def prev = get_previous_cgmlst_schemas_file()
+
     Channel
-        .of(tuple((outdir_abs), file(params.species_schemas)))
+        .of(tuple(prev, outdir_abs, file(params.species_schemas)))
         .combine(ready_ch)
         .set { update_ch }
     //
@@ -158,6 +170,12 @@ workflow PREPARE_CGMLST_SCHEMA {
     UPDATE_CGMLST_FILE(
         update_ch
     )
+    ch_versions = ch_versions.mix(UPDATE_CGMLST_FILE.out.versions)
+    
+    CUSTOM_DUMPSOFTWAREVERSIONS (
+        ch_versions.unique().collectFile(name: 'collated_versions.yml')
+    )
+
 }
 
 /*

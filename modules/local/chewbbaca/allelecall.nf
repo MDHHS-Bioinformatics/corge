@@ -22,7 +22,7 @@ process CHEWBBACA_ALLELECALL {
     species = task.ext.species ?: "${meta.species}"
 
     """
-    #first move all the new assmples to a directory
+    #first move all the new assemblies to a directory
     mkdir new_assemblies/
     mv *.fna new_assemblies/
 

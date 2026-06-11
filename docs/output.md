@@ -54,7 +54,7 @@ Results are organized by **species**:
             ├── 📁 linkages
             │   └── 📄 <Species>_potential_linkages.csv
             ├── 📁 genomic_context_groups
-            │   └── 📄 <Species>-groups_HC<threshold>.csv (one per threshold)
+            │   └── 📄 <Species>-groups_HC<threshold>.csv (one per HC threshold)
             ├── 📁 mashtree
             │   ├── 📄 <Species>_mash.dist
             │   ├── 📄 <Species>_mash.dnd
@@ -64,7 +64,7 @@ Results are organized by **species**:
             ├── 📁 microreact
             │   └── 📄 <Species>_corge.microreact
             ├── 📁 poodle_samplesheets
-            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv (one per threshold)
+            │   └── 📄 <Species>_poodle_manifest_HC<threshold>.csv (one per HC threshold)
             ├── 📁 ReporTree
             │    ├── 📄 <Species>_clusterComposition.tsv
             │    ├── 📄 <Species>_dist_hamming.tsv

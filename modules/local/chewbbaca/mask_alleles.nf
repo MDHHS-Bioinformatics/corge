@@ -1,5 +1,5 @@
 
-process CHEWBBACA_EXTRACTCGMLST {
+process CHEWBBACA_MASK_ALLELES {
     tag "$meta.species"
     label 'process_single'
 

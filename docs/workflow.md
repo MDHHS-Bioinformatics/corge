@@ -21,7 +21,7 @@ The workflow consists of several stages that transform raw sequencing data into 
 3. Generate a phylogenetic tree with [`IQ-TREE`](https://www.iqtree.org/) (optional with `--tree`).
 4. Hierarchical clustering with [`ReporTree`](https://github.com/insapathogenomics/ReporTree).
 5. Create potential linkage tables per species.
-6. Select groups per sample using user-defined thresholds.
+6. Select groups per sample using user-defined hierarchical-clustering (HC) thresholds.
 7. Generate [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) manifests.
 8. Run [`MashTree`](https://github.com/lskatz/mashtree).
 9. Generate [`Microreact`](https://microreact.org/) files for visual exploration of genomic groups in trees.

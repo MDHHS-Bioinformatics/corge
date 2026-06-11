@@ -10,9 +10,8 @@ process CONFIGURE_CGMLST_SCHEMA {
 
     output:
     path("${name}_cgMLST")        , emit: schema
-    val(name)                     , emit: name
     path "versions.yml"           , emit: versions
-    val true , emit: done
+
     when:
     task.ext.when == null || task.ext.when
 
