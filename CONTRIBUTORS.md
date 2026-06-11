@@ -16,3 +16,5 @@ We acknowledge all individuals who contributed to the development, evaluation, a
 ## Testing and Feedback
 - Ellen Yoon — Feedback and pipeline testing
 - John Chodkowski — Feedback and pipeline testing
+- Azam Sher — Feedback and pipeline testing
+- Ivy Earl — Feedback and pipeline testing
