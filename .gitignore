@@ -7,7 +7,6 @@ testing*
 *.pyc
 *results*
 logs/*
-*.sh
 python_notebooks/*
 mrsa_*
 results*
