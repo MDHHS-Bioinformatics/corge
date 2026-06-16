@@ -18,8 +18,8 @@ date-released: 2026-05-01
 
 doi: 10.XXXX/zenodo.XXXXXX
 
-repository-code: "https://github.com/MDHHS-Bioinformatics/CorGe+"
-url: "https://github.com/MDHHS-Bioinformatics/CorGe+"
+repository-code: "https://github.com/MDHHS-Bioinformatics/corge"
+url: "https://github.com/MDHHS-Bioinformatics/corge"
 
 keywords:
   - bioinformatics
@@ -31,5 +31,8 @@ keywords:
   - cgmlst
   - outbreak
   - genomic-epidemiology
+  - bacteria
+  - epidemiology
+  - linkage
 
 license: MIT
