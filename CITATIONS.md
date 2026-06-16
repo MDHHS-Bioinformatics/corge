@@ -11,38 +11,44 @@
 ## Pipeline tools
 
 - [ChewBBACA](https://doi.org/10.1099/mgen.0.000166)
-  > Silva M, Machado MP, Silva DN, Rossi M, Moran-Gilad J, Santos S, Ramirez M, Carriço JA. *chewBBACA: A complete suite for gene-by-gene schema creation and strain identification.* Microb Genom. 2018 Mar;4(3):e000166. doi: 10.1099/mgen.0.000166. PMID: 29543149; PMCID: PMC5885018. 
+  > - Silva, Mickael, Miguel P. Machado, Diogo N. Silva, Mirko Rossi, Jacob Moran-Gilad, Sergio Santos, Mario Ramirez, and Joao Andre Carrico. "chewBBACA: a complete suite for gene-by-gene schema creation and strain identification." Microbial genomics 4, no. 3 (2018): e000166.
+  > - Mamede, Rafael, Pedro Vila-Cerqueira, João André Carriço, and Mario Ramirez. "chewBBACA 3: lowering the barrier for scalable and detailed whole-and core-genome multilocus sequence typing." Genome Medicine 18, no. 1 (2026): 51.
 
 - [ReporTree](https://doi.org/10.1186/s13073-023-01196-1)
 
-  > Mixão, V, Pinto, M, Sobral, D, Di Pasquale A, Gomes, JP, Borges V. *ReporTree: a surveillance-oriented tool to strengthen the linkage between pathogen genetic clusters and epidemiological data.* Genome Med 15, 43 (2023). https://doi.org/10.1186/s13073-023-01196-1
+  > Mixão, Verónica, Miguel Pinto, Daniel Sobral, Adriano Di Pasquale, João Paulo Gomes, and Vítor Borges. "ReporTree: a surveillance-oriented tool to strengthen the linkage between pathogen genetic clusters and epidemiological data." Genome Medicine 15, no. 1 (2023): 43.
 
 - [Mashtree](https://doi.org/10.21105/joss.01762)
 
   > Katz LS, Griswold T, Morrison SS, Caravas JA, Zhang S, den Bakker HC, Deng X, Carleton HA. *Mashtree: a rapid comparison of whole genome sequence files.* J Open Source Softw. 2019;4(44):1762. doi:10.21105/joss.01762.
 
-- [Parsnp](https://doi.org/10.1186/s13059-014-0524-x)
+- [Parsnp](https://doi.org/10.1093/bioinformatics/btae311)
 
-  > Kille, Bryce, Michael G Nute, Victor Huang, Eddie Kim, Adam M Phillippy, and Todd J Treangen. 2024. *Parsnp 2.0: Scalable Core-Genome Alignment for Massive Microbial Datasets.* Bioinformatics 40 (5): btae311. doi.org/10.1093/bioinformatics/btae311.
+  > Kille, Bryce, Michael G. Nute, Victor Huang, Eddie Kim, Adam M. Phillippy, and Todd J. Treangen. "Parsnp 2.0: scalable core-genome alignment for massive microbial datasets." Bioinformatics 40, no. 5 (2024): btae311.
+
+- [Prodigal](https://doi.org/10.1186/1471-2105-11-119)
+  > Hyatt, Doug, Gwo-Liang Chen, Philip F. LoCascio, Miriam L. Land, Frank W. Larimer, and Loren J. Hauser. "Prodigal: prokaryotic gene recognition and translation initiation site identification." BMC bioinformatics 11, no. 1 (2010): 119.
 
 - [Microreact](https://doi.org/10.1099/mgen.0.000093)
 
-  > Argimón S, Abudahab K, Goater RJE, Fedosejev A, Bhai J, Glasner C, Feil EJ, Holden MT, Yeats CA, Grundmann H, Spratt BG. *Microreact: visualizing and sharing data for genomic epidemiology and phylogeography.* Microb Genom. 2016;2(11):e000093. doi:10.1099/mgen.0.000093.
+  > Argimón, Silvia, Khalil Abudahab, Richard JE Goater, Artemij Fedosejev, Jyothish Bhai, Corinna Glasner, Edward J. Feil et al. "Microreact: visualizing and sharing data for genomic epidemiology and phylogeography." Microbial genomics 2, no. 11 (2016): e000093.
 
 - [cgmlst.org](https://cgmlst.org/)
 
-  > Ridom GmbH. *cgmlst.org Nomenclature Server.* Accessed 2025.
-  > Schema-specific citations should be retrieved from [cgmlst.org](https://cgmlst.org/).
+  > - Ridom GmbH. *cgmlst.org Nomenclature Server.* Accessed 2025.
+  > - Schema-specific citations should be retrieved from [cgmlst.org](https://cgmlst.org/).
 
 
-- [IQ-TREE](https://www.iqtree.org/)
+- [IQ-TREE](https://doi.org/10.1093/molbev/msaa015)
   > Minh, Bui Quang, Heiko A. Schmidt, Olga Chernomor, Dominik Schrempf, Michael D. Woodhams, Arndt Von Haeseler, and Robert Lanfear. "IQ-TREE 2: new models and efficient methods for phylogenetic inference in the genomic era." Molecular biology and evolution 37, no. 5 (2020): 1530-1534.
 
-- [SNP-sites](https://www.iqtree.org/)
+- [SNP-sites](https://doi.org/10.1099/mgen.0.000056)
   > Andrew J. Page, Ben Taylor, Aidan J. Delaney, Jorge Soares, Torsten Seemann, Jacqueline A. Keane, Simon R. Harris. "SNP-sites: rapid efficient extraction of SNPs from multi-FASTA alignments", Microbial Genomics 2(4), (2016)
 
-- [MultiQC](https://pubmed.ncbi.nlm.nih.gov/27312411/)
-  > Ewels P, Magnusson M, Lundin S, Käller M. MultiQC: summarize analysis results for multiple tools and samples in a single report. Bioinformatics. 2016 Oct 1;32(19):3047-8. doi: 10.1093/bioinformatics/btw354. Epub 2016 Jun 16. PubMed PMID: 27312411; PubMed Central PMCID: PMC5039924.
+- [snp-dists](https://github.com/tseemann/snp-dists)
+
+- [MultiQC](https://doi.org/10.1093/bioinformatics/btw354)
+  > Ewels, Philip, Måns Magnusson, Sverker Lundin, and Max Käller. "MultiQC: summarize analysis results for multiple tools and samples in a single report." Bioinformatics 32, no. 19 (2016): 3047-3048.
 ---
 
 ## Software packaging/containerisation tools
