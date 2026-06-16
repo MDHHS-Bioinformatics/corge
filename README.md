@@ -19,7 +19,7 @@
 
 ### Suggested workflow
 
-Genome assemblies from sequencing pipelines (e.g., PHoeNIx, Bactopia, TheiaProk, or custom workflows) or public databases (e.g., AllTheBacteria, NCBI) can be analyzed with CorGe+ to identify potential linkages and group genetically similar samples. These groupings support more granular analyses for detecting related cases in routine surveillance and outbreak investigations.
+Genome assemblies from sequencing pipelines (e.g., [`PHoeNIx`](https://github.com/CDCgov/phoenix), [`Bactopia`](https://github.com/bactopia/bactopia), [`TheiaProk`](https://public-health-bacterial-genomics-theiagen.readthedocs.io/en/latest/theiaprok.html), or custom workflows) or public databases (e.g., [`AllTheBacteria`](https://github.com/AllTheBacteria/AllTheBacteria), [`NCBI`](https://www.ncbi.nlm.nih.gov/datasets/genome/)) can be analyzed with CorGe+ to identify potential linkages and group genetically similar samples. These groupings support more granular analyses for detecting related cases in routine surveillance and outbreak investigations.
 
 Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) enables higher-resolution comparisons within each group, including SNP-based and pangenome analyses.
 
