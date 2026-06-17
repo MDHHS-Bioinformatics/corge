@@ -254,7 +254,7 @@ poodle_samplesheets/<Species>_HC<threshold>_poodle_manifest.csv
 ```
 
 
-[**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) is a bioinformatics pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://iqtree.github.io/)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
+[**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) is a bioinformatics pipeline for high-resolution analysis of bacterial groups, combining hqSNP calling ([`Snippy`](https://github.com/tseemann/snippy)), recombination filtering ([`Gubbins`](https://github.com/nickjcroucher/gubbins)), phylogenetics ([`IQ-TREE`](https://github.com/iqtree/iqtree2)), pangenome analysis ([`Panaroo`](https://github.com/gtonkinhill/panaroo)), and Mash distance estimation ([`MashTree`](https://github.com/lskatz/mashtree)). It produces an interactive HTML report for each cluster with trees, pangenome profile, and distance matrices.
 
 CorGe+ automatically generates a PoODLE-compatible manifest for every selected threshold. The required columns are:
 
