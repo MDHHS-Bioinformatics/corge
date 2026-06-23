@@ -9,7 +9,7 @@ def summary_params = NfcoreSchema.paramsSummaryMap(workflow, params)
 // Validate input parameters
 WorkflowCorgeplus.initialise(params, log)
 
-def outdir_abs = file(params.outdir).toAbsolutePath()
+def outdir_abs = file(params.outdir).toAbsolutePath().toString()
 if (params.mode == 'remove') { //following params only need to be validated for remove mode
     def checkPathParamList = [ params.samples_to_remove, params.outdir]
     for (param in checkPathParamList) { if (param) { file(param, checkIfExists: true) } }
@@ -247,9 +247,22 @@ workflow REMOVE_SAMPLES {
     //
     // POODLE MANIFESTS: Generate PoODLE manifests per sample depending on the presence of master paths or not
     //
-    ch_linkages = LINKAGE_ANALYSIS.out.selected_cluster
-    .join(LINKAGE_ANALYSIS.out.potential_linkages)
+    ch_selected_cluster_for_poodle = LINKAGE_ANALYSIS.out.selected_cluster
+    .map { meta, genomic_context_groups ->
+        tuple(meta.species, meta, genomic_context_groups)
+    }
 
+    ch_potential_linkages_for_poodle = LINKAGE_ANALYSIS.out.potential_linkages
+        .map { meta, potential_linkages ->
+            tuple(meta.species, meta, potential_linkages)
+        }
+
+    ch_linkages = ch_selected_cluster_for_poodle
+        .join(ch_potential_linkages_for_poodle)
+        .map { species, selected_meta, genomic_context_groups, linkage_meta, potential_linkages ->
+            tuple(linkage_meta, genomic_context_groups, potential_linkages)
+        }
+        
     if (!params.master_paths){
         MAKE_POODLE_MANIFEST(ch_linkages, outdir_abs)
         ch_versions = ch_versions.mix(MAKE_POODLE_MANIFEST.out.versions)
