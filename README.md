@@ -161,6 +161,10 @@ nextflow run MDHHS-Bioinformatics/corge \
 > - Customize them with `--hc_thresholds`
 > - Reference HC thresholds from different sources are available at [`docs/cgmlst_thresholds_reference.md`](docs/cgmlst_thresholds_reference.md).
 
+
+> [!NOTE]
+> To compare new samples with historic samples, create a manifest with only the new samples and use the same `--outdir` from the previous run, so CorGe+ can look for existing historic sample data for comparison.
+
 _Advanced run:_
 
 This example shows some optional features for metadata-aware reporting, maximum-likelihood phylogenetic reconstruction, and automated PoODLE manifest generation.
@@ -177,7 +181,7 @@ This example shows some optional features for metadata-aware reporting, maximum-
   ISO2,ST2,urine,FacilityA,2026-02-12
   ```
 
-* 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples) .
+* 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples). Runtime increases with dataset size and diversity; analyses involving hundreds of genomes (e.g. >500 samples) may require several hours and substantial computational resources. Enable this option only when phylogenetic reconstruction is required.
 
 * 📦 **Automated PoODLE manifests**: Infers read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
 

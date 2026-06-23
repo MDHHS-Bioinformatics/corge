@@ -429,14 +429,15 @@ More info below [`Choosing thresholds`](#-choosing-thresholds)
 
 #### 🌳 Phylogenetic trees (ML)
 
+Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples). Runtime increases with dataset size and diversity; analyses involving hundreds of genomes (e.g. >500 samples) may require several hours and substantial computational resources. Enable this option only when phylogenetic reconstruction is required.
+
 ```bash
 --tree
 ```
 
 * Builds a **maximum-likelihood tree (GTR+G4)**
 * Requires ≥3 samples
-* Uses cgMLST-derived alignments when available
-* More computationally intensive
+* Uses cgMLST-derived or Parsnp alignments
 
 #### 📦 PoODLE sample sheets
 > [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
