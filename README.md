@@ -64,8 +64,8 @@ Full workflow details: [`Worflow documentation`](docs/workflow.md)
 * [`Nextflow`](https://docs.seqera.io/nextflow/install) (`>=22.10.1`)
 * One container runtime:
   * [`Docker`](https://docs.docker.com/engine/installation/) (recommended for local runs)
-  * [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
   * [`Apptainer`](https://apptainer.org/docs/user/latest/) (recommended for HPC)
+  * [`Singularity`](https://www.sylabs.io/guides/3.0/user-guide/)
 
 
 ### 2️⃣ Get cgMLST schemas (optional, recommended)
@@ -131,7 +131,11 @@ Prepare a CSV file describing your input assemblies:
 ```csv
 sample,assembly,species
 ISO1,/path/iso1.fasta,Escherichia_coli
-ISO2,/path/iso2.fasta,Acinetobacter_baumannii
+ISO2,/path/iso2.fasta,Escherichia_coli
+ISO3,/path/iso3.fasta,Escherichia_coli
+ISO4,/path/iso4.fasta,Acinetobacter_baumannii
+ISO5,/path/iso5.fasta,Acinetobacter_baumannii
+ISO6,/path/iso6.fasta,Acinetobacter_baumannii
 ```
 
 **Input format description**
@@ -181,7 +185,7 @@ This example shows some optional features for metadata-aware reporting, maximum-
   ISO2,ST2,urine,FacilityA,2026-02-12
   ```
 
-* 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requires at least 3 samples). Runtime increases with dataset size and diversity; analyses involving hundreds of genomes (e.g. >500 samples) may require several hours and substantial computational resources. Enable this option only when phylogenetic reconstruction is required.
+* 🌳 **Phylogenetic reconstruction (`--tree`)**: Optionally builds maximum-likelihood trees (GTR+G4) from cgMLST or SNP alignments (requires at least 3 samples). Runtime increases with dataset size and diversity; analyses involving hundreds of genomes (e.g. >500 samples) may require several hours and substantial computational resources. Enable this option only when phylogenetic reconstruction is required.
 
 * 📦 **Automated PoODLE manifests**: Infers read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
 
