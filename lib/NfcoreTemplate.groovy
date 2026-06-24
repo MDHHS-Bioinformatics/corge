@@ -230,9 +230,37 @@ class NfcoreTemplate {
         if (workflow.success) {
             if (workflow.stats.ignoredCount == 0) {
                 log.info "-${colors.purple}[$workflow.manifest.name]${colors.green} Pipeline completed successfully${colors.reset}-"
+                log.info "${colors.green} \nThank you for using CorGe+! \n${colors.reset}"
+                log.info "${colors.biyellow}         .^.     .^.                       ${colors.reset}"
+                log.info "${colors.biyellow}        /   \\   /   \\                      ${colors.reset}"
+                log.info "${colors.biyellow}        \\   /___\\   /                      ${colors.reset}"
+                log.info "${colors.biyellow}        /  - | | -  \\                      ${colors.reset}"
+                log.info "${colors.biyellow}       /  -● | | ●-  \\                     ${colors.reset}"
+                log.info "${colors.biyellow}       \\ ___/   \\___ /                     ${colors.reset}"
+                log.info "${colors.biyellow}        (     ●      )                      ${colors.reset}"
+                log.info "${colors.biyellow}         \\  (_|_)   /__________________/)   ${colors.reset}"
+                log.info "${colors.biyellow}          |    U         wwww wwww     *    ${colors.reset}"
+                log.info "${colors.biyellow}          |                 www        |    ${colors.reset}"
+                log.info "${colors.biyellow}          | \\    /                     |    ${colors.reset}"
+                log.info "${colors.biyellow}          |  |__|  |__ __ ________\\    |    ${colors.reset}"
+                log.info "${colors.biyellow}          (_/  (__/            (_ /(_ /   \n ${colors.reset}" 
             } else {
-                log.info "-${colors.purple}[$workflow.manifest.name]${colors.yellow} Pipeline completed successfully, but with errored process(es) ${colors.reset}-"
-            }
+                    log.info "-${colors.purple}[$workflow.manifest.name]${colors.yellow} Pipeline completed successfully, but with errored process(es) ${colors.reset}-"
+                    log.info "${colors.green} \nThank you for using CorGe+! \n${colors.reset}"
+                    log.info "${colors.biyellow}         .^.     .^.                       ${colors.reset}"
+                    log.info "${colors.biyellow}        /   \\   /   \\                      ${colors.reset}"
+                    log.info "${colors.biyellow}        \\   /___\\   /                      ${colors.reset}"
+                    log.info "${colors.biyellow}        /  - | | -  \\                      ${colors.reset}"
+                    log.info "${colors.biyellow}       /  -● | | ●-  \\                     ${colors.reset}"
+                    log.info "${colors.biyellow}       \\ ___/   \\___ /                     ${colors.reset}"
+                    log.info "${colors.biyellow}        (     ●      )                      ${colors.reset}"
+                    log.info "${colors.biyellow}         \\  (_|_)   /__________________/)   ${colors.reset}"
+                    log.info "${colors.biyellow}          |    U         wwww wwww     *    ${colors.reset}"
+                    log.info "${colors.biyellow}          |                 www        |    ${colors.reset}"
+                    log.info "${colors.biyellow}          | \\    /                     |    ${colors.reset}"
+                    log.info "${colors.biyellow}          |  |__|  |__ __ ________\\    |    ${colors.reset}"
+                    log.info "${colors.biyellow}          (_/  (__/            (_ /(_ /   \n ${colors.reset}" 
+            }       
         } else {
             log.info "-${colors.purple}[$workflow.manifest.name]${colors.red} Pipeline completed with errors${colors.reset}-"
         }
