@@ -10,7 +10,7 @@ class WorkflowMain {
     public static String citation(workflow) {
         return "If you use ${workflow.manifest.name} for your analysis please cite:\n\n" +
             "* CorGe+\n" +
-            "  https://doi.org/xxxx\n\n" +
+            "  https://doi.org/10.5281/zenodo.20857090\n\n" +
             "* Software dependencies\n" +
             "  https://github.com/${workflow.manifest.name}/blob/main/CITATIONS.md"
     }

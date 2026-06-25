@@ -12,7 +12,7 @@
 [![GitHub release](https://img.shields.io/github/v/release/MDHHS-Bioinformatics/mdhhs_repo_template)](https://github.com/MDHHS-Bioinformatics/mdhhs_repo_template/releases)
 ![Last Commit](https://img.shields.io/github/last-commit/MDHHS-Bioinformatics/mdhhs_repo_template)
 
-[![DOI](https://zenodo.org/badge/DOI/XXXX.svg)](https://zenodo.org/badge/latestdoi/XXXXXX)
+[![DOI](https://zenodo.org/badge/891573065.svg)](https://doi.org/10.5281/zenodo.20857090)
 
 
 **CorGe+** (“_core-gee_”) is a bioinformatics pipeline for analyzing bacterial genomes, built to quickly determine genomic linkages and to group related isolates. By combining core genome MLST (cgMLST) and core genome alignment approaches, it provides a scalable way to triage datasets before deeper analysis, making it especially useful for genomic surveillance and outbreak investigations. From a simple sample sheet of FASTA files, CorGe+ produces linkage tables, Microreact-ready visualizations, metadata summaries, and distance-based cluster assignments.
@@ -272,7 +272,7 @@ If you use CorGe+ for your analysis, please cite:
 
 Vasco K, Maldonado-Torres D, Blankenship H & Miles-Jay A (2026). 
 MDHHS-Bioinformatics/CorGe+: Core Genome plus (Version 1.0.0). 
-Zenodo. https://doi.org/XX.XXX/zenodo.XXXX
+Zenodo. https://doi.org/10.5281/zenodo.20857090
 
 An extensive list of references for the tools used by the pipeline can be found in [`CITATIONS.md`](CITATIONS.md).
 
