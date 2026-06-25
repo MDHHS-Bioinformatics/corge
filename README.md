@@ -9,8 +9,8 @@
 [![run with singularity](https://img.shields.io/badge/run%20with-singularity-1d355c.svg?labelColor=000000)](https://sylabs.io/docs/)
 [![run with apptainer](https://img.shields.io/badge/run%20with-apptainer-1d355c.svg?labelColor=000000)](https://apptainer.org/docs/user/latest/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-[![GitHub release](https://img.shields.io/github/v/release/MDHHS-Bioinformatics/mdhhs_repo_template)](https://github.com/MDHHS-Bioinformatics/mdhhs_repo_template/releases)
-![Last Commit](https://img.shields.io/github/last-commit/MDHHS-Bioinformatics/mdhhs_repo_template)
+[![GitHub release](https://img.shields.io/github/v/release/MDHHS-Bioinformatics/corge)](https://github.com/MDHHS-Bioinformatics/corge/releases)
+![Last Commit](https://img.shields.io/github/last-commit/MDHHS-Bioinformatics/corge)
 
 [![DOI](https://zenodo.org/badge/891573065.svg)](https://doi.org/10.5281/zenodo.20857090)
 
