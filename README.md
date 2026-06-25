@@ -24,7 +24,7 @@ Genome assemblies from sequencing pipelines (e.g., [`PHoeNIx`](https://github.co
 Optional downstream analysis with [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) enables higher-resolution comparisons within each group, including SNP-based and pangenome analyses.
 
 <p align="center">
-<img src="docs/images/corge_overview.png" width="500">
+<img src="docs/images/suggested_workflow.png" width="500">
 </p>
 
 

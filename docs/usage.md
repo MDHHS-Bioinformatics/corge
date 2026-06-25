@@ -4,6 +4,28 @@ This guide explains how to run **CorGe+**, prepare inputs, and understand common
 
 For full parameter details, see 👉 [`parameters.md`](parameters.md)
 
+## Table of contents
+- [How CorGe+ works](#-how-corge-works)
+- [Quick Start](#-quick-start)
+- [Important notes](#%EF%B8%8F-important-notes)
+- [1. Requirements](#1%EF%B8%8F%E2%83%A3-requirements)
+- [2. Get cgMLST schemas](#2%EF%B8%8F%E2%83%A3-get-cgmlst-schemas)
+- [3. Prepare the manifest](#3%EF%B8%8F%E2%83%A3-prepare-the-manifest)
+- [Run the analyses](#-run-analyses)
+- [Working with existing results](#-working-with-existing-results)
+  - [Regroup](#-regroup)
+  - [Build phylogenetic tree from existing data](#-build-phylogenetic-trees-from-existing-data)
+  - [Remove samples](#%EF%B8%8F-remove-samples)
+- [Common workflows](#-common-workflows)
+- [Interpretation guidance](#-interpretation-guidance)
+- [Choosing HC thresholds](#-choosing-hc-thresholds)
+- [Pipeline Outputs](#-pipeline-outputs)
+- [Best practices & caveats](#-best-practices--caveats)
+- [Troubleshooting](#-troubleshooting)
+- [Runtime expectations](##%EF%B8%8F-runtime-expectations)
+- [Reproducibility](#-reproducibility)
+- [Updating the Pipeline](#-updating-the-pipeline)
+
 ---
 
 ## 🧭 How CorGe+ works
@@ -376,56 +398,25 @@ More info below [`Choosing thresholds`](#-choosing-thresholds)
 
   ReporTree can link genetic clusters with epidemiological data through summary tables showing key statistics and trends. These parameters are optional but strongly recommended when generating lineage-, time-, or metadata-based reports.
 
-  At minimum, you can provide a metadata file like this:
-
-  ```bash
-  --metadata metadata.csv
-  ```
-
-  Example:
-
+  You can provide a metadata file like this:
   ```csv
   sample,st,source,location,date
   ISO1,ST2,wound,FacilityA,2026-01-03
   ISO2,ST2,urine,FacilityA,2026-02-12
   ```
 
-  Once metadata is included, ReporTree will enrich cluster outputs with useful summaries such as:
-
-  - number of samples per cluster
-  - distribution across locations or sources
-  - temporal signals (e.g. first and last detection dates, duration of circulation)
-
-  💡 **Going further**
-
-  You can refine and expand these reports depending on your needs.
-
-  For example, you might want to:
-
-  - focus only on a subset of samples (e.g. a country or time period)
-  - track specific metadata fields separately (e.g. sequence type or resistance profile)
-  - explore how lineages change over time
-
-  This can be done with options like:
-
-  Optional:
+  ReporTree will enrich cluster outputs with useful metadata, generate dedicated reports for key variables, filter your dataset before analysis and produce matrices for downstream visualization (e.g. lineage trends over time):
 
   ```bash
+  --metadata metadata.csv \
   --columns_summary_report lineage,country,date
   --metadata2report st
   --filter 'country == USA;date > 2024-01-01'
   --frequency_matrix lineage,iso_week
   ```
-  These allow you to:
-
-  - customize what gets summarized per cluster
-  - generate dedicated reports for key variables
-  - filter your dataset before analysis
-  - produce matrices for downstream visualization (e.g. lineage trends over time)
-
-
 
   More details about these options in [`parameters.md`](parameters.md) and [`ReporTree`](https://github.com/insapathogenomics/ReporTree?tab=readme-ov-file#usage).
+
 
 #### 🌳 Phylogenetic trees (ML)
 
@@ -596,11 +587,11 @@ Reference HC thresholds from different sources are available at [`cgmlst_thresho
 
 ---
 
-## 📂 Outputs
+## 📂 Pipeline Outputs
 
 ```
 work/           # temporary files
-results/        # final outputs
+<outdir>/       # final outputs
 .nextflow.log   # execution log
 ```
 
@@ -610,11 +601,28 @@ results/        # final outputs
 
 ---
 
+## 🧠 Best practices
+
+* Use high-quality assemblies (≥30× coverage, low fragmentation)
+* Treat CorGe+ as **screening tool**
+* Confirm results with high-resolution methods like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
+
+---
+
+## 🛠 Troubleshooting
+
+* **No clusters** → increase `--hc_thresholds`
+* **Different group IDs across runs** → expected with Parsnp or when a cluter merges, split or increases
+* **Switching from Parsnp to cgMLST** → remove prior results for that species and re-run all samples for consistency
+* **Low-quality results** → check assembly quality. The output `linkages/<Species>_potential_linkages.csv` reports the completeness quality check.
+ 
+---
+
 ## ⏱️ Runtime expectations
 
 * cgMLST → fast (minutes)
 * Parsnp → slower, scales with dataset size
-* `--tree` → most computationally expensive
+* `--tree` or tree mode → most computationally expensive
 
 ---
 
@@ -645,20 +653,3 @@ To update to the latest version:
 nextflow pull MDHHS-Bioinformatics/corge
 ```
 
----
-
-## 🛠 Troubleshooting
-
-* **No clusters** → increase `--hc_thresholds`
-* **Different group IDs across runs** → expected with Parsnp
-* **Switching from Parsnp to cgMLST** → remove prior results for that species and re-run all samples for consistency
-* **Low-quality results** → check assembly quality. The output `linkages/<Species>_potential_linkages.csv` reports the completeness quality check.
- 
-
----
-
-## 🧠 Best practices
-
-* Use high-quality assemblies (≥30× coverage, low fragmentation)
-* Treat CorGe+ as **screening tool**
-* Confirm results with high-resolution methods like [**PoODLE**](https://github.com/MDHHS-Bioinformatics/poodle) (hqSNPs, recombination filtering, pangenome comparisons). 
