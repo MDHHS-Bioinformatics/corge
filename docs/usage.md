@@ -433,14 +433,14 @@ Optionally builds maximum-likelihood trees from cgMLST or SNP alignments (requir
 #### 📦 PoODLE sample sheets
 > [`PoODLE`](https://github.com/MDHHS-Bioinformatics/poodle) is a Nextflow pipeline for parallel analysis of multiple bacterial species clusters, including hqSNP calling, recombination filtering, pangenome analysis, Mash, and report generation.
 
-CorGe+ can infer read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads and annotations specified with `--master_paths` can be used. 
+CorGe+ can infer read and annotation paths based on sample IDs from PHoeNIx `--phoenix_path` or Bactopia `--bactopia_path` main output directories. Alternatively, a CSV table with explicit absolute paths to reads, annotations and assemblies specified with `--master_paths` can be used. 
 
   Example for `--master_paths master_paths.csv`
 
   ```csv
-  sample,fastq_1,fastq_2,annotation
-  ISO1,/path/ISO1_R1.trim.fq.gz,/path/ISO1_R2.trim.fq.gz,/path/ISO1.gff
-  ISO2,/path/ISO2_R1.trim.fq.gz,/path/ISO2_R2.trim.fq.gz,/path/ISO2.gff
+  sample,fastq_1,fastq_2,annotation,assembly
+  ISO1,/path/ISO1_R1.trim.fq.gz,/path/ISO1_R2.trim.fq.gz,/path/ISO1.gff,/path/ISO1.fna
+  ISO2,/path/ISO2_R1.trim.fq.gz,/path/ISO2_R2.trim.fq.gz,/path/ISO2.gff,/path/ISO2.fna
   ```
 
   > If none are provided, the PoODLE samplesheets will contain empty placeholders for FASTQ and annotation paths, which you must fill in manually before running PoODLE. 
