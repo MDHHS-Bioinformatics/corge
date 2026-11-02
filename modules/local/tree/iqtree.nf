@@ -33,9 +33,6 @@ process IQTREE {
     if [[ \$count -ge 500 ]]; then
         support="--alrt 1000"
         treefile="${species}${args_extension}.treefile"
-    elif [[ \$count -gt 100 ]]; then
-        support="-B 1000 --fast"
-        treefile="${species}${args_extension}.contree"
     elif [[ \$count -gt 4 ]]; then
         support="-B 1000"
         treefile="${species}${args_extension}.contree"
