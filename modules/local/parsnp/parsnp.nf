@@ -36,6 +36,7 @@ process PARSNP {
         --alignment-program mafft \
         --curated \
         --recomb-filter \
+        --no-partition \
         --force-overwrite \
         --threads $task.cpus \
         $args \
