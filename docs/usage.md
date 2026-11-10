@@ -632,7 +632,7 @@ For reproducible analyses, run a specific pipeline release:
 
 ```bash
 nextflow run MDHHS-Bioinformatics/corge \
-  -r v1.0.0 \
+  -r v1.0.1 \
   -profile apptainer \
   --input samplesheet.csv \
   --outdir corge_results \

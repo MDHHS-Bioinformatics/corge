@@ -46,4 +46,4 @@ body:
         * Executor _(eg. slurm, local, awsbatch)_
         * Container engine: _(e.g. Docker, Singularity, Conda, Podman, Shifter or Charliecloud)_
         * OS _(eg. CentOS Linux, macOS, Linux Mint)_
-        * Version of MDHHS-Bioinformatics/corge _(eg. 1.0.0)_
+        * Version of MDHHS-Bioinformatics/corge _(eg. 1.0.1)_

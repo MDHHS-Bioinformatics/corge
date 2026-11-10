@@ -271,7 +271,7 @@ Contributions, issues, and pull requests are welcome! If you would like to contr
 If you use CorGe+ for your analysis, please cite:
 
 Vasco K, Maldonado-Torres D, Blankenship H & Miles-Jay A (2026). 
-MDHHS-Bioinformatics/CorGe+: Core Genome plus (Version 1.0.0). 
+MDHHS-Bioinformatics/CorGe+: Core Genome plus (Version 1.0.1). 
 Zenodo. https://doi.org/10.5281/zenodo.20857090
 
 An extensive list of references for the tools used by the pipeline can be found in [`CITATIONS.md`](CITATIONS.md).
